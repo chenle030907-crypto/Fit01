@@ -281,14 +281,26 @@ function analyzePhoto(input){
     $('#mc-photo-img').src=e.target.result
     $('#mc-photo-preview').classList.remove('hidden')
     $('#mc-photo-name').textContent='识别中...'
+    $('#mc-photo-conf').textContent='加载中'
+    $('#mc-photo-slider').value=200
+    $('#mc-photo-grams').textContent='200g'
     toast('AI 正在识别菜品...')
+    let timer=setTimeout(()=>{toast('网络较慢，请稍候...')},5000)
     api('/api/analyze-photo',{method:'POST',body:JSON.stringify({image:base64})}).then(r=>{
-      $('#mc-photo-name').textContent=r.name||'未知'
-      $('#mc-photo-conf').textContent=r.confidence==='high'?'高置信度':r.confidence==='medium'?'中等':'估算'
-      $('#mc-photo-slider').value=r.estimated_grams||200
-      $('#mc-photo-grams').textContent=(r.estimated_grams||200)+'g'
-      window._photoResult=r
-    }).catch(()=>{toast('识别失败')})
+      clearTimeout(timer)
+      let name=r.name||'未识别',grams=r.estimated_grams||200,conf=r.confidence||'medium'
+      $('#mc-photo-name').textContent=name
+      $('#mc-photo-conf').textContent=conf==='high'?'✅ 高置信度':conf==='medium'?'👍 中等置信度':'⚠️ 估算值'
+      $('#mc-photo-slider').value=grams
+      $('#mc-photo-grams').textContent=grams+'g'
+      window._photoResult={name:name,estimated_grams:grams,ingredients:r.ingredients||[],confidence:conf}
+      toast('识别完成: '+name+' '+grams+'g')
+    }).catch(()=>{
+      clearTimeout(timer)
+      $('#mc-photo-name').textContent='识别超时'
+      $('#mc-photo-conf').textContent='请重试或手动输入'
+      toast('识别超时，请切换到手动输入')
+    })
   }
   reader.readAsDataURL(file)
 }
@@ -298,15 +310,15 @@ function addPhotoFood(){
   if(!r)return toast('请先拍照识别')
   let g=parseInt($('#mc-photo-slider').value)
   let name=r.name||'扫描菜品'
-  if(!window._foods)window._foods=[]
-  window._foods.push({name:name,amount:g,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'photo'})
   if(!window._ingredients)window._ingredients=[]
   window._ingredients.push(name+' '+g+'g')
   refreshIngredients()
   $('#mc-parse').style.display='block'
   $('#mc-photo-preview').classList.add('hidden')
-  input.value=''
-  toast(name+' '+g+'g 已添加')
+  let inp=document.getElementById('mc-photo');if(inp)inp.value=''
+  // Auto-trigger AI nutrition parsing
+  toast('正在查询营养数据...')
+  parseIngredients()
 }
 function addIngredient(){
   let n=$('#mc-nm')?.value?.trim(),g=parseInt($('#mc-gr')?.value||100)

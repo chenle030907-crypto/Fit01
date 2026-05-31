@@ -66,15 +66,16 @@ def init_db():
     db.close()
 
 # ── AI APIs (Qwen) ──
-def call_ai(prompt, temp=0.1, max_tokens=1024):
+def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
     if not API_KEY: return None
     try:
+        body = {"model":"qwen-flash","messages":[{"role":"user","content":prompt}],
+                "temperature":temp,"max_tokens":max_tokens}
+        if json_mode: body["response_format"] = {"type": "json_object"}
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-            json={"model":"qwen-flash","messages":[{"role":"user","content":prompt}],
-                  "temperature":temp,"max_tokens":max_tokens},
-            timeout=20
+            json=body, timeout=20
         )
         return r.json()["choices"][0]["message"]["content"]
     except: return None
@@ -88,8 +89,9 @@ def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
             json={"model":"qwen-vl-flash","messages":[{"role":"user","content":[
                 {"type":"text","text":prompt},
                 {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
-            ]}],"temperature":temp,"max_tokens":max_tokens},
-            timeout=25
+            ]}],"temperature":temp,"max_tokens":max_tokens,
+            "response_format":{"type":"json_object"}},
+            timeout=10
         )
         return r.json()["choices"][0]["message"]["content"]
     except: return None
