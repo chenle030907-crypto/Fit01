@@ -92,6 +92,53 @@ function nav(){$('#nav').innerHTML=['home','diet','workout','me'].map(t=>{
   $$('.tab').forEach(t=>t.onclick=()=>{S.tab=t.dataset.t;r()})
 }
 
+// ── Water ──
+function renderWaterCard(){
+  const effective=S.water.reduce((s,w)=>s+(w.effective_ml||w.amount||0),0)
+  const raw=S.water.reduce((s,w)=>s+(w.amount||0),0)
+  const target=S.waterTarget||2500
+  const pct=Math.min(100,Math.round(effective/target*100))
+  const barColor=pct<30?'var(--red)':pct<70?'var(--orange)':'var(--green)'
+  return `<div class="card">
+    <span class="c-title">💧 饮水 · <span style="color:${barColor}">${pct}%</span></span>
+    <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val" style="font-size:28px">${effective}</span><span class="text-sub">/ ${target} ml</span></div>
+    ${raw!==effective?`<div class="text-sm text-sub" style="margin-bottom:4px">实际饮用 ${raw}ml，等效纯水 ${effective}ml</div>`:''}
+    <div class="progress-bar" style="height:8px;background:var(--divider);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div></div>
+    <div class="input-row mt12" style="flex-wrap:wrap">
+      <div style="position:relative;flex:0 0 80px"><input class="input sm" id="w-amt" placeholder="250" type="number" value="250" style="width:100%;text-align:center;font-size:16px;font-weight:600;padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">ml</span></div>
+      <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${renderDrinkOptions()}</select>
+      <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="flex:0 0 100px;margin-top:4px">
+      <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
+    </div>
+    <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="event.stopPropagation();undoWater(${w.id})" title="点击撤销">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
+  </div>`
+}
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function renderDrinkOptions(){
+  const drinks=(S.waterDrinks||[]).concat([{name:'其他（自定义）',calories_per_250ml:0}])
+  return drinks.map(d=>`<option>${d.name}</option>`).join('')
+}
+function toggleCustomDrink(){
+  const v=document.getElementById('w-type')?.value
+  const el=document.getElementById('w-custom')
+  if(el)el.classList.toggle('hidden',v!=='其他（自定义）')
+}
+function quickAddWater(){
+  const amt=parseInt(document.getElementById('w-amt')?.value||250)
+  let type=document.getElementById('w-type')?.value||'矿泉水'
+  if(!amt||amt<10)return toast('请输入饮水量')
+  if(type==='其他（自定义）'){type=document.getElementById('w-custom')?.value?.trim();if(!type)return toast('请输入饮品名称')}
+  api('/api/water',{method:'POST',body:JSON.stringify({date:T,amount:amt,drink_type:type})}).then(()=>{
+    loadWater().then(()=>r())
+    toast(`+${amt}ml ${type}`)
+  })
+}
+function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(()=>r());toast('已撤销')})}
+function loadWater(){return api('/api/water?date='+T).then(w=>{S.water=w})}
+function loadWaterTarget(){const u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
+
+
+
 // ── Home ──
 function home(){
   const m=S.mode||'happy',c=MODES[m]
@@ -458,51 +505,6 @@ function loadWorkouts(){return api('/api/workouts?date='+T).then(ws=>{S.workouts
 function loadDishes(){return api('/api/dishes').then(ds=>{S.dishes=ds})}
 function loadGoals(){const u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode})}).then(g=>{S.goals=g})}
 function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
-
-// ── Water ──
-function renderWaterCard(){
-  const effective=S.water.reduce((s,w)=>s+(w.effective_ml||w.amount||0),0)
-  const raw=S.water.reduce((s,w)=>s+(w.amount||0),0)
-  const target=S.waterTarget||2500
-  const pct=Math.min(100,Math.round(effective/target*100))
-  const barColor=pct<30?'var(--red)':pct<70?'var(--orange)':'var(--green)'
-  return `<div class="card">
-    <span class="c-title">💧 饮水 · <span style="color:${barColor}">${pct}%</span></span>
-    <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val" style="font-size:28px">${effective}</span><span class="text-sub">/ ${target} ml</span></div>
-    ${raw!==effective?`<div class="text-sm text-sub" style="margin-bottom:4px">实际饮用 ${raw}ml，等效纯水 ${effective}ml</div>`:''}
-    <div class="progress-bar" style="height:8px;background:var(--divider);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div></div>
-    <div class="input-row mt12" style="flex-wrap:wrap">
-      <div style="position:relative;flex:0 0 80px"><input class="input sm" id="w-amt" placeholder="250" type="number" value="250" style="width:100%;text-align:center;font-size:16px;font-weight:600;padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">ml</span></div>
-      <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${renderDrinkOptions()}</select>
-      <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="flex:0 0 100px;margin-top:4px">
-      <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
-    </div>
-    <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="event.stopPropagation();undoWater(${w.id})" title="点击撤销">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
-  </div>`
-}
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function renderDrinkOptions(){
-  const drinks=(S.waterDrinks||[]).concat([{name:'其他（自定义）',calories_per_250ml:0}])
-  return drinks.map(d=>`<option>${d.name}</option>`).join('')
-}
-function toggleCustomDrink(){
-  const v=document.getElementById('w-type')?.value
-  const el=document.getElementById('w-custom')
-  if(el)el.classList.toggle('hidden',v!=='其他（自定义）')
-}
-function quickAddWater(){
-  const amt=parseInt(document.getElementById('w-amt')?.value||250)
-  let type=document.getElementById('w-type')?.value||'矿泉水'
-  if(!amt||amt<10)return toast('请输入饮水量')
-  if(type==='其他（自定义）'){type=document.getElementById('w-custom')?.value?.trim();if(!type)return toast('请输入饮品名称')}
-  api('/api/water',{method:'POST',body:JSON.stringify({date:T,amount:amt,drink_type:type})}).then(()=>{
-    loadWater().then(()=>r())
-    toast(`+${amt}ml ${type}`)
-  })
-}
-function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(()=>r());toast('已撤销')})}
-function loadWater(){return api('/api/water?date='+T).then(w=>{S.water=w})}
-function loadWaterTarget(){const u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
 
 // ── Actions ──
 function switchMode(){
