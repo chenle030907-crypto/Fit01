@@ -364,9 +364,10 @@ function renderWaterCard(){
     <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>w.drink_type+' '+w.amount+'ml').join(' · '):'今天还没喝水'}</div>
   </div>`
 }
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function renderDrinkOptions(){
   const drinks=(S.waterDrinks||[]).concat([{name:'其他（自定义）',calories_per_250ml:0}])
-  return drinks.map(d=>`<option value="${escapeHtml(d.name)}">${d.name}</option>`).join('')
+  return drinks.map(d=>`<option>${d.name}</option>`).join('')
 }
 function quickAddWater(){
   const amt=parseInt(document.getElementById('w-amt')?.value||250)
