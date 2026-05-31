@@ -252,10 +252,13 @@ function saveProfile(){
   api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadAll().then(render);toast('已保存')})
 }
 function recordWeight(){
-  let wEl=$('#wt-in'),w=parseFloat(wEl?.value)
-  if(isNaN(w)||w<20||w>300)return toast('请输入有效体重(20-300kg)')
-  let bf=parseFloat($('#bf-in')?.value)
-  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:isNaN(bf)?null:bf})}).then(()=>{loadAll().then(render);toast('体重已更新: '+w+'kg')})
+  let wEl=document.getElementById('wt-in'),w=parseFloat(wEl?.value)
+  if(isNaN(w)||w<20||w>300){toast('请输入有效体重(20-300kg)');return}
+  let bfEl=document.getElementById('bf-in'),bf=parseFloat(bfEl?.value)
+  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:isNaN(bf)?null:bf})}).then(()=>{
+    toast('记录成功！已更新最新体重为：'+w+' kg')
+    loadAll().then(render)
+  }).catch(()=>toast('记录失败，请重试'))
 }
 
 // ── Meal modal ──
