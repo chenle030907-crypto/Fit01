@@ -158,6 +158,7 @@ function diet(){
 
 function addMealModal(){
   window._foods=[]
+  window._ingredients=[]
   let html=`
     <div class="modal-overlay" id="modal"><div class="modal-box">
     <div class="modal-title">添加饮食</div>
@@ -167,83 +168,76 @@ function addMealModal(){
       </select>
       <span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-time" value="${now()}">
     </div>
-    <span class="text-sub">AI 解析（输入菜品+克数）</span>
-    <div class="input-row mt4"><input class="input" id="mc-input" placeholder="番茄炒蛋 200g, 米饭 150g"><button class="btn primary sm" onclick="parseAndShow()">解析</button></div>
-    <span class="text-sub mt8">手动添加食材</span>
+    <span class="text-sub">食材（输入食材名+克数，可多次添加）</span>
     <div class="input-row mt4">
-      <input class="input" id="mc-manual-name" placeholder="食材名称" style="flex:2"><input class="input sm" id="mc-manual-gram" placeholder="克数" type="number" value="100" style="flex:1"><button class="btn primary sm" onclick="addManualFood()">+</button>
+      <input class="input" id="mc-manual-name" placeholder="食材名称 如: 鸡蛋" style="flex:2">
+      <input class="input sm" id="mc-manual-gram" placeholder="克数" type="number" value="100" style="flex:1">
+      <button class="btn primary sm" onclick="addIngredient()">+</button>
     </div>
-    <div id="mc-result" class="mt8"></div>
-    <button class="btn outline sm mt8" onclick="parseAndShow()" style="display:none"></button>`
-  html+=`<div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">保存</button></div></div></div>`
+    <div id="mc-ingredients" class="mt8"></div>
+    <button class="btn outline w100 mt8" id="mc-parse-btn" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
+    <div id="mc-result" class="mt8"></div>`
+  html+=`<div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`
   $('#app').insertAdjacentHTML('beforeend',html)
 }
 
-function addManualFood(){
+function addIngredient(){
   const name=document.getElementById('mc-manual-name')?.value?.trim()
   const gram=parseInt(document.getElementById('mc-manual-gram')?.value||100)
   if(!name)return toast('请输入食材名称')
   if(!gram||gram<1)return toast('请输入克数')
-  if(!window._foods)window._foods=[]
-  // Call AI to get nutrition for this ingredient
+  if(!window._ingredients)window._ingredients=[]
+  window._ingredients.push(`${name} ${gram}g`)
   document.getElementById('mc-manual-name').value=''
-  toast('正在查询营养数据...')
-  api('/api/parse-food',{method:'POST',body:JSON.stringify({text:name+' '+gram+'g'})}).then(r=>{
-    if(r.foods&&r.foods.length>0){
-      window._foods.push(r.foods[0])
-      refreshFoodList()
-      toast(`${name} ${gram}g · ${r.foods[0].calories||'?'}kcal`)
-    }else{
-      window._foods.push({name,amount:gram,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'manual'})
-      refreshFoodList()
-      toast(`${name} ${gram}g 已添加（营养待查）`)
-    }
-  }).catch(()=>{
-    window._foods.push({name,amount:gram,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'manual'})
-    refreshFoodList()
-  })
+  refreshIngredients()
+  document.getElementById('mc-parse-btn').style.display='block'
 }
 
-function parseAndShow(){
-  const text=document.getElementById('mc-input')?.value
-  if(!text||!text.trim())return
+function refreshIngredients(){
+  const ings=window._ingredients||[]
+  let h=''
+  if(ings.length>0){
+    ings.forEach((ing,i)=>{
+      h+=`<div class="food-row"><span>${ing}</span><button class="btn sm danger" onclick="removeIngredient(${i})">×</button></div>`
+    })
+  }
+  document.getElementById('mc-ingredients').innerHTML=h
+}
+
+function removeIngredient(i){
+  if(!window._ingredients)return
+  window._ingredients.splice(i,1)
+  refreshIngredients()
+  if(window._ingredients.length===0)document.getElementById('mc-parse-btn').style.display='none'
+}
+
+function parseIngredients(){
+  const ings=window._ingredients||[]
+  if(ings.length===0)return
+  const text=ings.join(', ')
+  toast('AI 正在计算菜品营养...')
   api('/api/parse-food',{method:'POST',body:JSON.stringify({text})}).then(r=>{
     if(r.foods&&r.foods.length>0){
-      if(!window._foods)window._foods=[]
-      r.foods.forEach(f=>window._foods.push(f))
-      document.getElementById('mc-input').value=''
-      refreshFoodList()
-      toast(`AI解析 ${r.foods.length} 项`)
+      window._foods=r.foods
+      const totalCal=r.foods.reduce((s,f)=>s+(f.calories||0),0)
+      const totalPro=r.foods.reduce((s,f)=>s+(f.protein||0),0)
+      const totalCarbs=r.foods.reduce((s,f)=>s+(f.carbs||0),0)
+      const totalFat=r.foods.reduce((s,f)=>s+(f.fat||0),0)
+      document.getElementById('mc-result').innerHTML=`
+        <div class="card" style="margin:8px 0 0;background:var(--divider)">
+          <span class="c-title" style="color:var(--green)">✅ 解析完成</span>
+          <div style="font-size:13px;color:var(--sub);margin-bottom:4px">${r.foods.map(f=>f.name+' '+f.amount+'g').join('、')}</div>
+          <span class="c-val">${Math.round(totalCal)}</span><span class="c-unit"> kcal</span>
+          <div class="text-sm mt4">蛋白质 ${totalPro.toFixed(1)}g · 碳水 ${totalCarbs.toFixed(1)}g · 脂肪 ${totalFat.toFixed(1)}g</div>
+        </div>`
+      toast(`解析完成 · ${Math.round(totalCal)}kcal`)
     }else toast('解析失败')
   })
 }
 
-function refreshFoodList(){
-  const foods=window._foods||[]
-  let h=''
-  if(foods.length>0){
-    const totalCal=foods.reduce((s,f)=>s+(f.calories||0),0)
-    const totalPro=foods.reduce((s,f)=>s+(f.protein||0),0)
-    const totalCarbs=foods.reduce((s,f)=>s+(f.carbs||0),0)
-    const totalFat=foods.reduce((s,f)=>s+(f.fat||0),0)
-    h+=`<div style="font-size:14px;font-weight:600;margin-bottom:4px">${foods.length} 项 · 合计 ${Math.round(totalCal)}kcal</div>`
-    h+=`<div class="text-sm text-sub" style="margin-bottom:8px">蛋白质 ${totalPro.toFixed(1)}g | 碳水 ${totalCarbs.toFixed(1)}g | 脂肪 ${totalFat.toFixed(1)}g</div>`
-    foods.forEach((f,i)=>{
-      h+=`<div class="food-row"><span>${f.name} <span class="text-sm">${f.amount||0}g</span></span><span class="bold">${f.calories||'?'}kcal</span><span class="text-sub text-sm">蛋白${(f.protein||0).toFixed(1)}g 碳水${(f.carbs||0).toFixed(1)}g 脂肪${(f.fat||0).toFixed(1)}g</span><button class="btn sm danger" onclick="removeFood(${i})">×</button></div>`
-    })
-  }
-  document.getElementById('mc-result').innerHTML=h
-}
-
-function removeFood(i){
-  if(!window._foods)return
-  window._foods.splice(i,1)
-  refreshFoodList()
-}
-
 function saveMeal(){
   const foods=window._foods||[]
-  if(foods.length===0){toast('请先添加食物');return}
+  if(foods.length===0){toast('请先解析食材');return}
   const mt=document.getElementById('mc-mealType')?.value||'lunch'
   const time=document.getElementById('mc-time')?.value||now()
   api('/api/meals',{method:'POST',body:JSON.stringify({date:T,meal_type:mt,time,foods})}).then(()=>{
