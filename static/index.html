@@ -90,6 +90,11 @@ function nav(){
   $$('.tab').forEach(t=>t.onclick=()=>{S.tab=t.dataset.t;render()})
 }
 function render(){S.tab==='home'?home():S.tab==='diet'?diet():S.tab==='workout'?workout():me();nav()}
+function renderMacroBar(label,val,target,color){
+  let pct=target>0?Math.min(150,Math.round(val/target*100)):0
+  let barColor=pct<80?'var(--blue)':pct<=100?'var(--green)':'var(--orange)'
+  return `<div class="macro-item"><span class="macro-val" style="color:${color}">${val}</span><span class="macro-lbl">${label} / ${target}g</span><div class="progress-bar" style="height:4px;margin-top:6px"><div class="progress-fill" style="width:${Math.min(pct,100)}%;background:${barColor}"></div></div><span class="text-sm" style="color:${barColor}">${pct}%</span></div>`
+}
 
 // ── Home ──
 function home(){
@@ -105,9 +110,9 @@ function home(){
     <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()"><span class="mode-emoji">${c.e}</span><div><span class="mode-label" style="color:${c.c}">${c.l}</span><span class="mode-desc">${c.d} · 点击切换</span></div></div>
     <div class="card text-center"><span class="text-sub">今日热量缺口</span><br><span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><br><span style="color:${dc};font-size:14px;font-weight:500">${ds}</span></div>
     <div class="macro-row">
-      <div class="macro-item"><span class="macro-val" style="color:var(--orange)">${Math.round(S.mealsProtein||0)}</span><span class="macro-lbl">蛋白 / ${g.protein||0}g</span></div>
-      <div class="macro-item"><span class="macro-val" style="color:var(--green)">${Math.round(S.mealsCarbs||0)}</span><span class="macro-lbl">碳水 / ${g.carbs||0}g</span></div>
-      <div class="macro-item"><span class="macro-val" style="color:var(--blue)">${Math.round(S.mealsFat||0)}</span><span class="macro-lbl">脂肪 / ${g.fat||0}g</span></div>
+      ${renderMacroBar('蛋白',Math.round(S.mealsProtein||0),g.protein||0,'var(--orange)')}
+      ${renderMacroBar('碳水',Math.round(S.mealsCarbs||0),g.carbs||0,'var(--green)')}
+      ${renderMacroBar('脂肪',Math.round(S.mealsFat||0),g.fat||0,'var(--blue)')}
     </div>
     <div class="card"><span class="c-title">💧 饮水 · ${pct}%</span>
       <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val" style="font-size:28px">${eff}</span><span class="text-sub">/ ${wt} ml</span></div>
@@ -120,6 +125,7 @@ function home(){
         <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
       </div>
       <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="undoWater(${w.id})">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
+    <div class="flex g8 mt8"><button class="btn sm outline" onclick="quickWaterFixed(200)">💧 200ml</button><button class="btn sm outline" onclick="quickWaterFixed(350)">💧 350ml</button><button class="btn sm outline" onclick="quickWaterFixed(500)">💧 500ml</button></div>
     </div>
     <div class="btn-row"><button class="btn primary" onclick="S.tab='diet';render()">🍽️ 记录饮食</button><button class="btn primary" onclick="S.tab='workout';render()">💪 记录运动</button></div>
     ${lw?`<div class="card" onclick="S.tab='me';render()"><span class="c-title">最新体重</span><span class="c-val">${lw}kg</span></div>`:''}
@@ -197,6 +203,11 @@ function me(){
 
 // ── Water functions ──
 function toggleCustomDrink(){document.getElementById('w-custom').classList.toggle('hidden',$('#w-type').value!=='其他')}
+function quickWaterFixed(ml){
+  let t=$('#w-type')?.value||'矿泉水'
+  if(t==='其他'){t=$('#w-custom')?.value?.trim();if(!t)t='水'}
+  api('/api/water',{method:'POST',body:JSON.stringify({date:T(),amount:ml,drink_type:t})}).then(()=>{loadWater().then(render);toast('+'+ml+'ml '+t)})
+}
 function quickAddWater(){
   let a=parseInt($('#w-amt')?.value||250),t=$('#w-type')?.value||'矿泉水'
   if(!a||a<10)return toast('请输入饮水量')
