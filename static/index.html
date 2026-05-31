@@ -56,6 +56,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 .unit-wrap{position:relative}
 .progress-bar{height:8px;background:var(--divider);border-radius:4px;overflow:hidden}
 .progress-fill{height:100%;border-radius:4px;transition:width .3s}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>
@@ -279,9 +280,8 @@ function analyzePhoto(input){
   reader.onload=function(e){
     let base64=e.target.result.split(',')[1]
     $('#mc-photo-img').src=e.target.result
-    $('#mc-photo-preview').classList.remove('hidden')
-    $('#mc-photo-name').textContent='识别中...'
-    $('#mc-photo-conf').textContent='加载中'
+    $('#mc-photo-img').style.cssText='width:100%;max-height:200px;object-fit:cover;border-radius:12px'
+    showPhotoSkeleton()
     $('#mc-photo-slider').value=200
     $('#mc-photo-grams').textContent='200g'
     toast('AI 正在识别菜品...')
@@ -295,7 +295,7 @@ function analyzePhoto(input){
         baseProtein:r.protein||r.nutrition?.protein_g||29,baseCarbs:r.carbs||r.nutrition?.carbs_g||76,
         baseFat:r.fat||r.nutrition?.fat_g||28}
       let cal=Math.round(window._photoResult.baseCals),pro=window._photoResult.baseProtein
-      $('#mc-photo-conf').textContent=(conf==='high'?'✅ ':'')+cal+'kcal · 蛋白'+pro+'g'
+      $('#mc-photo-conf').textContent=(conf==='high'?'✅ ':'')+cal+'kcal · 蛋白'+pro+'g · 碳水'+r.carbs+'g · 脂肪'+r.fat+'g'
       $('#mc-photo-slider').value=grams
       $('#mc-photo-grams').textContent=grams+'g'
       toast('识别完成: '+name+' '+grams+'g')
@@ -318,7 +318,7 @@ function updatePhotoGrams(v){
   let carbs=Math.round((r.baseCarbs||76)*ratio*10)/10,fat=Math.round((r.baseFat||28)*ratio*10)/10
   $('#mc-photo-name').nextElementSibling.textContent=r.confidence==='high'?'✅ 高置信度':r.confidence==='medium'?'👍 中等置信度':'⚠️ 估算'
   let confEl=$('#mc-photo-conf')
-  if(confEl)confEl.textContent=(r.confidence==='high'?'✅':'')+' '+cal+'kcal · 蛋白'+pro+'g'
+  if(confEl)confEl.textContent=(r.confidence==='high'?'✅ ':'')+cal+'kcal · 蛋白'+pro+'g · 碳水'+carbs+'g · 脂肪'+fat+'g'
 }
 function clearPhotoCard(){
   $('#mc-photo-preview').classList.add('hidden')
@@ -326,9 +326,18 @@ function clearPhotoCard(){
   window._photoResult=null
   let inp=document.getElementById('mc-photo');if(inp)inp.value=''
 }
+function showPhotoSkeleton(){
+  $('#mc-photo-img').src=''
+  $('#mc-photo-img').style.cssText='width:100%;height:150px;background:linear-gradient(90deg,#E5E5EA 25%,#F5F5F7 50%,#E5E5EA 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px'
+  $('#mc-photo-preview').classList.remove('hidden')
+  $('#mc-photo-name').textContent='AI 营养师分析中...'
+  $('#mc-photo-conf').textContent='正在全速解析食材'
+  $('#mc-photo-slider').value=300
+  $('#mc-photo-grams').textContent='...'
+}
 function editPhotoName(){
   let el=$('#mc-photo-name'),old=el.textContent
-  if(old==='识别中...')return
+  if(old==='识别中...'||old.includes('分析中'))return
   let inp=document.createElement('input')
   inp.className='input';inp.value=old==='--'||old.includes('未识别')||old.includes('超时')?'':old
   inp.style.cssText='font-size:16px;font-weight:600;padding:4px 8px;margin:-4px 0';inp.id='mc-photo-name-input'
