@@ -161,7 +161,7 @@ function workout(){
   else S.workouts.forEach(w=>{
     let exs=w.exercises;if(typeof exs==='string')try{exs=JSON.parse(exs)}catch(e){exs=[]};if(!Array.isArray(exs))exs=[]
     let ic=w.type==='cardio'
-    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${ic?'🏃 有氧':'💪 无氧'}</span><div class="mt8">${exs.map(e=>ic?`<span class="chip">坡度${e.incline||0}% ${e.speed||0}速 ${e.minutes||0}min</span>`:`<span class="chip">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div><div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
+    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${ic?'🏃 有氧':'💪 无氧'}</span><div class="mt8">${exs.map(e=>ic?`<span class="chip">${e.name||'有氧'}</span>`:`<span class="chip">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div><div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
   })
   h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
   $('#app').innerHTML=h
@@ -409,31 +409,61 @@ function saveMeal(){
 }
 
 // ── Workout modal ──
+const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',calPerMin:9,fields:['分钟','速度km/h']},
+  walking:{name:'爬坡/快走',emoji:'🚶',calPerMin:6,fields:['分钟','坡度%','速度km/h']},
+  cycling:{name:'动感单车',emoji:'🚴',calPerMin:7,fields:['分钟','阻力']},
+  rowing:{name:'划船机',emoji:'🚣',calPerMin:7,fields:['分钟']},
+  elliptical:{name:'椭圆机',emoji:'🧗',calPerMin:5,fields:['分钟','阻力']},
+  jump:{name:'跳绳',emoji:'🪢',calPerMin:9,fields:['分钟']},
+  swim:{name:'游泳',emoji:'🏊',calPerMin:8,fields:['分钟']}}
+const STRENGTH_EXAMPLES=['卧推','深蹲','硬拉','引体向上','划船','推举','弯举','臂屈伸','卷腹','平板支撑']
+
 function addWorkoutModal(){
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="wo-m"><div class="modal-box">
     <div class="modal-title">记录训练</div>
-    <div class="flex g8 mb8"><select class="input sm" id="wo-tp" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-dr" type="number" value="45" style="padding-right:28px;width:100%"><span class="unit-label">min</span></span></div>
-    <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8" onclick="addStrengthEx()">+ 添加动作</button></div>
-    <div id="wo-cd" class="hidden"><span class="text-sub">爬坡分段</span><div id="wo-segs"></div><button class="btn outline sm mt8" onclick="addCardioSeg()">+ 添加分段</button></div>
+    <div class="flex g8 mb8"><select class="input sm" id="wo-tp" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-dr" type="number" value="45" style="padding-right:28px;width:100%"><span class="unit-label">min</span></span><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-cal" type="number" value="300" style="padding-right:28px;width:100%" placeholder="估算"><span class="unit-label">kcal</span></span></div>
+    <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><div class="chip-row mt8">${STRENGTH_EXAMPLES.map(e=>`<button class="chip" onclick="quickStrengthEx('${e}')">${e}</button>`).join('')}</div></div>
+    <div id="wo-cd" class="hidden"><span class="text-sub">运动类型</span><div class="chip-row mt4">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="quickCardio('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div><input class="input sm mt4 hidden" id="wo-custom-ex" placeholder="或手动输入运动名称"><div id="wo-segs"></div></div>
     <div class="flex g8 mt16"><button class="btn w100" onclick="$('#wo-m').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存训练</button></div></div></div>`)
 }
-function toggleWoType(){$('#wo-st').classList.toggle('hidden',$('#wo-tp').value!=='strength');$('#wo-cd').classList.toggle('hidden',$('#wo-tp').value!=='cardio')}
-function addStrengthEx(){$('#wo-exs').innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称"><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="4" style="padding-right:24px"><span class="unit-label">组</span></span><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="12" style="padding-right:24px"><span class="unit-label">次</span></span><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="0" style="padding-right:24px"><span class="unit-label">kg</span></span></div>`}
-function addCardioSeg(){let n=$('#wo-segs').children.length+1;$('#wo-segs').innerHTML+=`<div class="input-row mt8" style="align-items:center"><span class="text-sm text-sub">第${n}段</span><span class="unit-wrap"><input class="input sm" type="number" value="12" style="padding-right:24px"><span class="unit-label">%</span></span><span class="unit-wrap"><input class="input sm" type="number" value="3.5" step="0.1" style="padding-right:32px"><span class="unit-label">km/h</span></span><span class="unit-wrap"><input class="input sm" type="number" value="5" style="padding-right:30px"><span class="unit-label">min</span></span><button class="btn sm danger" onclick="this.parentElement.remove()">×</button></div>`}
+function toggleWoType(){
+  let isCardio=$('#wo-tp').value==='cardio'
+  $('#wo-st').classList.toggle('hidden',isCardio)
+  $('#wo-cd').classList.toggle('hidden',!isCardio)
+  if(isCardio&&!window._woType)quickCardio('running')
+}
+function quickStrengthEx(name){$('#wo-exs').innerHTML+=`<div class="input-row mt8"><input class="input" value="${name}"><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="4" style="padding-right:24px"><span class="unit-label">组</span></span><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="12" style="padding-right:24px"><span class="unit-label">次</span></span><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="0" style="padding-right:24px"><span class="unit-label">kg</span></span></div>`}
+function quickCardio(key){
+  window._woType=key
+  let p=CARDIO_PRESETS[key],dur=parseInt($('#wo-dr')?.value||45)
+  let estCal=Math.round(p.calPerMin*dur*(S.user?.current_weight||70)/70)
+  $('#wo-cal').value=estCal
+  $('#wo-custom-ex').classList.add('hidden')
+  $('#wo-segs').innerHTML=`<div class="card mt8" style="background:var(--divider)"><span style="font-size:18px">${p.emoji} ${p.name}</span><span class="text-sub ml-auto">≈${p.calPerMin} kcal/min</span></div>`
+  p.fields.forEach(f=>{$('#wo-segs').innerHTML+=`<div class="input-row mt4"><span class="text-sm text-sub" style="width:60px">${f}</span><input class="input sm" type="number" value="${f.includes('分钟')?dur:3}" style="flex:1"></div>`})
+  $('#wo-segs').innerHTML+=`<button class="btn outline sm mt4" onclick="quickCardioCustom()">+ 自定义运动</button>`
+}
+function quickCardioCustom(){
+  $('#wo-custom-ex').classList.remove('hidden')
+  $('#wo-custom-ex').focus()
+  $('#wo-cal').val(300)
+}
+$('#wo-dr')?.addEventListener('input',function(){if(window._woType)quickCardio(window._woType)})
 function saveWorkout(){
-  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||45,u=S.user||{},exs=[],desc=''
-  if(tp==='strength'){$('#wo-exs').querySelectorAll('.input-row').forEach(r=>{let inps=r.querySelectorAll('input');let n=inps[0]?.value?.trim()||'训练',s=parseInt(inps[1]?.value)||4,re=parseInt(inps[2]?.value)||12,w=parseInt(inps[3]?.value)||0;exs.push({name:n,sets:s,reps:re,weight:w});desc+=n+' '+s+'组×'+re+'次×'+w+'kg; '})}
-  else{$('#wo-segs').querySelectorAll('.input-row').forEach(r=>{let inps=r.querySelectorAll('input');let inc=parseFloat(inps[0]?.value)||0,sp=parseFloat(inps[1]?.value)||0,mn=parseInt(inps[2]?.value)||0;exs.push({name:'爬坡',incline:inc,speed:sp,minutes:mn});desc+='坡度'+inc+'% 速度'+sp+' '+mn+'min; '})}
+  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||45,cal=parseInt($('#wo-cal')?.value)||300,u=S.user||{},exs=[],desc=''
+  if(tp==='strength'){
+    $('#wo-exs').querySelectorAll('.input-row').forEach(r=>{let inps=r.querySelectorAll('input');let n=inps[0]?.value?.trim()||'训练',s=parseInt(inps[1]?.value)||4,re=parseInt(inps[2]?.value)||12,w=parseInt(inps[3]?.value)||0;exs.push({name:n,sets:s,reps:re,weight:w});desc+=n+' '+s+'组×'+re+'次×'+w+'kg; '})
+  }else{
+    let ename=$('#wo-custom-ex').value.trim()||(CARDIO_PRESETS[window._woType]?.name)||'有氧'
+    let fields=[]
+    $('#wo-segs').querySelectorAll('.input-row input').forEach(inp=>fields.push(inp.value||0))
+    exs.push({name:ename,fields:fields})
+    desc=ename+' 参数:'+fields.join('/')+' '
+  }
   if(!exs.length)return toast('请添加训练内容')
   desc+='总时长'+dr+'min'
-  toast('AI 正在计算消耗...')
-  api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,description:desc})}).then(r=>{
-    let cal=r.calories||300
-    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+cal+'kcal')})
-  }).catch(()=>{
-    let cal=Math.round((tp==='cardio'?dr*8:dr*6)*(u.current_weight||70)/70)
-    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练已记录(估算)')})
-  })
+  toast('保存中...')
+  api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+cal+'kcal')})
 }
 
 // ── Boot ──
