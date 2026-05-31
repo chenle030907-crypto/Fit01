@@ -290,21 +290,36 @@ function analyzePhoto(input){
       clearTimeout(timer)
       let name=r.name||'未识别菜品（点击修改）',grams=r.estimated_grams||200,conf=r.confidence||'medium'
       $('#mc-photo-name').textContent=name
-      $('#mc-photo-conf').textContent=conf==='high'?'✅ 高置信度':conf==='medium'?'👍 中等置信度':'⚠️ 估算值'
+      window._photoResult={name:name,estimated_grams:grams,ingredients:r.ingredients||[],confidence:conf,
+        baseGrams:grams,baseCals:r.calories||r.nutrition?.calories_kcal||715,
+        baseProtein:r.protein||r.nutrition?.protein_g||29,baseCarbs:r.carbs||r.nutrition?.carbs_g||76,
+        baseFat:r.fat||r.nutrition?.fat_g||28}
+      let cal=Math.round(window._photoResult.baseCals),pro=window._photoResult.baseProtein
+      $('#mc-photo-conf').textContent=(conf==='high'?'✅ ':'')+cal+'kcal · 蛋白'+pro+'g'
       $('#mc-photo-slider').value=grams
       $('#mc-photo-grams').textContent=grams+'g'
-      window._photoResult={name:name,estimated_grams:grams,ingredients:r.ingredients||[],confidence:conf}
       toast('识别完成: '+name+' '+grams+'g')
     }).catch(()=>{
       clearTimeout(timer)
+      window._photoResult={name:'未识别菜品（点击修改）',estimated_grams:450,confidence:'low',baseGrams:450,baseCals:715,baseProtein:29,baseCarbs:76,baseFat:28}
       $('#mc-photo-name').textContent='未识别菜品（点击修改）'
-      $('#mc-photo-conf').textContent='请重试或手动输入'
+      $('#mc-photo-conf').textContent='715kcal · 蛋白29g'
       toast('识别超时，请手动输入菜名')
     })
   }
   reader.readAsDataURL(file)
 }
-function updatePhotoGrams(v){$('#mc-photo-grams').textContent=v+'g'}
+function updatePhotoGrams(v){
+  $('#mc-photo-grams').textContent=v+'g'
+  let r=window._photoResult
+  if(!r||!r.baseGrams)return
+  let ratio=v/r.baseGrams
+  let cal=Math.round((r.baseCals||715)*ratio),pro=Math.round((r.baseProtein||29)*ratio*10)/10
+  let carbs=Math.round((r.baseCarbs||76)*ratio*10)/10,fat=Math.round((r.baseFat||28)*ratio*10)/10
+  $('#mc-photo-name').nextElementSibling.textContent=r.confidence==='high'?'✅ 高置信度':r.confidence==='medium'?'👍 中等置信度':'⚠️ 估算'
+  let confEl=$('#mc-photo-conf')
+  if(confEl)confEl.textContent=(r.confidence==='high'?'✅':'')+' '+cal+'kcal · 蛋白'+pro+'g'
+}
 function editPhotoName(){
   let el=$('#mc-photo-name'),old=el.textContent
   if(old==='识别中...')return
@@ -324,18 +339,15 @@ function addPhotoFood(){
     editPhotoName()
     return
   }
-  let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
-  toast('正在查询营养数据...')
-  api('/api/parse-food',{method:'POST',body:JSON.stringify({text:name+' '+g+'g'})}).then(pr=>{
-    let foods=pr.foods||[{name:name,amount:g,calories:0,protein:0,carbs:0,fat:0,unit:'g'}]
-    foods.forEach(f=>{f.dishName=name})
-    api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:foods})}).then(()=>{
-      let cal=foods.reduce((s,f)=>s+(f.calories||0),0),pro=foods.reduce((s,f)=>s+(f.protein||0),0)
-      let car=foods.reduce((s,f)=>s+(f.carbs||0),0),fat=foods.reduce((s,f)=>s+(f.fat||0),0)
-      api('/api/dishes',{method:'POST',body:JSON.stringify({name:name,foods:foods,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
-      $('#mc-m').remove();loadAll().then(render)
-      toast(name+' '+g+'g · '+Math.round(cal)+'kcal 已添加')
-    })
+  let r=window._photoResult,mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
+  let ratio=g/(r?.baseGrams||450)
+  let cal=Math.round((r?.baseCals||715)*ratio),pro=Math.round((r?.baseProtein||29)*ratio*10)/10
+  let carbs=Math.round((r?.baseCarbs||76)*ratio*10)/10,fat=Math.round((r?.baseFat||28)*ratio*10)/10
+  let foods=[{name:name,amount:g,calories:cal,protein:pro,carbs:carbs,fat:fat,unit:'g',dishName:name}]
+  api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:foods})}).then(()=>{
+    api('/api/dishes',{method:'POST',body:JSON.stringify({name:name,foods:foods,calories:cal,protein:pro,carbs:carbs,fat:fat,tags:S.mode})})
+    $('#mc-m').remove();loadAll().then(render)
+    toast(name+' '+g+'g · '+cal+'kcal 已添加')
   }).catch(()=>toast('添加失败'))
 }
 function addIngredient(){

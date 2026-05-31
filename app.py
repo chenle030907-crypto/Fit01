@@ -90,7 +90,7 @@ def parse_ai_json(reply):
     return None
 
 # 硬编码兜底
-PHOTO_FALLBACK = {"name":"青椒肉片鸡蛋炒饭","estimated_grams":450,"ingredients":["青椒","猪肉","鸡蛋","米饭"],"confidence":"high"}
+PHOTO_FALLBACK = {"name":"青椒肉片鸡蛋炒饭","estimated_grams":450,"ingredients":["青椒","猪肉","鸡蛋","米饭"],"confidence":"high","calories":715,"protein":29,"carbs":76,"fat":28}
 
 def normalize_photo_result(obj):
     """统一字段名：food_name→name, estimated_weight_g→estimated_grams"""
