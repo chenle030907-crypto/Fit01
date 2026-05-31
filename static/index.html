@@ -161,7 +161,7 @@ function workout(){
   else S.workouts.forEach(w=>{
     let exs=w.exercises;if(typeof exs==='string')try{exs=JSON.parse(exs)}catch(e){exs=[]};if(!Array.isArray(exs))exs=[]
     let ic=w.type==='cardio'
-    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${ic?'🏃 有氧':'💪 无氧'}</span><div class="mt8">${exs.map(e=>ic?`<span class="chip">${e.name||'有氧'}</span>`:`<span class="chip">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div><div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
+    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${ic?'🏃 有氧':'💪 无氧'}</span><div class="mt8">${exs.map(e=>ic?`<span class="chip">${e.name||'有氧'}</span>${e.segments?`<div class="text-sm text-sub mt4">${e.segments.map(s=>s.name+' '+s.minutes+'min').join(' | ')}</div>`:''}`:`<span class="chip">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div><div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
   })
   h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
   $('#app').innerHTML=h
@@ -423,14 +423,14 @@ function addWorkoutModal(){
     <div class="modal-title">记录训练</div>
     <div class="flex g8 mb8"><select class="input sm" id="wo-tp" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-dr" type="number" value="45" style="padding-right:28px;width:100%"><span class="unit-label">min</span></span><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-cal" type="number" value="300" style="padding-right:28px;width:100%" placeholder="估算"><span class="unit-label">kcal</span></span></div>
     <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8 w100" onclick="addStrengthRow()">+ 添加动作（可手写名称）</button><div class="chip-row mt8">${STRENGTH_EXAMPLES.map(e=>`<button class="chip" onclick="addStrengthRow('${e}')">${e}</button>`).join('')}</div></div>
-    <div id="wo-cd" class="hidden"><span class="text-sub">运动类型</span><div class="chip-row mt4">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="quickCardio('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div><input class="input sm mt4 hidden" id="wo-custom-ex" placeholder="或手动输入运动名称"><div id="wo-segs"></div></div>
+    <div id="wo-cd" class="hidden"><span class="text-sub">分段训练</span><div id="wo-segs"></div><button class="btn outline sm mt8 w100" onclick="addCardioSeg()">+ 添加下一段训练</button><div class="chip-row mt8">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="fillCardioSeg('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div></div>
     <div class="flex g8 mt16"><button class="btn w100" onclick="$('#wo-m').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存训练</button></div></div></div>`)
 }
 function toggleWoType(){
   let isCardio=$('#wo-tp').value==='cardio'
   $('#wo-st').classList.toggle('hidden',isCardio)
   $('#wo-cd').classList.toggle('hidden',!isCardio)
-  if(isCardio&&!window._woType)quickCardio('running')
+  if(isCardio&&!$('#wo-segs').children.length)addCardioSeg('running')
 }
 function addStrengthRow(name=''){
   $('#wo-exs').insertAdjacentHTML('beforeend',`<div class="card mt8" style="padding:14px;background:var(--bg)">
@@ -460,9 +460,12 @@ function estimateCalories(){
   clearTimeout(_estTimer)
   _estTimer=setTimeout(()=>{
     let dur=parseInt($('#wo-dr')?.value||45),tp=$('#wo-tp')?.value||'strength'
-    let name=tp==='cardio'?(CARDIO_PRESETS[window._woType]?.name||$('#wo-custom-ex').value.trim()||'有氧'):'力量训练'
-    if(!name)return
-    let desc=name+' '+dur+'分钟'
+    let segs=[]
+    $('#wo-segs').querySelectorAll('.card').forEach(card=>{
+      let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||card.querySelector('span')?.textContent?.trim()||'有氧'
+      let d=parseInt(inps[1]?.value)||0;if(d>0)segs.push(n+' '+d+'min')
+    })
+    let desc=tp==='cardio'&&segs.length?segs.join(', ')+' 总'+dur+'分钟组合有氧':'力量训练 '+dur+'分钟'
     if(tp==='strength'){
       let exs=[]
       $('#wo-exs').querySelectorAll('.card').forEach(r=>{let inps=r.querySelectorAll('input');exs.push(inps[0]?.value?.trim()||'训练')})
@@ -485,11 +488,17 @@ function saveWorkout(){
   if(tp==='strength'){
     $('#wo-exs').querySelectorAll('.card').forEach(card=>{let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||'训练',s=parseInt(inps[1]?.value)||4,re=parseInt(inps[2]?.value)||12,w=parseInt(inps[3]?.value)||0;exs.push({name:n,sets:s,reps:re,weight:w});desc+=n+' '+s+'组×'+re+'次×'+w+'kg; '})
   }else{
-    let ename=$('#wo-custom-ex').value.trim()||(CARDIO_PRESETS[window._woType]?.name)||'有氧'
-    let fields=[]
-    $('#wo-segs').querySelectorAll('.input-row input').forEach(inp=>fields.push(inp.value||0))
-    exs.push({name:ename,fields:fields})
-    desc=ename+' 参数:'+fields.join('/')+' '
+    let segs=[];let allNames=[]
+    $('#wo-segs').querySelectorAll('.card').forEach(card=>{
+      let inps=card.querySelectorAll('input')
+      let n=inps[0]?.value?.trim()||card.querySelector('span')?.textContent?.trim()||'有氧'
+      let d=parseInt(inps[1]?.value)||0
+      segs.push({name:n,minutes:d});allNames.push(n+' '+d+'min')
+    })
+    if(!segs.length){segs.push({name:'有氧',minutes:dr});allNames.push('有氧 '+dr+'min')}
+    let comboName=allNames.length>1?'组合有氧':segs[0].name
+    exs.push({name:comboName,segments:segs})
+    desc=allNames.join(' / ')+' 总'+dr+'min'
   }
   if(!exs.length)return toast('请添加训练内容')
   desc+='总时长'+dr+'min'
