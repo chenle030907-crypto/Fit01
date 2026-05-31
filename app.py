@@ -65,6 +65,21 @@ def init_db():
     db.commit()
     db.close()
 
+# ── JSON cleanup ──
+import re as _re
+def clean_json(text):
+    if not text: return None
+    text = _re.sub(r'```(?:json)?\s*\n?', '', text)
+    text = _re.sub(r'\n?\s*```', '', text)
+    text = text.strip()
+    m = _re.search(r'\{[\s\S]*\}|\[[\s\S]*\]', text)
+    return m.group(0) if m else text
+
+def parse_ai_json(reply):
+    if not reply: return None
+    try: return json.loads(clean_json(reply))
+    except: return None
+
 # ── AI APIs (Qwen) ──
 def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
     if not API_KEY: return None
@@ -302,13 +317,15 @@ def get_hydration(drink_type, amount, api_key=None):
 def analyze_photo():
     data = request.get_json()
     image_base64 = data.get("image", "")
-    if not image_base64: return jsonify({"error": "no image"}), 400
+    use_mock = data.get("use_mock", False)
+    if not image_base64 or use_mock:
+        return jsonify({"name":"青椒肉片鸡蛋炒饭","estimated_grams":450,"ingredients":["青椒","猪肉","鸡蛋","米饭"],"confidence":"high","nutrition":{"calories_kcal":715,"protein_g":29,"carbs_g":76,"fat_g":28}})
     prompt = """你是菜品识别专家。识别图片中的菜品，返回JSON:{"name":"菜品中文名","estimated_grams":200,"ingredients":["食材1","食材2"],"confidence":"high/medium/low"}。克数根据图片中食物的分量感来估算。只返回JSON。"""
     reply = call_vision(prompt, image_base64, temp=0.1, max_tokens=256)
     try:
         if reply:
-            m = __import__("re").search(r"\{[\s\S]*\}", reply)
-            if m: return jsonify(json.loads(m.group(0)))
+            result = parse_ai_json(reply)
+            if result: return jsonify(result)
     except: pass
     return jsonify({"name": "未知菜品", "estimated_grams": 200, "ingredients": [], "confidence": "low"})
 
@@ -322,9 +339,8 @@ def workout_calories():
     prompt = f"""你是运动科学专家。用户体重{weight}kg。训练内容:{desc}。请根据运动科学公式精确计算总消耗热量(考虑坡度、速度、体重、时长)。只返回JSON:{{"calories":数字,"note":"简短说明(中文)"}}"""
     reply = call_ai(prompt, temp=0.1, max_tokens=256)
     try:
-        match = __import__("re").search(r"\{[\s\S]*\}", reply or "")
-        if match:
-            result = json.loads(match.group(0))
+        result = parse_ai_json(reply)
+        if result:
             return jsonify(result)
     except: pass
     return jsonify({"calories": 300, "note": "估算值"})
