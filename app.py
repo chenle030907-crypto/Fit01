@@ -118,19 +118,26 @@ def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
 
 def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
     if not API_KEY: return None
-    try:
-        r = requests.post(
-            "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
-            headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-            json={"model":"qwen-vl-flash","messages":[{"role":"user","content":[
-                {"type":"text","text":prompt},
-                {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
-            ]}],"temperature":temp,"max_tokens":max_tokens,
-            "response_format":{"type":"json_object"}},
-            timeout=10
-        )
-        return r.json()["choices"][0]["message"]["content"]
-    except: return None
+    for model in ["qwen-vl-plus","qwen-vl-max","qwen2.5-vl-72b-instruct","qwen-vl-flash"]:
+        try:
+            r = requests.post(
+                "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+                headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+                json={"model":model,"messages":[{"role":"user","content":[
+                    {"type":"text","text":prompt},
+                    {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
+                ]}],"temperature":temp,"max_tokens":max_tokens,
+                "response_format":{"type":"json_object"}},
+                timeout=15
+            )
+            data = r.json()
+            if "choices" in data:
+                print(f"[vision] model={model} OK")
+                return data["choices"][0]["message"]["content"]
+            print(f"[vision] model={model} error: {data.get('error',data)[:200]}")
+        except Exception as e:
+            print(f"[vision] model={model} exception: {e}")
+    return None
 
 # ── Static files ──
 @app.route("/")
