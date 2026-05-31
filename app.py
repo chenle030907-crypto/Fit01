@@ -250,7 +250,7 @@ def delete_dish(id):
 def measurements():
     db = get_db()
     if request.method == "GET":
-        rows = db.execute("SELECT * FROM measurements ORDER BY date DESC LIMIT 90").fetchall()
+        rows = db.execute("SELECT * FROM measurements GROUP BY date ORDER BY date DESC LIMIT 90").fetchall()
         return jsonify([dict(r) for r in rows])
     data = request.get_json()
     date = data.get("date", str(datetime.date.today()))
