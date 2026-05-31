@@ -113,7 +113,7 @@ function home(){
       ${raw!==eff?`<div class="text-sm text-sub" style="margin-bottom:4px">实际 ${raw}ml，等效纯水 ${eff}ml</div>`:''}
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${bc}"></div></div>
       <div class="input-row mt12" style="flex-wrap:wrap">
-        <span class="unit-wrap"><input class="input sm" id="w-amt" value="250" type="number" style="width:85px;text-align:center;font-size:18px;font-weight:600;padding-right:28px"><span class="unit-label">ml</span></span>
+        <span class="unit-wrap" style="flex:1"><input class="input sm" id="w-amt" value="250" type="number" style="width:100%;text-align:center;font-size:18px;font-weight:600;padding-right:28px"><span class="unit-label">ml</span></span>
         <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${(S.waterDrinks||[]).map(d=>`<option>${d.name}</option>`).join('')}<option>其他</option></select>
         <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="width:100px">
         <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
