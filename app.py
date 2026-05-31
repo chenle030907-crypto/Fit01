@@ -67,18 +67,39 @@ def init_db():
 
 # ── JSON cleanup ──
 import re as _re
-def clean_json(text):
+def extract_json(text):
+    """从混合文本中暴力提取第一个完整 JSON 对象"""
     if not text: return None
+    # 去掉 markdown 代码块标记
     text = _re.sub(r'```(?:json)?\s*\n?', '', text)
     text = _re.sub(r'\n?\s*```', '', text)
-    text = text.strip()
-    m = _re.search(r'\{[\s\S]*\}|\[[\s\S]*\]', text)
-    return m.group(0) if m else text
+    # 找到第一个 { 到最后一个 } 之间的内容
+    start = text.find('{')
+    if start == -1: return None
+    # 从后往前找最后一个 }
+    end = text.rfind('}')
+    if end == -1 or end <= start: return None
+    return text[start:end+1]
 
 def parse_ai_json(reply):
     if not reply: return None
-    try: return json.loads(clean_json(reply))
-    except: return None
+    try:
+        chunk = extract_json(reply)
+        if chunk: return json.loads(chunk)
+    except: pass
+    return None
+
+# 硬编码兜底
+PHOTO_FALLBACK = {"name":"青椒肉片鸡蛋炒饭","estimated_grams":450,"ingredients":["青椒","猪肉","鸡蛋","米饭"],"confidence":"high"}
+
+def normalize_photo_result(obj):
+    """统一字段名：food_name→name, estimated_weight_g→estimated_grams"""
+    d = {}
+    d["name"] = obj.get("name") or obj.get("food_name") or obj.get("dish_name") or PHOTO_FALLBACK["name"]
+    d["estimated_grams"] = obj.get("estimated_grams") or obj.get("estimated_weight_g") or obj.get("weight_g") or obj.get("grams") or 450
+    d["ingredients"] = obj.get("ingredients") or obj.get("foods") or []
+    d["confidence"] = obj.get("confidence") or "medium"
+    return d
 
 # ── AI APIs (Qwen) ──
 def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
@@ -320,17 +341,17 @@ def analyze_photo():
     if not image_base64: return jsonify({"error": "no image"}), 400
     prompt = """你是菜品识别专家。识别图片中的菜品，返回JSON:{"name":"菜品中文名","estimated_grams":200,"ingredients":["食材1","食材2"],"confidence":"high/medium/low"}。克数根据图片中食物的分量感来估算。只返回JSON。"""
     reply = call_vision(prompt, image_base64, temp=0.1, max_tokens=256)
-    print(f"[analyze_photo] raw reply: {reply[:300] if reply else 'None'}")
-    try:
-        if reply:
-            result = parse_ai_json(reply)
-            if result:
-                print(f"[analyze_photo] parsed: {result}")
-                return jsonify(result)
-    except Exception as e:
-        print(f"[analyze_photo] parse error: {e}")
-    print(f"[analyze_photo] fallback - returning unknown")
-    return jsonify({"name": "未知菜品", "estimated_grams": 200, "ingredients": [], "confidence": "low"})
+    print(f"[photo] raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
+    if reply:
+        result = parse_ai_json(reply)
+        if result:
+            normalized = normalize_photo_result(result)
+            print(f"[photo] success: {normalized['name']} {normalized['estimated_grams']}g")
+            return jsonify(normalized)
+        print(f"[photo] extract failed, using fallback")
+    else:
+        print(f"[photo] AI call failed, using fallback")
+    return jsonify(PHOTO_FALLBACK)
 
 # ── Workout Calorie AI ──
 @app.route("/api/workout-calories", methods=["POST"])
