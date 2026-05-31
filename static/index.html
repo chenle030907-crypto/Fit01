@@ -263,7 +263,7 @@ function addMealModal(){window._foods=[];window._ingredients=[]
       </div>
     </div>
     <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
-    <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:24px"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
+    <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2" onfocus="clearPhotoCard()"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:24px" onfocus="clearPhotoCard()"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
     <div id="mc-ings" class="mt8"></div>
     <div class="input-row mt8"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）"></div>
     <button class="btn outline w100 mt8" id="mc-parse" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
@@ -320,6 +320,12 @@ function updatePhotoGrams(v){
   let confEl=$('#mc-photo-conf')
   if(confEl)confEl.textContent=(r.confidence==='high'?'✅':'')+' '+cal+'kcal · 蛋白'+pro+'g'
 }
+function clearPhotoCard(){
+  $('#mc-photo-preview').classList.add('hidden')
+  $('#mc-photo-name').textContent='--'
+  window._photoResult=null
+  let inp=document.getElementById('mc-photo');if(inp)inp.value=''
+}
 function editPhotoName(){
   let el=$('#mc-photo-name'),old=el.textContent
   if(old==='识别中...')return
@@ -353,6 +359,7 @@ function addPhotoFood(){
 function addIngredient(){
   let n=$('#mc-nm')?.value?.trim(),g=parseInt($('#mc-gr')?.value||100)
   if(!n)return toast('请输入食材名称');if(!g||g<1)return toast('请输入克数')
+  clearPhotoCard()
   if(!window._ingredients)window._ingredients=[];window._ingredients.push(n+' '+g+'g');$('#mc-nm').value='';refreshIngredients();$('#mc-parse').style.display='block'
 }
 function refreshIngredients(){let h='';(window._ingredients||[]).forEach((ing,i)=>{h+=`<div class="food-row"><span>${ing}</span><button class="btn sm danger" onclick="removeIngredient(${i})">×</button></div>`});$('#mc-ings').innerHTML=h}
