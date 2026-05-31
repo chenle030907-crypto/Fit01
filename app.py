@@ -55,6 +55,11 @@ def init_db():
             date TEXT NOT NULL, weight REAL, body_fat REAL,
             note TEXT, created_at TEXT DEFAULT (datetime('now','localtime'))
         );
+        CREATE TABLE IF NOT EXISTS water (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT NOT NULL, amount INTEGER NOT NULL, drink_type TEXT DEFAULT 'water',
+            created_at TEXT DEFAULT (datetime('now','localtime'))
+        );
         INSERT OR IGNORE INTO users (id) VALUES (1);
     """)
     db.commit()
@@ -239,6 +244,42 @@ def calc_nutrition():
     fat = int(w * 0.9)
     carbs = max(0, int((target_cal - protein*4 - fat*9)/4))
     return jsonify({"bmr":bmr,"tdee":tdee,"target_calories":target_cal,"protein":protein,"carbs":carbs,"fat":fat,"fiber":30 if g==1 else 25})
+
+# ── Water API ──
+@app.route("/api/water", methods=["GET","POST"])
+def water():
+    db = get_db()
+    if request.method == "GET":
+        date = request.args.get("date", str(datetime.date.today()))
+        rows = db.execute("SELECT * FROM water WHERE date=? ORDER BY created_at", [date]).fetchall()
+        return jsonify([dict(r) for r in rows])
+    data = request.get_json()
+    db.execute("INSERT INTO water (date,amount,drink_type) VALUES (?,?,?)",
+        [data.get("date",str(datetime.date.today())), data.get("amount",250), data.get("drink_type","water")])
+    db.commit()
+    return jsonify({"ok":True})
+
+@app.route("/api/water-target", methods=["POST"])
+def water_target():
+    data = request.get_json()
+    w = data.get("weight", 70)
+    af = data.get("activity_level", 1.55)
+    base = int(w * 33)
+    act_bonus = int((af - 1.2) * 500)
+    target = base + act_bonus
+    prompt = f"""你是营养顾问。用户{w}kg，活动系数{af}。推荐每日饮水目标(ml)，并列出5种常见饮品每250ml的热量。返回JSON:{{"target_ml":数字,"drinks":[{{"name":"水/咖啡/电解质水/椰子水/牛奶等","calories_per_250ml":数字,"note":"一句话"}}]}}"""
+    reply = call_ai(prompt, temp=0.2, max_tokens=512)
+    drinks = [{"name":"矿泉水","calories_per_250ml":0,"note":"零卡补水首选"},{"name":"黑咖啡","calories_per_250ml":5,"note":"提神,几乎零卡"},{"name":"电解质水","calories_per_250ml":15,"note":"运动后补充电解质"},{"name":"椰子水","calories_per_250ml":46,"note":"天然电解质"},{"name":"全脂牛奶","calories_per_250ml":155,"note":"补充蛋白质和钙"}]
+    ai_target = target
+    if reply:
+        try:
+            m = __import__("re").search(r"\{[\s\S]*\}", reply)
+            if m:
+                ai = json.loads(m.group(0))
+                ai_target = ai.get("target_ml", target)
+                if ai.get("drinks"): drinks = ai["drinks"]
+        except: pass
+    return jsonify({"target_ml": ai_target, "drinks": drinks})
 
 # ── Start ──
 if __name__ == "__main__":

@@ -80,7 +80,7 @@ const MODES={cardio:{label:'有氧日',emoji:'🏃',desc:'高碳水供能',bg:'#
   happy:{label:'Happy日',emoji:'😊',desc:'休息恢复',bg:'#E8F5E9'},
   cheat:{label:'放纵日',emoji:'🎉',desc:'随便吃',bg:'#FFEBEE'}}
 
-let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[]}
+let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500}
 
 // ── Render engine ──
 function r(){if(S.tab==='home')home();else if(S.tab==='diet')diet();else if(S.tab==='workout')workout();else me();nav()}
@@ -119,6 +119,7 @@ function home(){
       <div class="macro-item"><span class="macro-val" style="color:var(--green)">${Math.round(S.mealsCarbs||0)}</span><span class="macro-lbl">碳水 / ${g.carbs||0}g</span></div>
       <div class="macro-item"><span class="macro-val" style="color:var(--blue)">${Math.round(S.mealsFat||0)}</span><span class="macro-lbl">脂肪 / ${g.fat||0}g</span></div>
     </div>
+    ${renderWaterCard()}
     <div class="btn-row">
       <button class="btn primary" onclick="S.tab='diet';r()">🍽️ 记录饮食</button>
       <button class="btn primary" onclick="S.tab='workout';r()">💪 记录运动</button>
@@ -337,13 +338,58 @@ function recordWeight(){
 }
 
 // ── Data ──
-function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements()]).then(()=>loadGoals())}
+function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements(),loadWater(),loadWaterTarget()]).then(()=>loadGoals())}
 function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_type||'happy'})}
 function loadMeals(){return api('/api/meals?date='+T).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
 function loadWorkouts(){return api('/api/workouts?date='+T).then(ws=>{S.workouts=ws})}
 function loadDishes(){return api('/api/dishes').then(ds=>{S.dishes=ds})}
 function loadGoals(){const u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode})}).then(g=>{S.goals=g})}
 function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
+
+// ── Water ──
+function renderWaterCard(){
+  const todayWater=S.water.reduce((s,w)=>s+(w.amount||0),0)
+  const target=S.waterTarget||2500
+  const pct=Math.min(100,Math.round(todayWater/target*100))
+  const barColor=pct<30?'var(--red)':pct<70?'var(--orange)':'var(--green)'
+  const u=S.user||{}
+  return `<div class="card" onclick="addWaterModal()">
+    <span class="c-title">💧 饮水</span>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:8px">
+      <span class="c-val" style="font-size:24px">${todayWater}</span><span class="text-sub">/ ${target}ml</span>
+      <span style="color:${barColor};font-weight:600;margin-left:auto">${pct}%</span>
+    </div>
+    <div class="progress-bar" style="height:6px;background:var(--divider);border-radius:3px;margin-top:8px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${barColor};border-radius:3px;transition:width 0.3s"></div>
+    </div>
+    <div class="chip-row mt8" id="water-drinks">${(S.waterDrinks||[]).slice(0,4).map(d=>`<span class="chip" onclick="event.stopPropagation();quickDrink('${escapeHtml(d.name)}',${d.calories_per_250ml||0})">${d.name} 250ml<br><small>${d.calories_per_250ml||0}kcal</small></span>`).join('')}</div>
+  </div>`
+}
+function escapeHtml(s){return s.replace(/'/g,"\\'").replace(/"/g,'&quot;')}
+function quickDrink(name,cal){
+  api('/api/water',{method:'POST',body:JSON.stringify({date:T,amount:250,drink_type:name})}).then(()=>{
+    loadWater().then(()=>r())
+    toast(`${name} +250ml${cal>0?' ('+cal+'kcal)':''}`)
+  })
+}
+function addWaterModal(){
+  let h=`<div class="modal-overlay" id="modal" onclick="document.getElementById('modal').remove()"><div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">记录饮水</div>
+    <div class="chip-row mb8">${(S.waterDrinks||[]).map(d=>`<button class="chip" onclick="addWaterAmount('${escapeHtml(d.name)}',250)">${d.name}<br><small>${d.calories_per_250ml||0}kcal/250ml</small></button>`).join('')}</div>
+    <div class="input-row mt8"><input class="input sm" id="wt-amount" placeholder="毫升" type="number" value="250"><span class="text-sub">ml</span></div>
+    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="addWaterAmount('water',parseInt(document.getElementById('wt-amount')?.value||250))">记录</button></div>
+  </div></div>`
+  document.body.insertAdjacentHTML('beforeend',h)
+}
+function addWaterAmount(type,amount){
+  api('/api/water',{method:'POST',body:JSON.stringify({date:T,amount,drink_type:type})}).then(()=>{
+    document.getElementById('modal')?.remove()
+    loadWater().then(()=>r())
+    toast(`+${amount}ml ${type}`)
+  })
+}
+function loadWater(){return api('/api/water?date='+T).then(w=>{S.water=w})}
+function loadWaterTarget(){const u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
 
 // ── Actions ──
 function switchMode(){
