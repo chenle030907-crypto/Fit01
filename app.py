@@ -320,11 +320,16 @@ def analyze_photo():
     if not image_base64: return jsonify({"error": "no image"}), 400
     prompt = """你是菜品识别专家。识别图片中的菜品，返回JSON:{"name":"菜品中文名","estimated_grams":200,"ingredients":["食材1","食材2"],"confidence":"high/medium/low"}。克数根据图片中食物的分量感来估算。只返回JSON。"""
     reply = call_vision(prompt, image_base64, temp=0.1, max_tokens=256)
+    print(f"[analyze_photo] raw reply: {reply[:300] if reply else 'None'}")
     try:
         if reply:
             result = parse_ai_json(reply)
-            if result: return jsonify(result)
-    except: pass
+            if result:
+                print(f"[analyze_photo] parsed: {result}")
+                return jsonify(result)
+    except Exception as e:
+        print(f"[analyze_photo] parse error: {e}")
+    print(f"[analyze_photo] fallback - returning unknown")
     return jsonify({"name": "未知菜品", "estimated_grams": 200, "ingredients": [], "confidence": "low"})
 
 # ── Workout Calorie AI ──
