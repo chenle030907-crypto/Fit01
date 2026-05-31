@@ -8,7 +8,8 @@ from flask import Flask, request, jsonify, send_from_directory, g
 
 app = Flask(__name__, static_folder="static", static_url_path="")
 API_KEY = os.environ.get("AI_API_KEY", "")
-DB_PATH = os.path.join(os.path.dirname(__file__), "dongshi.db")
+DB_PATH = os.path.join(os.environ.get("DATA_DIR", os.path.dirname(__file__)), "dongshi.db")
+PORT = int(os.environ.get("PORT", 8080))
 
 # ── DB helpers ──
 def get_db():
@@ -242,4 +243,8 @@ def calc_nutrition():
 # ── Start ──
 if __name__ == "__main__":
     init_db()
-    app.run(debug=True, port=8080)
+    import argparse
+    p = argparse.ArgumentParser()
+    p.add_argument("--port", type=int, default=PORT)
+    args = p.parse_args()
+    app.run(host="0.0.0.0", port=args.port, debug=False)
