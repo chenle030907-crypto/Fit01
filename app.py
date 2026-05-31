@@ -7,7 +7,7 @@ import requests
 from flask import Flask, request, jsonify, send_from_directory, g
 
 app = Flask(__name__, static_folder="static", static_url_path="")
-API_KEY = os.environ.get("GEMINI_API_KEY", "")
+API_KEY = os.environ.get("AI_API_KEY", "")
 DB_PATH = os.path.join(os.path.dirname(__file__), "dongshi.db")
 
 # ── DB helpers ──
@@ -59,16 +59,18 @@ def init_db():
     db.commit()
     db.close()
 
-# ── Gemini API ──
-def call_gemini(prompt, temp=0.1, max_tokens=1024):
+# ── AI API (DeepSeek, OpenAI-compatible) ──
+def call_ai(prompt, temp=0.1, max_tokens=1024):
     if not API_KEY: return None
     try:
         r = requests.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}",
-            json={"contents":[{"parts":[{"text":prompt}]}],"generationConfig":{"temperature":temp,"maxOutputTokens":max_tokens}},
+            "https://api.deepseek.com/v1/chat/completions",
+            headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+            json={"model":"deepseek-chat","messages":[{"role":"user","content":prompt}],
+                  "temperature":temp,"max_tokens":max_tokens},
             timeout=20
         )
-        return r.json()["candidates"][0]["content"]["parts"][0].get("text","")
+        return r.json()["choices"][0]["message"]["content"]
     except: return None
 
 # ── Static files ──
@@ -188,7 +190,7 @@ def parse_food():
     if not text: return jsonify({"error":"empty"}), 400
     prompt = f"""你是营养数据库。解析输入的食物，返回JSON数组。每个对象: name(中文), amount(克), unit("g"), calories, protein, carbs, fat, fiber, category("grains"|"meat"|"seafood"|"vegetables"|"fruits"|"dairy"|"legumes"|"snacks"|"beverages"|"oils"|"condiments"|"dishes")。只返回JSON数组。
 输入: {text}"""
-    reply = call_gemini(prompt)
+    reply = call_ai(prompt)
     if not reply: return jsonify({"error":"gemini failed"}), 500
     m = __import__("re").search(r"\[[\s\S]*\]", reply)
     if not m: return jsonify({"error":"parse", "raw":reply}), 422
@@ -209,7 +211,7 @@ def recommend():
     }
     mn = {"cardio":"有氧日-高碳水","strength":"无氧日-高蛋白","happy":"休息日-低卡","cheat":"放纵日-大吃"}
     prompt = f"""健身饮食顾问。今天是{mn.get(mode,mode)}。用户{user.get('weight',70)}kg,{user.get('height',170)}cm。剩余热量:{remaining}。推荐3-5道中餐。返回JSON:{{"recommendations":[{{"name","calories","protein","carbs","fat","serving","reason","ingredients":[]}}],"summary":"一句话"}}。只返回JSON。"""
-    reply = call_gemini(prompt, temp=0.4, max_tokens=2048)
+    reply = call_ai(prompt, temp=0.4, max_tokens=2048)
     if not reply: return jsonify({"error":"gemini failed"}), 500
     m = __import__("re").search(r"\{[\s\S]*\}", reply)
     if not m: return jsonify({"error":"parse","raw":reply}), 422
