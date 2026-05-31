@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Fit No.1</title>
 <style>
-:root{--bg:#F5F5F7;--card:#FFFFFF;--text:#1D1D1F;--sub:#86868B;--border:#E5E5EA;--divider:#F2F2F7;--green:#4CAF50;--orange:#FF9500;--blue:#007AFF;--red:#FF3B30}
+:root{--bg:#F5F5F7;--card:#FFF;--text:#1D1D1F;--sub:#86868B;--border:#E5E5EA;--divider:#F2F2F7;--green:#4CAF50;--orange:#FF9500;--blue:#007AFF;--red:#FF3B30}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
 .page{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:90px}
-.nav{position:sticky;top:0;z-index:10;background:rgba(245,245,247,0.9);backdrop-filter:blur(10px);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid var(--border)}
+.nav{position:sticky;top:0;z-index:10;background:rgba(245,245,247,.9);backdrop-filter:blur(10px);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--border)}
 .nav-t{font-size:17px;font-weight:600}
 .card{background:var(--card);margin:12px 16px;padding:16px;border-radius:16px}
 .c-title{font-size:14px;color:var(--sub);margin-bottom:8px}
@@ -25,178 +25,121 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 .macro-lbl{font-size:11px;color:var(--sub);margin-top:4px}
 .btn-row{display:flex;gap:10px;margin:0 16px 12px}
 .btn{flex:1;padding:14px;border-radius:14px;text-align:center;font-size:15px;font-weight:500;border:none;cursor:pointer;background:var(--card)}
-.btn.primary{background:var(--text);color:white}
+.btn.primary{background:var(--text);color:#fff}
 .btn.outline{background:transparent;border:1px solid var(--border)}
 .btn.danger{color:var(--red)}
 .btn.sm{padding:8px 14px;font-size:13px;flex:0}
 .input{padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:var(--card);outline:none;width:100%}
 .input:focus{border-color:var(--blue)}
-select.input{appearance:none}
 .input-row{display:flex;gap:8px}
-.flex{display:flex}.g8{gap:8px}.g12{gap:12px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mb8{margin-bottom:8px}.w100{width:100%}
-.text-center{text-align:center}.text-sub{color:var(--sub);font-size:13px}.text-sm{font-size:13px}
+.flex{display:flex}.g8{gap:8px}.w100{width:100%}
+.text-center{text-align:center}.text-sub{color:var(--sub);font-size:13px}.text-sm{font-size:13px}.text-right{text-align:right}
 .ml-auto{margin-left:auto}
 .big-num{font-size:48px;font-weight:700;letter-spacing:-1px}
-.tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;background:var(--divider)}
-.tag.green{background:#E8F5E9;color:var(--green)}
-.tag.orange{background:#FFF3E0;color:var(--orange)}
-.tag.blue{background:#E8F0FE;color:var(--blue)}
-.tag.red{background:#FFEBEE;color:var(--red)}
 .chip-row{display:flex;gap:6px;overflow-x:auto;padding:4px 0;flex-wrap:wrap}
 .chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:13px;white-space:nowrap;cursor:pointer}
-.chip.active{background:var(--text);color:white;border-color:var(--text)}
-.food-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid var(--divider)}
+.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
+.food-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--divider)}
 .food-row:last-child{border-bottom:none}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:rgba(245,245,247,0.95);backdrop-filter:blur(10px);border-top:0.5px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:rgba(245,245,247,.95);backdrop-filter:blur(10px);border-top:.5px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
 .tab{flex:1;text-align:center;padding:10px 0 6px;font-size:11px;color:var(--sub);cursor:pointer}
 .tab.active{color:var(--green)}
 .tab-icon{font-size:22px;display:block;margin-bottom:2px}
-.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:10px 20px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.show{opacity:1}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);display:flex;align-items:flex-end;justify-content:center;z-index:100}
 .modal-box{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 30px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto}
 .modal-title{font-size:17px;font-weight:600;margin-bottom:16px;text-align:center}
 .hidden{display:none!important}
 .bold{font-weight:600}
+.unit-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px;pointer-events:none}
+.unit-wrap{position:relative}
+.progress-bar{height:8px;background:var(--divider);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;border-radius:4px;transition:width .3s}
 </style>
 </head>
 <body>
 <div class="page" id="app"></div>
 <div class="bottom-nav" id="nav"></div>
 <div class="toast" id="toast"></div>
-
 <script>
-// ── State ──
+// ── State & Utils ──
+const T=()=>new Date().toISOString().slice(0,10)
+const now=()=>new Date().toTimeString().slice(0,5)
 const $=s=>document.querySelector(s)
 const $$=s=>document.querySelectorAll(s)
-const today=()=>new Date().toISOString().slice(0,10)
-const now=()=>new Date().toTimeString().slice(0,5)
-const T=today()
-const api=(url,opts={})=>fetch(url,{headers:{'Content-Type':'application/json'},...opts}).then(r=>r.ok?r.json():Promise.reject(r))
-const toast=msg=>{const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+const api=(u,o={})=>fetch(u,{headers:{'Content-Type':'application/json'},...o}).then(r=>r.ok?r.json():Promise.reject(r))
+const toast=m=>{let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+const U=(n,u)=>`<span class="unit-wrap"><input class="input sm" value="${n}" style="padding-right:24px">${u?`<span class="unit-label">${u}</span>`:''}</span>`
 
-const MODES={cardio:{label:'有氧日',emoji:'🏃',desc:'高碳水供能',bg:'#E8F0FE'},
-  strength:{label:'无氧日',emoji:'💪',desc:'高蛋白修复',bg:'#FFF3E0'},
-  happy:{label:'Happy日',emoji:'😊',desc:'休息恢复',bg:'#E8F5E9'},
-  cheat:{label:'放纵日',emoji:'🎉',desc:'随便吃',bg:'#FFEBEE'}}
+const MODES={cardio:{l:'有氧日',e:'🏃',d:'高碳水供能',bg:'#E8F0FE',c:'#007AFF'},
+  strength:{l:'无氧日',e:'💪',d:'高蛋白修复',bg:'#FFF3E0',c:'#FF9500'},
+  happy:{l:'Happy日',e:'😊',d:'休息恢复',bg:'#E8F5E9',c:'#4CAF50'},
+  cheat:{l:'放纵日',e:'🎉',d:'随便吃',bg:'#FFEBEE',c:'#FF3B30'}}
 
-let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500}
+let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500,waterDrinks:[]}
 
-// ── Render engine ──
-function r(){if(S.tab==='home')home();else if(S.tab==='diet')diet();else if(S.tab==='workout')workout();else me();nav()}
-function nav(){$('#nav').innerHTML=['home','diet','workout','me'].map(t=>{
-  const icons={home:'📊',diet:'🍽️',workout:'💪',me:'👤'}
-  const labels={home:'首页',diet:'饮食',workout:'运动',me:'我的'}
-  return `<div class="tab ${S.tab===t?'active':''}" data-t="${t}"><span class="tab-icon">${icons[t]}</span>${labels[t]}</div>`
-}).join('')
-  $$('.tab').forEach(t=>t.onclick=()=>{S.tab=t.dataset.t;r()})
-}
-
-// ── Water ──
-function renderWaterCard(){
-  const effective=S.water.reduce((s,w)=>s+(w.effective_ml||w.amount||0),0)
-  const raw=S.water.reduce((s,w)=>s+(w.amount||0),0)
-  const target=S.waterTarget||2500
-  const pct=Math.min(100,Math.round(effective/target*100))
-  const barColor=pct<30?'var(--red)':pct<70?'var(--orange)':'var(--green)'
-  return `<div class="card">
-    <span class="c-title">💧 饮水 · <span style="color:${barColor}">${pct}%</span></span>
-    <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val" style="font-size:28px">${effective}</span><span class="text-sub">/ ${target} ml</span></div>
-    ${raw!==effective?`<div class="text-sm text-sub" style="margin-bottom:4px">实际饮用 ${raw}ml，等效纯水 ${effective}ml</div>`:''}
-    <div class="progress-bar" style="height:8px;background:var(--divider);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div></div>
-    <div class="input-row mt12" style="flex-wrap:wrap">
-      <div style="position:relative;flex:0 0 80px"><input class="input sm" id="w-amt" placeholder="250" type="number" value="250" style="width:100%;text-align:center;font-size:16px;font-weight:600;padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">ml</span></div>
-      <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${renderDrinkOptions()}</select>
-      <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="flex:0 0 100px;margin-top:4px">
-      <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
-    </div>
-    <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="event.stopPropagation();undoWater(${w.id})" title="点击撤销">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
-  </div>`
-}
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-function renderDrinkOptions(){
-  const drinks=(S.waterDrinks||[]).concat([{name:'其他（自定义）',calories_per_250ml:0}])
-  return drinks.map(d=>`<option>${d.name}</option>`).join('')
-}
-function toggleCustomDrink(){
-  const v=document.getElementById('w-type')?.value
-  const el=document.getElementById('w-custom')
-  if(el)el.classList.toggle('hidden',v!=='其他（自定义）')
-}
-function quickAddWater(){
-  const amt=parseInt(document.getElementById('w-amt')?.value||250)
-  let type=document.getElementById('w-type')?.value||'矿泉水'
-  if(!amt||amt<10)return toast('请输入饮水量')
-  if(type==='其他（自定义）'){type=document.getElementById('w-custom')?.value?.trim();if(!type)return toast('请输入饮品名称')}
-  api('/api/water',{method:'POST',body:JSON.stringify({date:T,amount:amt,drink_type:type})}).then(()=>{
-    loadWater().then(()=>r())
-    toast(`+${amt}ml ${type}`)
+// ── Nav ──
+function nav(){
+  let h='';['home','diet','workout','me'].forEach(t=>{
+    let ic={home:'📊',diet:'🍽️',workout:'💪',me:'👤'},lb={home:'首页',diet:'饮食',workout:'运动',me:'我的'}
+    h+=`<div class="tab ${S.tab===t?'active':''}" data-t="${t}"><span class="tab-icon">${ic[t]}</span>${lb[t]}</div>`
   })
+  $('#nav').innerHTML=h
+  $$('.tab').forEach(t=>t.onclick=()=>{S.tab=t.dataset.t;render()})
 }
-function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(()=>r());toast('已撤销')})}
-function loadWater(){return api('/api/water?date='+T).then(w=>{S.water=w})}
-function loadWaterTarget(){const u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
-
-
+function render(){S.tab==='home'?home():S.tab==='diet'?diet():S.tab==='workout'?workout():me();nav()}
 
 // ── Home ──
 function home(){
-  const m=S.mode||'happy',c=MODES[m]
-  const g=S.goals||{}
-  const eaten=S.mealsTotal||0
-  const workoutBurn=(S.workouts||[]).reduce((s,w)=>s+(w.calories||0),0)
-  const deficit=eaten-(g.tdee||2000)-workoutBurn
-  const ds=deficit<-300?'热量缺口':deficit>300?'热量盈余':'热量平衡'
-  const dc=deficit<-300?'var(--green)':deficit>300?'var(--red)':'var(--orange)'
-  const latestW=S.measurements&&S.measurements.length>0?S.measurements[0].weight:(S.user.current_weight||0)
-
+  let m=S.mode||'happy',c=MODES[m],g=S.goals||{}
+  let eaten=S.mealsTotal||0,wb=(S.workouts||[]).reduce((s,w)=>s+(w.calories||0),0)
+  let deficit=eaten-(g.tdee||2000)-wb,ds=deficit<-300?'热量缺口':deficit>300?'热量盈余':'热量平衡',dc=deficit<-300?'var(--green)':deficit>300?'var(--red)':'var(--orange)'
+  let eff=S.water.reduce((s,w)=>s+(w.effective_ml||w.amount||0),0),raw=S.water.reduce((s,w)=>s+(w.amount||0),0)
+  let wt=S.waterTarget||2500,pct=Math.min(100,Math.round(eff/wt*100))
+  let bc=pct<30?'var(--red)':pct<70?'var(--orange)':'var(--green)'
+  let lw=S.measurements&&S.measurements[0]?S.measurements[0].weight:(S.user.current_weight||0)
   $('#app').innerHTML=`
-    <div class="nav"><span class="nav-t">Fit No.1</span><span class="text-sub">${T}</span></div>
-    <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()">
-      <span class="mode-emoji">${c.emoji}</span><div><span class="mode-label">${c.label}</span><span class="mode-desc">${c.desc} · 点击切换</span></div>
-    </div>
-    <div class="card text-center">
-      <span class="text-sub">今日热量缺口</span><br>
-      <span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><br>
-      <span style="color:${dc};font-size:14px;font-weight:500">${ds}</span>
-      ${g.target_calories?`<div style="margin-top:8px"><span class="text-sub">目标 ${g.target_calories} · 摄入 ${eaten} · 运动 ${workoutBurn}</span></div>`:''}
-    </div>
+    <div class="nav"><span class="nav-t">Fit No.1</span><span class="text-sub">${T()}</span></div>
+    <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()"><span class="mode-emoji">${c.e}</span><div><span class="mode-label" style="color:${c.c}">${c.l}</span><span class="mode-desc">${c.d} · 点击切换</span></div></div>
+    <div class="card text-center"><span class="text-sub">今日热量缺口</span><br><span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><br><span style="color:${dc};font-size:14px;font-weight:500">${ds}</span></div>
     <div class="macro-row">
       <div class="macro-item"><span class="macro-val" style="color:var(--orange)">${Math.round(S.mealsProtein||0)}</span><span class="macro-lbl">蛋白 / ${g.protein||0}g</span></div>
       <div class="macro-item"><span class="macro-val" style="color:var(--green)">${Math.round(S.mealsCarbs||0)}</span><span class="macro-lbl">碳水 / ${g.carbs||0}g</span></div>
       <div class="macro-item"><span class="macro-val" style="color:var(--blue)">${Math.round(S.mealsFat||0)}</span><span class="macro-lbl">脂肪 / ${g.fat||0}g</span></div>
     </div>
-    ${renderWaterCard()}
-    <div class="btn-row">
-      <button class="btn primary" onclick="S.tab='diet';r()">🍽️ 记录饮食</button>
-      <button class="btn primary" onclick="S.tab='workout';r()">💪 记录运动</button>
+    <div class="card"><span class="c-title">💧 饮水 · ${pct}%</span>
+      <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val" style="font-size:28px">${eff}</span><span class="text-sub">/ ${wt} ml</span></div>
+      ${raw!==eff?`<div class="text-sm text-sub" style="margin-bottom:4px">实际 ${raw}ml，等效纯水 ${eff}ml</div>`:''}
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${bc}"></div></div>
+      <div class="input-row mt12" style="flex-wrap:wrap">
+        <span class="unit-wrap"><input class="input sm" id="w-amt" value="250" type="number" style="width:70px;text-align:center;font-size:16px;font-weight:600;padding-right:24px"><span class="unit-label">ml</span></span>
+        <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${(S.waterDrinks||[]).map(d=>`<option>${d.name}</option>`).join('')}<option>其他</option></select>
+        <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="width:100px">
+        <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
+      </div>
+      <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="undoWater(${w.id})">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
     </div>
-    ${latestW?`<div class="card" onclick="S.tab='me';r()"><span class="c-title">最新体重</span><span class="c-val">${latestW}kg</span></div>`:''}
+    <div class="btn-row"><button class="btn primary" onclick="S.tab='diet';render()">🍽️ 记录饮食</button><button class="btn primary" onclick="S.tab='workout';render()">💪 记录运动</button></div>
+    ${lw?`<div class="card" onclick="S.tab='me';render()"><span class="c-title">最新体重</span><span class="c-val">${lw}kg</span></div>`:''}
   `
 }
 
 // ── Diet ──
 function diet(){
-  const types={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}
-  const mb={breakfast:[],lunch:[],dinner:[],snack:[]}
+  let tp={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'},mb={breakfast:[],lunch:[],dinner:[],snack:[]}
   S.meals.forEach(m=>{if(mb[m.meal_type])mb[m.meal_type].push(m)})
-  let h=`
-    <div class="nav"><span class="nav-t">饮食</span><span class="text-sub">${T}</span></div>
-    <div class="card text-center">
-      <span class="text-sub">今日摄入</span><br>
-      <span class="big-num">${S.mealsTotal||0}</span><span class="c-unit"> kcal</span><br>
-      <span class="text-sub">蛋白${Math.round(S.mealsProtein||0)}g · 碳水${Math.round(S.mealsCarbs||0)}g · 脂肪${Math.round(S.mealsFat||0)}g</span>
-    </div>`
-  Object.entries(types).forEach(([t,label])=>{
-    const meals=mb[t]||[]
-    h+=`<div class="card"><span class="c-title">${label} <span class="text-sub">${meals.length}餐</span></span>`
-    if(meals.length===0) h+=`<div class="text-sub" style="padding:8px 0">暂无记录</div>`
-    else meals.forEach(m=>{
-      let foods=[];try{foods=JSON.parse(m.foods)}catch(e){}
-      const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
-      const pro=foods.reduce((s,f)=>s+(f.protein||0),0)
-      const dishName=foods[0]?.dishName||foods.map(f=>f.name).join('+')
-      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm" style="margin-left:8px;font-weight:500">${dishName}</span><div class="text-sm text-sub">${foods.map(f=>f.name+' '+f.amount+'g').join(' · ')}</div></div><div class="flex g8" style="flex-direction:column;align-items:flex-end"><span class="bold">${cal}kcal</span><span class="text-sm text-sub">蛋白${pro.toFixed(1)}g</span><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
+  let h=`<div class="nav"><span class="nav-t">饮食</span><span class="text-sub">${T()}</span></div>
+    <div class="card text-center"><span class="text-sub">今日摄入</span><br><span class="big-num">${S.mealsTotal||0}</span><span class="c-unit"> kcal</span></div>`
+  Object.entries(tp).forEach(([t,lb])=>{
+    let ml=mb[t]||[]
+    h+=`<div class="card"><span class="c-title">${lb} · ${ml.length}餐</span>`
+    if(!ml.length)h+=`<div class="text-sub" style="padding:8px 0">暂无记录</div>`
+    else ml.forEach(m=>{
+      let fs=[];try{fs=JSON.parse(m.foods)}catch(e){}
+      let cal=fs.reduce((s,f)=>s+(f.calories||0),0),pro=fs.reduce((s,f)=>s+(f.protein||0),0)
+      let dn=fs[0]?.dishName||fs.map(f=>f.name).join('+')
+      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm bold" style="margin-left:8px">${dn}</span><div class="text-sm text-sub">${fs.map(f=>f.name+' '+f.amount+'g').join(' · ')}</div></div><div class="text-right"><span class="bold">${cal}kcal</span><br><span class="text-sm text-sub">蛋白${pro.toFixed(1)}g</span><br><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
     })
     h+=`</div>`
   })
@@ -204,330 +147,179 @@ function diet(){
   $('#app').innerHTML=h
 }
 
-function addMealModal(){
-  window._foods=[]
-  window._ingredients=[]
-  let html=`
-    <div class="modal-overlay" id="modal"><div class="modal-box">
-    <div class="modal-title">添加饮食</div>
-    <div class="flex g8 mb8"><span class="text-sub">餐次</span>
-      <select class="input sm" id="mc-mealType">
-        <option value="lunch">午餐</option><option value="breakfast">早餐</option><option value="dinner">晚餐</option><option value="snack">加餐</option>
-      </select>
-      <span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-time" value="${now()}">
-    </div>
-    <span class="text-sub">食材（输入食材名+克数，可多次添加）</span>
-    <div class="input-row mt4">
-      <input class="input" id="mc-manual-name" placeholder="食材名称 如: 鸡蛋" style="flex:2">
-      <div style="position:relative;flex:1"><input class="input sm" id="mc-manual-gram" placeholder="100" type="number" value="100" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">g</span></div>
-      <button class="btn primary sm" onclick="addIngredient()">+</button>
-    </div>
-    <div id="mc-ingredients" class="mt8"></div>
-    <div class="input-row mt8"><input class="input" id="mc-dish-name" placeholder="菜品名称（如：番茄炒蛋）"></div>
-    <button class="btn outline w100 mt8" id="mc-parse-btn" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
-    <div id="mc-result" class="mt8"></div>
-    <span class="text-sub mt8">已保存的菜品（点击直接添加）</span>
-    <div class="chip-row mt4" id="mc-saved-dishes"></div>`
-  html+=`<div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`
-  $('#app').insertAdjacentHTML('beforeend',html)
-  // Load saved dishes
-  api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{
-    const el=document.getElementById('mc-saved-dishes')
-    if(el&&ds.length>0)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin-right:6px;margin-bottom:6px"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin-right:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:white;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')
-  })
-}
-
-function deleteDish(id){
-  if(!confirm('删除这个菜品？'))return
-  api('/api/dishes/'+id,{method:'DELETE'}).then(()=>{
-    toast('已删除')
-    // Refresh saved dishes in current modal
-    api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{
-      const el=document.getElementById('mc-saved-dishes')
-      if(el&&ds.length>0)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin-right:6px;margin-bottom:6px"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin-right:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:white;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')
-      else if(el)el.innerHTML='<span class="text-sub text-sm">暂无保存的菜品</span>'
-    })
-  })
-}
-function useDish(id){
-  api('/api/dishes').then(ds=>{const d=ds.find(x=>x.id===id);if(!d)return
-    let foods;try{foods=JSON.parse(d.foods)}catch(e){return}
-    window._foods=foods
-    window._ingredients=foods.map(f=>`${f.name} ${f.amount}g`)
-    document.getElementById('mc-dish-name').value=d.name
-    refreshIngredients()
-    document.getElementById('mc-parse-btn').style.display='none'
-    document.getElementById('mc-result').innerHTML=`
-      <div class="card" style="margin:8px 0 0;background:var(--divider)">
-        <span class="c-title" style="color:var(--green)">已选用: ${d.name}</span>
-        <span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span>
-        <div class="text-sm mt4">蛋白质 ${(d.protein||0).toFixed(1)}g · 碳水 ${(d.carbs||0).toFixed(1)}g · 脂肪 ${(d.fat||0).toFixed(1)}g</div>
-      </div>`
-  })
-}
-
-function addIngredient(){
-  const name=document.getElementById('mc-manual-name')?.value?.trim()
-  const gram=parseInt(document.getElementById('mc-manual-gram')?.value||100)
-  if(!name)return toast('请输入食材名称')
-  if(!gram||gram<1)return toast('请输入克数')
-  if(!window._ingredients)window._ingredients=[]
-  window._ingredients.push(`${name} ${gram}g`)
-  document.getElementById('mc-manual-name').value=''
-  refreshIngredients()
-  document.getElementById('mc-parse-btn').style.display='block'
-}
-
-function refreshIngredients(){
-  const ings=window._ingredients||[]
-  let h=''
-  if(ings.length>0){
-    ings.forEach((ing,i)=>{
-      h+=`<div class="food-row"><span>${ing}</span><button class="btn sm danger" onclick="removeIngredient(${i})">×</button></div>`
-    })
-  }
-  document.getElementById('mc-ingredients').innerHTML=h
-}
-
-function removeIngredient(i){
-  if(!window._ingredients)return
-  window._ingredients.splice(i,1)
-  refreshIngredients()
-  if(window._ingredients.length===0)document.getElementById('mc-parse-btn').style.display='none'
-}
-
-function parseIngredients(){
-  const ings=window._ingredients||[]
-  if(ings.length===0)return
-  const text=ings.join(', ')
-  toast('AI 正在计算菜品营养...')
-  api('/api/parse-food',{method:'POST',body:JSON.stringify({text})}).then(r=>{
-    if(r.foods&&r.foods.length>0){
-      window._foods=r.foods
-      const totalCal=r.foods.reduce((s,f)=>s+(f.calories||0),0)
-      const totalPro=r.foods.reduce((s,f)=>s+(f.protein||0),0)
-      const totalCarbs=r.foods.reduce((s,f)=>s+(f.carbs||0),0)
-      const totalFat=r.foods.reduce((s,f)=>s+(f.fat||0),0)
-      document.getElementById('mc-result').innerHTML=`
-        <div class="card" style="margin:8px 0 0;background:var(--divider)">
-          <span class="c-title" style="color:var(--green)">✅ 解析完成</span>
-          <div style="font-size:13px;color:var(--sub);margin-bottom:4px">${r.foods.map(f=>f.name+' '+f.amount+'g').join('、')}</div>
-          <span class="c-val">${Math.round(totalCal)}</span><span class="c-unit"> kcal</span>
-          <div class="text-sm mt4">蛋白质 ${totalPro.toFixed(1)}g · 碳水 ${totalCarbs.toFixed(1)}g · 脂肪 ${totalFat.toFixed(1)}g</div>
-        </div>`
-      toast(`解析完成 · ${Math.round(totalCal)}kcal`)
-    }else toast('解析失败')
-  })
-}
-
-function saveMeal(){
-  const foods=window._foods||[]
-  if(foods.length===0){toast('请先解析食材');return}
-  const mt=document.getElementById('mc-mealType')?.value||'lunch'
-  const time=document.getElementById('mc-time')?.value||now()
-  const dishName=document.getElementById('mc-dish-name')?.value?.trim()||foods.map(f=>f.name).join('+')
-  // Attach dish name to first food item
-  foods.forEach(f=>{f.dishName=dishName})
-  api('/api/meals',{method:'POST',body:JSON.stringify({date:T,meal_type:mt,time,foods})}).then(()=>{
-    const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
-    const pro=foods.reduce((s,f)=>s+(f.protein||0)*1,0)
-    const car=foods.reduce((s,f)=>s+(f.carbs||0)*1,0)
-    const fat=foods.reduce((s,f)=>s+(f.fat||0)*1,0)
-    api('/api/dishes',{method:'POST',body:JSON.stringify({name:dishName,foods,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
-    document.getElementById('modal').remove()
-    loadAll().then(()=>r())
-    toast('已保存')
-  })
-}
-
 // ── Workout ──
 function workout(){
-  let h=`<div class="nav"><span class="nav-t">运动</span><span class="text-sub">${T}</span></div>`
-  if(S.workouts.length===0) h+=`<div class="card"><div class="text-sub text-center" style="padding:20px">暂无训练记录</div></div>`
+  let h=`<div class="nav"><span class="nav-t">运动</span><span class="text-sub">${T()}</span></div>`
+  if(!S.workouts.length)h+=`<div class="card"><div class="text-sub text-center" style="padding:20px">暂无训练记录</div></div>`
   else S.workouts.forEach(w=>{
     let exs=w.exercises;if(typeof exs==='string')try{exs=JSON.parse(exs)}catch(e){exs=[]};if(!Array.isArray(exs))exs=[]
-    const isCardio=w.type==='cardio'
-    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${isCardio?'🏃 有氧':'💪 无氧'}</span>
-      <div class="mt8">${exs.map(e=>isCardio?`<span class="tag">坡度${e.incline||0}% ${e.speed||0}速 ${e.minutes||0}min</span>`:`<span class="tag">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div>
-      <div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
+    let ic=w.type==='cardio'
+    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${ic?'🏃 有氧':'💪 无氧'}</span><div class="mt8">${exs.map(e=>ic?`<span class="chip">坡度${e.incline||0}% ${e.speed||0}速 ${e.minutes||0}min</span>`:`<span class="chip">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div><div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
   })
   h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
   $('#app').innerHTML=h
 }
 
-function addWorkoutModal(){
-  window._woSegments=[]
-  window._woExercises=[]
-  let h=`<div class="modal-overlay" id="modal" onclick="document.getElementById('modal').remove()"><div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-title">记录训练</div>
-    <div class="flex g8 mb8">
-      <select class="input sm" id="wo-type" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select>
-      <div style="position:relative;width:90px"><input class="input sm" style="width:100%;padding-right:28px" id="wo-dur" placeholder="45" type="number" value="45"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">min</span></div>
-    </div>
-    <div id="wo-strength-panel">
-      <span class="text-sub">动作</span>
-      <div id="wo-exs"></div>
-      <button class="btn outline sm mt8" onclick="addStrengthEx()">+ 添加动作</button>
-    </div>
-    <div id="wo-cardio-panel" class="hidden">
-      <span class="text-sub">爬坡分段</span>
-      <div id="wo-segs"></div>
-      <button class="btn outline sm mt8" onclick="addCardioSeg()">+ 添加分段</button>
-    </div>
-    <div id="wo-result" class="mt8"></div>
-    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存训练</button></div></div></div>`
-  $('#app').insertAdjacentHTML('beforeend',h)
-}
-
-function toggleWoType(){
-  const type=document.getElementById('wo-type')?.value
-  document.getElementById('wo-strength-panel').classList.toggle('hidden',type!=='strength')
-  document.getElementById('wo-cardio-panel').classList.toggle('hidden',type!=='cardio')
-}
-
-function addStrengthEx(){
-  const el=document.getElementById('wo-exs')
-  el.innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称" value=""><div style="position:relative;flex:0 0 60px"><input class="input sm" placeholder="4" type="number" value="4" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">组</span></div><div style="position:relative;flex:0 0 60px"><input class="input sm" placeholder="12" type="number" value="12" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">次</span></div><div style="position:relative;flex:0 0 60px"><input class="input sm" placeholder="0" type="number" value="0" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">kg</span></div></div>`
-}
-
-function addCardioSeg(){
-  const el=document.getElementById('wo-segs')
-  const n=el.children.length+1
-  el.innerHTML+=`<div class="input-row mt8" style="align-items:center"><span class="text-sm text-sub">第${n}段</span><div style="position:relative;flex:1"><input class="input sm" placeholder="12" type="number" value="12" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">%</span></div><div style="position:relative;flex:1"><input class="input sm" placeholder="3.5" type="number" value="3.5" step="0.1" style="padding-right:30px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:10px">km/h</span></div><div style="position:relative;flex:1"><input class="input sm" placeholder="5" type="number" value="5" style="padding-right:28px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">min</span></div><button class="btn sm danger" onclick="this.parentElement.remove()">×</button></div>`
-
-function saveWorkout(){
-  const type=document.getElementById('wo-type')?.value||'strength'
-  const dur=parseInt(document.getElementById('wo-dur')?.value)||45
-  const u=S.user||{}
-  let exs=[],desc=''
-  if(type==='strength'){
-    document.querySelectorAll('#wo-exs .input-row').forEach(row=>{
-      const inputs=row.querySelectorAll('input')
-      const name=inputs[0]?.value?.trim()||'训练'
-      const sets=parseInt(inputs[1]?.value)||4
-      const reps=parseInt(inputs[2]?.value)||12
-      const weight=parseInt(inputs[3]?.value)||0
-      exs.push({name,sets,reps,weight})
-      desc+=`${name} ${sets}组×${reps}次×${weight}kg; `
-    })
-  }else{
-    document.querySelectorAll('#wo-segs .input-row').forEach(row=>{
-      const inputs=row.querySelectorAll('input')
-      const incline=parseFloat(inputs[0]?.value)||0
-      const speed=parseFloat(inputs[1]?.value)||0
-      const minutes=parseInt(inputs[2]?.value)||0
-      exs.push({name:'爬坡',incline,speed,minutes})
-      desc+=`坡度${incline}% 速度${speed} ${minutes}min; `
-    })
-  }
-  if(exs.length===0)return toast('请添加训练内容')
-  desc+=`总时长${dur}min`
-  toast('AI 正在计算消耗...')
-  api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,description:desc})}).then(r=>{
-    const cal=r.calories||300
-    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T,start_time:now(),duration:dur,type,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{
-      document.getElementById('modal')?.remove();loadAll().then(()=>r());toast(`训练完成 · ${cal}kcal ${r.note||''}`)
-    })
-  }).catch(()=>{
-    const cal=type==='cardio'?dur*8:dur*6
-    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T,start_time:now(),duration:dur,type,exercises:JSON.stringify(exs),calories:Math.round(cal*(u.current_weight||70)/70)})}).then(()=>{
-      document.getElementById('modal')?.remove();loadAll().then(()=>r());toast(`训练已记录(估算)`)
-    })
-  })
-}
-
 // ── Me ──
 function me(){
-  const u=S.user||{},g=S.goals||{}
-  const latest=S.measurements&&S.measurements[0]?S.measurements[0]:{}
+  let u=S.user||{},g=S.goals||{},lw=S.measurements&&S.measurements[0]?S.measurements[0]:{}
   let h=`<div class="nav"><span class="nav-t">我的</span></div>
     <div class="card text-center"><span style="font-size:22px;font-weight:700">${u.nickname||'健身者'}</span></div>
     <div class="card"><span class="c-title">身体数据</span>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
         <div><span class="text-sub">身高</span><br><span class="bold">${u.height||170}cm</span></div>
-        <div><span class="text-sub">体重</span><br><span class="bold">${latest.weight||u.current_weight||70}kg</span></div>
-        <div><span class="text-sub">目标体重</span><br><span class="bold">${u.target_weight||65}kg</span></div>
+        <div><span class="text-sub">体重</span><br><span class="bold">${lw.weight||u.current_weight||70}kg</span></div>
+        <div><span class="text-sub">目标</span><br><span class="bold">${u.target_weight||65}kg</span></div>
         <div><span class="text-sub">年龄</span><br><span class="bold">${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
       </div>
       <button class="btn outline w100 mt12" onclick="editProfile()">编辑资料</button>
       <div class="input-row mt12">
-        <div style="position:relative;flex:1"><input class="input sm" id="wt-input" placeholder="68" type="number" step="0.1" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">kg</span></div>
-        <div style="position:relative;flex:1"><input class="input sm" id="bf-input" placeholder="18" type="number" step="0.1" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">%</span></div>
+        <span class="unit-wrap"><input class="input sm" id="wt-in" type="number" step="0.1" placeholder="68" style="padding-right:24px"><span class="unit-label">kg</span></span>
+        <span class="unit-wrap"><input class="input sm" id="bf-in" type="number" step="0.1" placeholder="18" style="padding-right:24px"><span class="unit-label">%</span></span>
         <button class="btn primary sm" onclick="recordWeight()">记录</button>
       </div>
     </div>
-    <div class="card"><span class="c-title">营养目标（${MODES[S.mode]?.label||''}）</span>
+    <div class="card"><span class="c-title">营养目标（${(MODES[S.mode]||MODES.happy).l}）</span>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
-        <div><span class="text-sub">BMR</span><br><span class="bold">${g.bmr||0} kcal</span></div>
-        <div><span class="text-sub">TDEE</span><br><span class="bold">${g.tdee||0} kcal</span></div>
-        <div><span class="text-sub">目标热量</span><br><span class="bold">${g.target_calories||0} kcal</span></div>
-        <div><span class="text-sub">蛋白质</span><br><span class="bold">${g.protein||0}g (${((g.protein||0)/(u.current_weight||70)).toFixed(1)}g/kg)</span></div>
-        <div><span class="text-sub">碳水</span><br><span class="bold">${g.carbs||0}g</span></div>
-        <div><span class="text-sub">脂肪</span><br><span class="bold">${g.fat||0}g</span></div>
+        <div><span class="text-sub">BMR</span><br><span class="bold">${g.bmr||0} kcal</span></div><div><span class="text-sub">TDEE</span><br><span class="bold">${g.tdee||0} kcal</span></div>
+        <div><span class="text-sub">目标热量</span><br><span class="bold">${g.target_calories||0} kcal</span></div><div><span class="text-sub">蛋白</span><br><span class="bold">${g.protein||0}g</span></div>
+        <div><span class="text-sub">碳水</span><br><span class="bold">${g.carbs||0}g</span></div><div><span class="text-sub">脂肪</span><br><span class="bold">${g.fat||0}g</span></div>
       </div>
     </div>`
   if(S.measurements&&S.measurements.length>1){
-    h+=`<div class="card"><span class="c-title">体重趋势（近${Math.min(S.measurements.length,10)}条）</span>`
+    h+=`<div class="card"><span class="c-title">体重趋势</span>`
     S.measurements.slice(0,10).reverse().forEach(m=>h+=`<div class="food-row"><span>${m.date}</span><span class="bold">${m.weight}kg</span>${m.body_fat?`<span class="text-sub">${m.body_fat}%</span>`:''}</div>`)
     h+=`</div>`
   }
   $('#app').innerHTML=h
 }
 
-function editProfile(){
-  const u=S.user||{}
-  $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal"><div class="modal-box">
-    <div class="modal-title">编辑资料</div>
-    <div class="flex g8 mb8"><input class="input" placeholder="昵称" id="pf-nn" value="${u.nickname||''}"></div>
-    <div class="input-row mb8"><div style="position:relative;flex:1"><input class="input" type="number" placeholder="170" id="pf-ht" value="${u.height||170}" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">cm</span></div><div style="position:relative;flex:1"><input class="input" type="number" placeholder="70" id="pf-wt" value="${u.current_weight||70}" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">kg</span></div></div>
-    <div class="input-row mb8"><div style="position:relative;flex:1"><input class="input" type="number" placeholder="65" id="pf-tw" value="${u.target_weight||65}" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">kg</span></div><input class="input" type="date" id="pf-bd" value="${u.birth_date||'1995-01-01'}"></div>
-    <select class="input mb8" id="pf-al">
-      <option value="1.2" ${u.activity_level==1.2?'selected':''}>久坐</option><option value="1.375" ${u.activity_level==1.375?'selected':''}>轻度</option><option value="1.55" ${u.activity_level==1.55?'selected':''}>中度</option><option value="1.725" ${u.activity_level==1.725?'selected':''}>高度</option><option value="1.9" ${u.activity_level==1.9?'selected':''}>极强度</option>
-    </select>
-    <div class="flex g8"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveProfile()">保存</button></div></div></div>`)
+// ── Water functions ──
+function toggleCustomDrink(){document.getElementById('w-custom').classList.toggle('hidden',$('#w-type').value!=='其他')}
+function quickAddWater(){
+  let a=parseInt($('#w-amt')?.value||250),t=$('#w-type')?.value||'矿泉水'
+  if(!a||a<10)return toast('请输入饮水量')
+  if(t==='其他'){t=$('#w-custom')?.value?.trim();if(!t)return toast('请输入饮品名称')}
+  api('/api/water',{method:'POST',body:JSON.stringify({date:T(),amount:a,drink_type:t})}).then(()=>{loadWater().then(render);toast(`+${a}ml ${t}`)})
 }
+function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(render);toast('已撤销')})}
 
-function saveProfile(){
-  const d={nickname:$('#pf-nn')?.value||'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
-  api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{document.getElementById('modal').remove();loadAll().then(()=>r());toast('已保存')})
-}
-
-function recordWeight(){
-  const w=+($('#wt-input')?.value);if(!w||w<20)return toast('请输入有效体重')
-  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T,weight:w,body_fat:+($('#bf-input')?.value)||null})}).then(()=>{loadAll().then(()=>r());toast('已记录体重')})
-}
-
-// ── Data ──
-function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements(),loadWater(),loadWaterTarget()]).then(()=>loadGoals())}
+// ── Data loading ──
+function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements(),loadWater(),loadWaterTarget()]).then(loadGoals)}
 function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_type||'happy'})}
-function loadMeals(){return api('/api/meals?date='+T).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
-function loadWorkouts(){return api('/api/workouts?date='+T).then(ws=>{S.workouts=ws})}
+function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
+function loadWorkouts(){return api('/api/workouts?date='+T()).then(ws=>{S.workouts=ws})}
 function loadDishes(){return api('/api/dishes').then(ds=>{S.dishes=ds})}
-function loadGoals(){const u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode})}).then(g=>{S.goals=g})}
+function loadGoals(){let u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode})}).then(g=>{S.goals=g})}
 function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
+function loadWater(){return api('/api/water?date='+T()).then(w=>{S.water=w})}
+function loadWaterTarget(){let u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
 
-// ── Actions ──
+// ── Mode switch ──
 function switchMode(){
-  const types=['cardio','strength','happy','cheat']
-  let h=`<div class="modal-overlay" id="mode-modal" onclick="document.getElementById('mode-modal').remove()"><div class="modal-box" onclick="event.stopPropagation()" style="border-radius:20px">
-    <div class="modal-title">选择今日模式</div>`
-  types.forEach(t=>{
-    const c=MODES[t]
-    h+=`<div class="mode-option ${S.mode===t?'active':''}" style="background:${c.bg};margin-bottom:8px;padding:14px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickMode('${t}')">
-      <span style="font-size:28px">${c.emoji}</span><div style="flex:1"><span style="font-size:16px;font-weight:600">${c.label}</span><span style="font-size:12px;color:#86868B;display:block">${c.desc}</span></div>
-      ${S.mode===t?'<span style="color:#4CAF50;font-size:20px">✓</span>':''}
-    </div>`
-  })
+  let types=['cardio','strength','happy','cheat'],h=`<div class="modal-overlay" id="mode-m" onclick="$('#mode-m').remove()"><div class="modal-box" onclick="event.stopPropagation()" style="border-radius:20px"><div class="modal-title">选择今日模式</div>`
+  types.forEach(t=>{let c=MODES[t];h+=`<div style="background:${c.bg};margin-bottom:8px;padding:14px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickMode('${t}')"><span style="font-size:28px">${c.e}</span><div style="flex:1"><span style="font-size:16px;font-weight:600">${c.l}</span><span style="font-size:12px;color:var(--sub);display:block">${c.d}</span></div>${S.mode===t?'<span style="color:var(--green);font-size:20px">✓</span>':''}</div>`})
   h+=`</div></div>`
   document.body.insertAdjacentHTML('beforeend',h)
 }
-function pickMode(t){document.getElementById('mode-modal').remove();S.mode=t;api('/api/user',{method:'POST',body:JSON.stringify({workout_type:t})});loadGoals().then(()=>r())}
-function delMeal(id){if(confirm('删除？')){api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
-function delWorkout(id){if(confirm('删除？')){api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
+function pickMode(t){$('#mode-m').remove();S.mode=t;api('/api/user',{method:'POST',body:JSON.stringify({workout_type:t})});loadGoals().then(render)}
+function delMeal(id){if(confirm('删除？'))api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(render))}
+function delWorkout(id){if(confirm('删除？'))api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(render))}
+
+// ── Profile actions ──
+function editProfile(){
+  let u=S.user||{}
+  $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="pf-m"><div class="modal-box"><div class="modal-title">编辑资料</div>
+    <div class="input-row mb8"><span class="unit-wrap"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:24px"><span class="unit-label">cm</span></span><span class="unit-wrap"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:24px"><span class="unit-label">kg</span></span></div>
+    <div class="input-row mb8"><span class="unit-wrap"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:24px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}"></div>
+    <select class="input mb8" id="pf-al">${[{v:1.2,l:'久坐'},{v:1.375,l:'轻度'},{v:1.55,l:'中度'},{v:1.725,l:'高度'},{v:1.9,l:'极强度'}].map(o=>`<option value="${o.v}" ${u.activity_level==o.v?'selected':''}>${o.l}</option>`).join('')}</select>
+    <div class="flex g8"><button class="btn w100" onclick="$('#pf-m').remove()">取消</button><button class="btn primary w100" onclick="saveProfile()">保存</button></div></div></div>`)
+}
+function saveProfile(){
+  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
+  api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadAll().then(render);toast('已保存')})
+}
+function recordWeight(){
+  let w=+($('#wt-in')?.value);if(!w||w<20)return toast('请输入有效体重')
+  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:+($('#bf-in')?.value)||null})}).then(()=>{loadAll().then(render);toast('已记录')})
+}
+
+// ── Meal modal ──
+function addMealModal(){window._foods=[];window._ingredients=[]
+  $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mc-m"><div class="modal-box">
+    <div class="modal-title">添加饮食</div>
+    <div class="flex g8 mb8"><select class="input sm" id="mc-tp"><option value="lunch">午餐</option><option value="breakfast">早餐</option><option value="dinner">晚餐</option><option value="snack">加餐</option></select><span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-tm" value="${now()}"></div>
+    <span class="text-sub">食材（加食材名+克数）</span>
+    <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:24px"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
+    <div id="mc-ings" class="mt8"></div>
+    <div class="input-row mt8"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）"></div>
+    <button class="btn outline w100 mt8" id="mc-parse" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
+    <div id="mc-res" class="mt8"></div>
+    <span class="text-sub mt8">已保存菜品</span><div class="chip-row mt4" id="mc-dishes"></div>
+    <div class="flex g8 mt16"><button class="btn w100" onclick="$('#mc-m').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`)
+  api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
+}
+function addIngredient(){
+  let n=$('#mc-nm')?.value?.trim(),g=parseInt($('#mc-gr')?.value||100)
+  if(!n)return toast('请输入食材名称');if(!g||g<1)return toast('请输入克数')
+  if(!window._ingredients)window._ingredients=[];window._ingredients.push(n+' '+g+'g');$('#mc-nm').value='';refreshIngredients();$('#mc-parse').style.display='block'
+}
+function refreshIngredients(){let h='';(window._ingredients||[]).forEach((ing,i)=>{h+=`<div class="food-row"><span>${ing}</span><button class="btn sm danger" onclick="removeIngredient(${i})">×</button></div>`});$('#mc-ings').innerHTML=h}
+function removeIngredient(i){window._ingredients.splice(i,1);refreshIngredients();if(!window._ingredients.length)$('#mc-parse').style.display='none'}
+function parseIngredients(){
+  let txt=(window._ingredients||[]).join(', ');if(!txt)return
+  toast('AI 正在计算...')
+  api('/api/parse-food',{method:'POST',body:JSON.stringify({text:txt})}).then(r=>{
+    if(r.foods&&r.foods.length){window._foods=r.foods;let cal=r.foods.reduce((s,f)=>s+(f.calories||0),0),pro=r.foods.reduce((s,f)=>s+(f.protein||0),0),carbs=r.foods.reduce((s,f)=>s+(f.carbs||0),0),fat=r.foods.reduce((s,f)=>s+(f.fat||0),0)
+      $('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--divider)"><span class="c-title" style="color:var(--green)">✅ 解析完成</span><span class="c-val">${Math.round(cal)}</span><span class="c-unit"> kcal</span><div class="text-sm mt4">蛋白 ${pro.toFixed(1)}g · 碳水 ${carbs.toFixed(1)}g · 脂肪 ${fat.toFixed(1)}g</div></div>`
+      toast(`解析完成 · ${Math.round(cal)}kcal`)
+    }else toast('解析失败')
+  })
+}
+function useDish(id){api('/api/dishes').then(ds=>{let d=ds.find(x=>x.id===id);if(!d)return;let fs;try{fs=JSON.parse(d.foods)}catch(e){return};window._foods=fs;window._ingredients=fs.map(f=>f.name+' '+f.amount+'g');$('#mc-dn').value=d.name;refreshIngredients();$('#mc-parse').style.display='none';$('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--divider)"><span class="c-title" style="color:var(--green)">已选用: ${d.name}</span><span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span></div>`})}
+function deleteDish(id){if(!confirm('删除？'))return;api('/api/dishes/'+id,{method:'DELETE'}).then(()=>{toast('已删除');api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el)el.innerHTML=(ds||[]).slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})})}
+function saveMeal(){
+  let fs=window._foods||[];if(!fs.length)return toast('请先解析食材')
+  let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now(),dn=$('#mc-dn')?.value?.trim()||fs.map(f=>f.name).join('+')
+  fs.forEach(f=>{f.dishName=dn})
+  api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:fs})}).then(()=>{
+    let cal=fs.reduce((s,f)=>s+(f.calories||0),0),pro=fs.reduce((s,f)=>s+(f.protein||0),0),car=fs.reduce((s,f)=>s+(f.carbs||0),0),fat=fs.reduce((s,f)=>s+(f.fat||0),0)
+    api('/api/dishes',{method:'POST',body:JSON.stringify({name:dn,foods:fs,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
+    $('#mc-m').remove();loadAll().then(render);toast('已保存')
+  })
+}
+
+// ── Workout modal ──
+function addWorkoutModal(){
+  $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="wo-m"><div class="modal-box">
+    <div class="modal-title">记录训练</div>
+    <div class="flex g8 mb8"><select class="input sm" id="wo-tp" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-dr" type="number" value="45" style="padding-right:28px;width:100%"><span class="unit-label">min</span></span></div>
+    <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8" onclick="addStrengthEx()">+ 添加动作</button></div>
+    <div id="wo-cd" class="hidden"><span class="text-sub">爬坡分段</span><div id="wo-segs"></div><button class="btn outline sm mt8" onclick="addCardioSeg()">+ 添加分段</button></div>
+    <div class="flex g8 mt16"><button class="btn w100" onclick="$('#wo-m').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存训练</button></div></div></div>`)
+}
+function toggleWoType(){$('#wo-st').classList.toggle('hidden',$('#wo-tp').value!=='strength');$('#wo-cd').classList.toggle('hidden',$('#wo-tp').value!=='cardio')}
+function addStrengthEx(){$('#wo-exs').innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称"><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="4" style="padding-right:24px"><span class="unit-label">组</span></span><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="12" style="padding-right:24px"><span class="unit-label">次</span></span><span class="unit-wrap" style="width:60px"><input class="input sm" type="number" value="0" style="padding-right:24px"><span class="unit-label">kg</span></span></div>`}
+function addCardioSeg(){let n=$('#wo-segs').children.length+1;$('#wo-segs').innerHTML+=`<div class="input-row mt8" style="align-items:center"><span class="text-sm text-sub">第${n}段</span><span class="unit-wrap"><input class="input sm" type="number" value="12" style="padding-right:24px"><span class="unit-label">%</span></span><span class="unit-wrap"><input class="input sm" type="number" value="3.5" step="0.1" style="padding-right:32px"><span class="unit-label">km/h</span></span><span class="unit-wrap"><input class="input sm" type="number" value="5" style="padding-right:30px"><span class="unit-label">min</span></span><button class="btn sm danger" onclick="this.parentElement.remove()">×</button></div>`}
+function saveWorkout(){
+  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||45,u=S.user||{},exs=[],desc=''
+  if(tp==='strength'){$('#wo-exs').querySelectorAll('.input-row').forEach(r=>{let inps=r.querySelectorAll('input');let n=inps[0]?.value?.trim()||'训练',s=parseInt(inps[1]?.value)||4,re=parseInt(inps[2]?.value)||12,w=parseInt(inps[3]?.value)||0;exs.push({name:n,sets:s,reps:re,weight:w});desc+=n+' '+s+'组×'+re+'次×'+w+'kg; '})}
+  else{$('#wo-segs').querySelectorAll('.input-row').forEach(r=>{let inps=r.querySelectorAll('input');let inc=parseFloat(inps[0]?.value)||0,sp=parseFloat(inps[1]?.value)||0,mn=parseInt(inps[2]?.value)||0;exs.push({name:'爬坡',incline:inc,speed:sp,minutes:mn});desc+='坡度'+inc+'% 速度'+sp+' '+mn+'min; '})}
+  if(!exs.length)return toast('请添加训练内容')
+  desc+='总时长'+dr+'min'
+  toast('AI 正在计算消耗...')
+  api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,description:desc})}).then(r=>{
+    let cal=r.calories||300
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+cal+'kcal')})
+  }).catch(()=>{
+    let cal=Math.round((tp==='cardio'?dr*8:dr*6)*(u.current_weight||70)/70)
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练已记录(估算)')})
+  })
+}
 
 // ── Boot ──
-r()
-loadAll().then(()=>r()).catch(()=>r())
+render()
+loadAll().then(render).catch(render)
 </script>
 </body>
 </html>
