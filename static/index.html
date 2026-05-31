@@ -148,7 +148,8 @@ function diet(){
       let foods=[];try{foods=JSON.parse(m.foods)}catch(e){}
       const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
       const pro=foods.reduce((s,f)=>s+(f.protein||0),0)
-      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm" style="margin-left:8px">${foods.map(f=>f.name).join('、')}</span><div class="text-sm text-sub">${foods.map(f=>f.name+' '+f.amount+'g').join(' · ')}</div></div><div class="flex g8" style="flex-direction:column;align-items:flex-end"><span class="bold">${cal}kcal</span><span class="text-sm text-sub">蛋白${pro.toFixed(1)}g</span><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
+      const dishName=foods[0]?.dishName||foods.map(f=>f.name).join('+')
+      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm" style="margin-left:8px;font-weight:500">${dishName}</span><div class="text-sm text-sub">${foods.map(f=>f.name+' '+f.amount+'g').join(' · ')}</div></div><div class="flex g8" style="flex-direction:column;align-items:flex-end"><span class="bold">${cal}kcal</span><span class="text-sm text-sub">蛋白${pro.toFixed(1)}g</span><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
     })
     h+=`</div>`
   })
@@ -175,6 +176,7 @@ function addMealModal(){
       <button class="btn primary sm" onclick="addIngredient()">+</button>
     </div>
     <div id="mc-ingredients" class="mt8"></div>
+    <div class="input-row mt8"><input class="input" id="mc-dish-name" placeholder="菜品名称（如：番茄炒蛋）"></div>
     <button class="btn outline w100 mt8" id="mc-parse-btn" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
     <div id="mc-result" class="mt8"></div>`
   html+=`<div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`
@@ -240,15 +242,15 @@ function saveMeal(){
   if(foods.length===0){toast('请先解析食材');return}
   const mt=document.getElementById('mc-mealType')?.value||'lunch'
   const time=document.getElementById('mc-time')?.value||now()
+  const dishName=document.getElementById('mc-dish-name')?.value?.trim()||foods.map(f=>f.name).join('+')
+  // Attach dish name to first food item
+  foods.forEach(f=>{f.dishName=dishName})
   api('/api/meals',{method:'POST',body:JSON.stringify({date:T,meal_type:mt,time,foods})}).then(()=>{
-    const names=foods.map(f=>f.name).filter(Boolean).sort()
-    if(names.length>0){
-      const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
-      const pro=foods.reduce((s,f)=>s+(f.protein||0)*1,0)
-      const car=foods.reduce((s,f)=>s+(f.carbs||0)*1,0)
-      const fat=foods.reduce((s,f)=>s+(f.fat||0)*1,0)
-      api('/api/dishes',{method:'POST',body:JSON.stringify({name:names.join('+'),foods,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
-    }
+    const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
+    const pro=foods.reduce((s,f)=>s+(f.protein||0)*1,0)
+    const car=foods.reduce((s,f)=>s+(f.carbs||0)*1,0)
+    const fat=foods.reduce((s,f)=>s+(f.fat||0)*1,0)
+    api('/api/dishes',{method:'POST',body:JSON.stringify({name:dishName,foods,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
     document.getElementById('modal').remove()
     loadAll().then(()=>r())
     toast('已保存')
