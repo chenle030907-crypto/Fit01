@@ -392,7 +392,7 @@ function renderWaterCard(){
       <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="flex:0 0 100px;margin-top:4px">
       <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
     </div>
-    <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>w.drink_type+' '+w.amount+'ml'+(w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':'')).join(' · '):'今天还没喝水'}</div>
+    <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="event.stopPropagation();undoWater(${w.id})" title="点击撤销">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
   </div>`
 }
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
@@ -415,6 +415,7 @@ function quickAddWater(){
     toast(`+${amt}ml ${type}`)
   })
 }
+function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(()=>r());toast('已撤销')})}
 function loadWater(){return api('/api/water?date='+T).then(w=>{S.water=w})}
 function loadWaterTarget(){const u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
 

@@ -285,6 +285,13 @@ def water():
     db.commit()
     return jsonify({"ok":True})
 
+@app.route("/api/water/<int:id>", methods=["DELETE"])
+def delete_water(id):
+    db = get_db()
+    db.execute("DELETE FROM water WHERE id=?", [id])
+    db.commit()
+    return jsonify({"ok":True})
+
 @app.route("/api/water-target", methods=["POST"])
 def water_target():
     data = request.get_json()
