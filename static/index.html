@@ -5,347 +5,357 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>动食日记</title>
 <style>
+:root{--bg:#F5F5F7;--card:#FFFFFF;--text:#1D1D1F;--sub:#86868B;--border:#E5E5EA;--divider:#F2F2F7;--green:#4CAF50;--orange:#FF9500;--blue:#007AFF;--red:#FF3B30}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:#F5F5F7;color:#1D1D1F;font-size:15px}
-body.night{background:#1C1C1E;color:#E5E5EA}
-.page{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:80px}
-/* Nav Bar */
-.nav{position:sticky;top:0;z-index:10;background:rgba(245,245,247,0.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid #E5E5EA}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
+.page{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:90px}
+.nav{position:sticky;top:0;z-index:10;background:rgba(245,245,247,0.9);backdrop-filter:blur(10px);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid var(--border)}
 .nav-t{font-size:17px;font-weight:600}
-.night .nav{background:rgba(28,28,30,0.9);border-color:#2C2C2E}
-/* Cards */
-.card{background:white;margin:12px 16px;padding:16px;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
-.night .card{background:#2C2C2E}
-.card-title{font-size:14px;color:#86868B;margin-bottom:8px;display:block}
-/* Mode Bar */
-.mode-bar{display:flex;align-items:center;gap:8px;padding:14px 16px;border-radius:16px;margin:12px 16px;cursor:pointer}
+.card{background:var(--card);margin:12px 16px;padding:16px;border-radius:16px}
+.c-title{font-size:14px;color:var(--sub);margin-bottom:8px}
+.c-val{font-size:28px;font-weight:700}
+.c-unit{font-size:14px;color:var(--sub)}
+.mode-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;margin:12px 16px;cursor:pointer}
 .mode-emoji{font-size:24px}
 .mode-label{font-size:17px;font-weight:600;flex:1}
-.mode-desc{font-size:12px;margin-top:2px;display:block}
-/* Big Number */
-.big-num{font-size:48px;font-weight:700;letter-spacing:-1px;text-align:center;display:block}
-.big-label{font-size:13px;color:#86868B;text-align:center;display:block}
-/* Macro Row */
+.mode-desc{font-size:12px;color:var(--sub);margin-top:2px}
 .macro-row{display:flex;gap:8px;margin:0 16px 12px}
-.macro-item{flex:1;background:white;border-radius:14px;padding:12px;text-align:center}
-.night .macro-item{background:#2C2C2E}
-.macro-val{font-size:15px;font-weight:600;display:block}
-.macro-lbl{font-size:11px;color:#86868B;margin-top:2px;display:block}
-/* Buttons */
-.btn-row{display:flex;gap:12px;margin:0 16px 12px}
-.btn{flex:1;padding:14px;border-radius:14px;text-align:center;font-size:15px;font-weight:500;border:none;cursor:pointer;background:white}
-.night .btn{background:#2C2C2E}
-.btn.primary{background:#1D1D1F;color:white}
-.night .btn.primary{background:#E5E5EA;color:#1D1D1F}
-.btn.danger{color:#FF3B30}
-/* Input */
-.input-row{display:flex;gap:8px;margin:12px 16px}
-.input{flex:1;padding:12px 16px;border:1px solid #E5E5EA;border-radius:12px;font-size:15px;background:white;outline:none}
-.night .input{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
-.input.small{flex:0 0 80px;text-align:center}
-/* Food List */
-.food-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid #F2F2F7}
-.night .food-item{border-color:#2C2C2E}
-/* Dish chips */
-.dish-row{display:flex;gap:8px;overflow-x:auto;padding:8px 16px;flex-wrap:wrap}
-.dish-chip{background:white;border-radius:20px;padding:8px 14px;font-size:13px;white-space:nowrap;cursor:pointer;border:none}
-.night .dish-chip{background:#2C2C2E}
-.dish-chip.active{background:#1D1D1F;color:white}
-.night .dish-chip.active{background:#E5E5EA;color:#1D1D1F}
-/* Toast */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:10px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s}
+.macro-item{flex:1;background:var(--card);border-radius:14px;padding:14px;text-align:center}
+.macro-val{font-size:15px;font-weight:600}
+.macro-lbl{font-size:11px;color:var(--sub);margin-top:4px}
+.btn-row{display:flex;gap:10px;margin:0 16px 12px}
+.btn{flex:1;padding:14px;border-radius:14px;text-align:center;font-size:15px;font-weight:500;border:none;cursor:pointer;background:var(--card)}
+.btn.primary{background:var(--text);color:white}
+.btn.outline{background:transparent;border:1px solid var(--border)}
+.btn.danger{color:var(--red)}
+.btn.sm{padding:8px 14px;font-size:13px;flex:0}
+.input{padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:var(--card);outline:none;width:100%}
+.input:focus{border-color:var(--blue)}
+select.input{appearance:none}
+.input-row{display:flex;gap:8px}
+.flex{display:flex}.g8{gap:8px}.g12{gap:12px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mb8{margin-bottom:8px}.w100{width:100%}
+.text-center{text-align:center}.text-sub{color:var(--sub);font-size:13px}.text-sm{font-size:13px}
+.ml-auto{margin-left:auto}
+.big-num{font-size:48px;font-weight:700;letter-spacing:-1px}
+.tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;background:var(--divider)}
+.tag.green{background:#E8F5E9;color:var(--green)}
+.tag.orange{background:#FFF3E0;color:var(--orange)}
+.tag.blue{background:#E8F0FE;color:var(--blue)}
+.tag.red{background:#FFEBEE;color:var(--red)}
+.chip-row{display:flex;gap:6px;overflow-x:auto;padding:4px 0;flex-wrap:wrap}
+.chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:13px;white-space:nowrap;cursor:pointer}
+.chip.active{background:var(--text);color:white;border-color:var(--text)}
+.food-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:0.5px solid var(--divider)}
+.food-row:last-child{border-bottom:none}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:rgba(245,245,247,0.95);backdrop-filter:blur(10px);border-top:0.5px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+.tab{flex:1;text-align:center;padding:10px 0 6px;font-size:11px;color:var(--sub);cursor:pointer}
+.tab.active{color:var(--green)}
+.tab-icon{font-size:22px;display:block;margin-bottom:2px}
+.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:10px 20px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
 .toast.show{opacity:1}
-/* hidden pages */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);display:flex;align-items:flex-end;justify-content:center;z-index:100}
+.modal-box{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 30px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:16px;text-align:center}
 .hidden{display:none!important}
-/* Meal section */
-.meal-block{margin:0 16px 12px}
-.meal-type-label{font-size:14px;font-weight:600;color:#86868B;margin-bottom:4px;display:block}
-.meal-entry{background:white;border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
-.night .meal-entry{background:#2C2C2E}
-/* Bottom Nav */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:420px;margin:0 auto;background:rgba(245,245,247,0.95);border-top:0.5px solid #E5E5EA;display:flex;padding-bottom:env(safe-area-inset-bottom);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
-.night .bottom-nav{background:rgba(28,28,30,0.95);border-color:#2C2C2E}
-.tab{flex:1;text-align:center;padding:8px 0;font-size:11px;color:#86868B;cursor:pointer}
-.tab.active{color:#4CAF50}
-.tab-icon{font-size:22px;display:block}
-/* Modal */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:100}
-.modal-box{background:white;border-radius:16px;padding:24px;width:300px;max-width:90%}
-.night .modal-box{background:#2C2C2E}
+.bold{font-weight:600}
 </style>
 </head>
 <body>
 <div class="page" id="app"></div>
-<div class="bottom-nav">
-  <div class="tab active" data-tab="home"><span class="tab-icon">📊</span>首页</div>
-  <div class="tab" data-tab="diet"><span class="tab-icon">🍽️</span>饮食</div>
-  <div class="tab" data-tab="workout"><span class="tab-icon">💪</span>运动</div>
-  <div class="tab" data-tab="me"><span class="tab-icon">👤</span>我的</div>
-</div>
+<div class="bottom-nav" id="nav"></div>
 <div class="toast" id="toast"></div>
 
 <script>
+// ── State ──
 const $=s=>document.querySelector(s)
 const $$=s=>document.querySelectorAll(s)
-const api=(url,opts={})=>fetch(url,{headers:{'Content-Type':'application/json'},...opts}).then(r=>r.json())
-const T=()=>new Date().toISOString().slice(0,10)
-const fmt=n=>n.toFixed(1)
-const MODES={cardio:{label:'有氧日',emoji:'🏃',desc:'高碳水供能',color:'#007AFF',bg:'#E8F0FE'},
-  strength:{label:'无氧日',emoji:'💪',desc:'高蛋白修复',color:'#FF9500',bg:'#FFF3E0'},
-  happy:{label:'Happy日',emoji:'😊',desc:'休息恢复低卡',color:'#4CAF50',bg:'#E8F5E9'},
-  cheat:{label:'放纵日',emoji:'🎉',desc:'大吃特吃',color:'#FF3B30',bg:'#FFEBEE'}}
-let state={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy'}
+const today=()=>new Date().toISOString().slice(0,10)
+const now=()=>new Date().toTimeString().slice(0,5)
+const T=today()
+const api=(url,opts={})=>fetch(url,{headers:{'Content-Type':'application/json'},...opts}).then(r=>r.ok?r.json():Promise.reject(r))
+const toast=msg=>{const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
 
-function toast(msg){
-  const t=$('#toast');t.textContent=msg;t.classList.add('show')
-  setTimeout(()=>t.classList.remove('show'),2000)
-}
+const MODES={cardio:{label:'有氧日',emoji:'🏃',desc:'高碳水供能',bg:'#E8F0FE'},
+  strength:{label:'无氧日',emoji:'💪',desc:'高蛋白修复',bg:'#FFF3E0'},
+  happy:{label:'Happy日',emoji:'😊',desc:'休息恢复',bg:'#E8F5E9'},
+  cheat:{label:'放纵日',emoji:'🎉',desc:'随便吃',bg:'#FFEBEE'}}
 
-// ── Render ──
-function render(){
-  const p=state.tab
-  if(p==='home') renderHome()
-  else if(p==='diet') renderDiet()
-  else if(p==='workout') renderWorkout()
-  else if(p==='me') renderMe()
-  $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===p))
+let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[]}
+
+// ── Render engine ──
+function r(){S.tab==='home'?home():S.tab==='diet'?diet():S.tab==='workout'?workout():S.tab==='me'?me();nav()}
+function nav(){$('#nav').innerHTML=['home','diet','workout','me'].map(t=>{
+  const icons={home:'📊',diet:'🍽️',workout:'💪',me:'👤'}
+  const labels={home:'首页',diet:'饮食',workout:'运动',me:'我的'}
+  return `<div class="tab ${S.tab===t?'active':''}" data-t="${t}"><span class="tab-icon">${icons[t]}</span>${labels[t]}</div>`
+}).join('')
+  $$('.tab').forEach(t=>t.onclick=()=>{S.tab=t.dataset.t;r()})
 }
 
 // ── Home ──
-function renderHome(){
-  const m=state.mode||'happy'
-  const c=MODES[m]
-  const g=state.goals||{}
-  const deficit=(state.mealsTotal||0)-(g.tdee||2000)
-  const ds=deficit<-200?'热量缺口':deficit>200?'热量盈余':'热量平衡'
-  const dc=deficit<-200?'#4CAF50':deficit>200?'#FF3B30':'#FF9500'
+function home(){
+  const m=S.mode||'happy',c=MODES[m]
+  const g=S.goals||{}
+  const eaten=S.mealsTotal||0
+  const workoutBurn=(S.workouts||[]).reduce((s,w)=>s+(w.calories||0),0)
+  const deficit=eaten-(g.tdee||2000)-workoutBurn
+  const ds=deficit<-300?'热量缺口':deficit>300?'热量盈余':'热量平衡'
+  const dc=deficit<-300?'var(--green)':deficit>300?'var(--red)':'var(--orange)'
+  const latestW=S.measurements&&S.measurements.length>0?S.measurements[0].weight:(S.user.current_weight||0)
+
   $('#app').innerHTML=`
-    <div class="page">
-      <div class="nav"><span class="nav-t">动食日记</span><span>${T()}</span></div>
-      <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()">
-        <span class="mode-emoji">${c.emoji}</span>
-        <div><span class="mode-label" style="color:${c.color}">${c.label}</span><span class="mode-desc">${c.desc} · 点击切换</span></div>
-      </div>
-      <div class="card" style="text-align:center">
-        <span class="big-label">今日热量缺口</span>
-        <span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span>
-        <span class="big-label" style="color:${dc}">${ds} · kcal</span>
-      </div>
-      <div class="macro-row">
-        <div class="macro-item"><span class="macro-val" style="color:#FF9500">${Math.round(state.mealsProtein||0)}/${g.protein||0}g</span><span class="macro-lbl">蛋白质</span></div>
-        <div class="macro-item"><span class="macro-val" style="color:#4CAF50">${Math.round(state.mealsCarbs||0)}/${g.carbs||0}g</span><span class="macro-lbl">碳水</span></div>
-        <div class="macro-item"><span class="macro-val" style="color:#007AFF">${Math.round(state.mealsFat||0)}/${g.fat||0}g</span><span class="macro-lbl">脂肪</span></div>
-      </div>
-      <div class="btn-row">
-        <button class="btn primary" onclick="gotoDiet()">记录饮食</button>
-        <button class="btn primary" onclick="gotoWorkout()">记录运动</button>
-      </div>
-    </div>`
+    <div class="nav"><span class="nav-t">动食日记</span><span class="text-sub">${T}</span></div>
+    <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()">
+      <span class="mode-emoji">${c.emoji}</span><div><span class="mode-label">${c.label}</span><span class="mode-desc">${c.desc} · 点击切换</span></div>
+    </div>
+    <div class="card text-center">
+      <span class="text-sub">今日热量缺口</span><br>
+      <span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><br>
+      <span style="color:${dc};font-size:14px;font-weight:500">${ds}</span>
+      ${g.target_calories?`<div style="margin-top:8px"><span class="text-sub">目标 ${g.target_calories} · 摄入 ${eaten} · 运动 ${workoutBurn}</span></div>`:''}
+    </div>
+    <div class="macro-row">
+      <div class="macro-item"><span class="macro-val" style="color:var(--orange)">${Math.round(S.mealsProtein||0)}</span><span class="macro-lbl">蛋白 / ${g.protein||0}g</span></div>
+      <div class="macro-item"><span class="macro-val" style="color:var(--green)">${Math.round(S.mealsCarbs||0)}</span><span class="macro-lbl">碳水 / ${g.carbs||0}g</span></div>
+      <div class="macro-item"><span class="macro-val" style="color:var(--blue)">${Math.round(S.mealsFat||0)}</span><span class="macro-lbl">脂肪 / ${g.fat||0}g</span></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" onclick="S.tab='diet';r()">🍽️ 记录饮食</button>
+      <button class="btn primary" onclick="S.tab='workout';r()">💪 记录运动</button>
+    </div>
+    ${latestW?`<div class="card" onclick="S.tab='me';r()"><span class="c-title">最新体重</span><span class="c-val">${latestW}kg</span></div>`:''}
+  `
 }
 
 // ── Diet ──
-function renderDiet(){
+function diet(){
   const types={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}
-  const mealsByType={breakfast:[],lunch:[],dinner:[],snack:[]}
-  state.meals.forEach(m=>{if(mealsByType[m.meal_type])mealsByType[m.meal_type].push(m)})
-  let html=`<div class="page"><div class="nav"><span class="nav-t">饮食</span><span>${T()}</span></div>`
-  html+=`<div class="card"><span class="big-label">今日摄入</span><span class="big-num">${state.mealsTotal||0}</span><span class="big-label">kcal</span></div>`
-  for(const [t,label] of Object.entries(types)){
-    html+=`<div class="meal-block"><span class="meal-type-label">${label}</span>`
-    const meals=mealsByType[t]||[]
-    if(meals.length===0) html+=`<div class="meal-entry"><span style="color:#C7C7CC">暂无记录</span></div>`
+  const mb={breakfast:[],lunch:[],dinner:[],snack:[]}
+  S.meals.forEach(m=>{if(mb[m.meal_type])mb[m.meal_type].push(m)})
+  let h=`
+    <div class="nav"><span class="nav-t">饮食</span><span class="text-sub">${T}</span></div>
+    <div class="card text-center">
+      <span class="text-sub">今日摄入</span><br>
+      <span class="big-num">${S.mealsTotal||0}</span><span class="c-unit"> kcal</span><br>
+      <span class="text-sub">蛋白${Math.round(S.mealsProtein||0)}g · 碳水${Math.round(S.mealsCarbs||0)}g · 脂肪${Math.round(S.mealsFat||0)}g</span>
+    </div>`
+  Object.entries(types).forEach(([t,label])=>{
+    const meals=mb[t]||[]
+    h+=`<div class="card"><span class="c-title">${label} <span class="text-sub">${meals.length}餐</span></span>`
+    if(meals.length===0) h+=`<div class="text-sub" style="padding:8px 0">暂无记录</div>`
     else meals.forEach(m=>{
-      let foods=[]
-      try{foods=JSON.parse(m.foods)}catch(e){}
-      html+=`<div class="meal-entry"><div><span>${m.time||''}</span><span style="font-size:12px;color:#86868B;margin-left:8px">${foods.map(f=>f.name).join('、')}</span></div><div><span style="font-weight:600">${foods.reduce((s,f)=>s+f.calories,0)}kcal</span><button onclick="delMeal(${m.id})" class="btn danger" style="font-size:12px;padding:4px 8px;margin-left:8px">×</button></div></div>`
+      let foods=[];try{foods=JSON.parse(m.foods)}catch(e){}
+      const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
+      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm" style="margin-left:8px">${foods.map(f=>f.name).join('、')}</span></div><div class="flex g8"><span class="bold">${cal}kcal</span><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
     })
-    html+=`</div>`
-  }
-  html+=`<div class="btn-row"><button class="btn primary" onclick="addMeal()">+ 添加饮食</button></div></div>`
-  $('#app').innerHTML=html
-}
-
-// ── Workout ──
-function renderWorkout(){
-  let html=`<div class="page"><div class="nav"><span class="nav-t">运动</span><span>${T()}</span></div>`
-  if(state.workouts.length===0) html+=`<div class="card"><span class="big-label" style="text-align:center">暂无训练</span></div>`
-  else state.workouts.forEach(w=>{
-    html+=`<div class="card"><span class="card-title">${w.start_time||''} · ${w.duration||0}分钟 · ${w.calories||0}kcal</span></div>`
+    h+=`</div>`
   })
-  html+=`<div class="btn-row"><button class="btn primary" onclick="addWorkout()">+ 记录训练</button></div></div>`
-  $('#app').innerHTML=html
+  h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addMealModal()">+ 添加饮食</button></div>`
+  $('#app').innerHTML=h
 }
 
-// ── Me ──
-function renderMe(){
-  const u=state.user||{}
-  $('#app').innerHTML=`
-    <div class="page">
-      <div class="nav"><span class="nav-t">我的</span></div>
-      <div class="card"><span style="font-size:22px;font-weight:700">${u.nickname||'健身者'}</span></div>
-      <div class="card">
-        <span class="card-title">身体数据</span>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
-          <div><span style="color:#86868B;font-size:12px">身高</span><br><span>${u.height||170}cm</span></div>
-          <div><span style="color:#86868B;font-size:12px">体重</span><br><span>${u.current_weight||70}kg</span></div>
-          <div><span style="color:#86868B;font-size:12px">目标</span><br><span>${u.target_weight||65}kg</span></div>
-          <div><span style="color:#86868B;font-size:12px">年龄</span><br><span>${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
-        </div>
-        <button class="btn primary" style="width:100%;margin-top:12px" onclick="editProfile()">编辑资料</button>
-      </div>
-      <div class="card">
-        <span class="card-title">营养目标</span>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
-          <div><span style="color:#86868B;font-size:12px">BMR</span><br><span>${state.goals.bmr||0} kcal</span></div>
-          <div><span style="color:#86868B;font-size:12px">TDEE</span><br><span>${state.goals.tdee||0} kcal</span></div>
-          <div><span style="color:#86868B;font-size:12px">目标热量</span><br><span>${state.goals.target_calories||0} kcal</span></div>
-          <div><span style="color:#86868B;font-size:12px">蛋白质</span><br><span>${state.goals.protein||0}g</span></div>
-        </div>
-      </div>
+function addMealModal(){
+  let html=`
+    <div class="modal-overlay" id="modal"><div class="modal-box">
+    <div class="modal-title">添加饮食</div>
+    <div class="flex g8 mb8"><span class="text-sub">餐次</span>
+      <select class="input sm" id="mc-mealType">
+        <option value="lunch">午餐</option><option value="breakfast">早餐</option><option value="dinner">晚餐</option><option value="snack">加餐</option>
+      </select>
+      <span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-time" value="${now()}">
+    </div>
+    <div class="input-row mt8">
+      <input class="input" id="mc-input" placeholder="如: 番茄炒蛋 200g, 米饭 150g">
+      <button class="btn primary sm" onclick="parseAndShow()">AI解析</button>
+    </div>
+    <div id="mc-result"></div>
+    <div class="mt8"><span class="text-sub">推荐菜品</span>
+      <div class="chip-row" id="mc-dishes"></div>
     </div>`
-}
-
-// ── Modals ──
-function addMeal(){
-  const m=state.mode||'happy'
-  api('/api/dishes?tag='+m).then(d=>{state.dishes=d})
-  let selected=[]
-  let html=`<div class="modal-overlay" id="modal-meal"><div class="modal-box" style="width:90%;max-height:80vh;overflow-y:auto">
-    <span style="font-size:17px;font-weight:600">添加饮食</span>
-    <div class="input-row"><input class="input" id="food-input" placeholder="如: 番茄炒蛋 200g, 米饭 150g"><button class="btn primary" onclick="parseFood()">AI解析</button></div>
-    <div id="parsed-foods"></div>
-    <div id="dish-suggestions" style="margin-top:8px">
-      <span class="card-title">推荐菜品</span>
-      <div class="dish-row" id="dish-list"></div>
-    </div>`
-  if(state.dishes&&state.dishes.length>0){
-    html+=`<div class="dish-row">${state.dishes.map(d=>`<button class="dish-chip" onclick="pickDish(${d.id},'${d.name}')">${d.name}<br><small>${d.calories}kcal</small></button>`).join('')}</div>`
+  if(S.dishes&&S.dishes.length>0){
+    html+=`<div class="chip-row mt8">${S.dishes.slice(0,8).map(d=>`<button class="chip" onclick="useDish(${d.id})">${d.name}<br><small>${d.calories}kcal</small></button>`).join('')}</div>`
   }
-  html+=`<div style="margin-top:12px;display:flex;gap:8px">
-    <button class="btn" onclick="closeModal('modal-meal')">取消</button>
-    <button class="btn primary" onclick="saveMeal()">保存</button></div></div></div>`
+  html+=`<div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">保存</button></div></div></div>`
   $('#app').insertAdjacentHTML('beforeend',html)
+  api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{S.dishes=ds;ds.slice(0,6).forEach(d=>{
+    const el=document.getElementById('mc-dishes')
+    if(el)el.innerHTML+=`<button class="chip" onclick="useDish(${d.id})">${d.name}<br><small>${d.calories}kcal</small></button>`
+  })})
 }
 
-function parseFood(){
-  const text=$('#food-input').value
+function parseAndShow(){
+  const text=document.getElementById('mc-input').value
   if(!text.trim()) return
   api('/api/parse-food',{method:'POST',body:JSON.stringify({text})}).then(r=>{
     if(r.foods){
-      let h=''
-      r.foods.forEach((f,i)=>{
-        h+=`<div class="food-item"><span>${f.name} ${f.amount}g</span><span>${f.calories}kcal | 蛋白${f.protein}g</span></div>`
-      })
-      $('#parsed-foods').innerHTML=h
-      window._parsedFoods=r.foods
-      toast(`解析 ${r.foods.length} 项食材`)
-    }else{toast('解析失败,请重试')}
+      window._foods=r.foods
+      document.getElementById('mc-result').innerHTML=r.foods.map((f,i)=>
+        `<div class="food-row"><span>${f.name} ${f.amount}g</span><span class="bold">${f.calories}kcal</span><span class="text-sub">蛋白${(f.protein||0).toFixed(1)}g</span></div>`
+      ).join('')
+      toast(`解析 ${r.foods.length} 项`)
+    }else toast('解析失败')
   })
+}
+
+function useDish(id){
+  const d=S.dishes.find(x=>x.id===id)
+  if(!d) return
+  let foods;try{foods=JSON.parse(d.foods)}catch(e){return}
+  window._foods=foods
+  document.getElementById('mc-result').innerHTML=foods.map(f=>
+    `<div class="food-row"><span>${f.name} ${f.amount||0}g</span><span class="bold">${f.calories||0}kcal</span></div>`
+  ).join('')
+  document.getElementById('mc-input').value=d.name
 }
 
 function saveMeal(){
-  const foods=window._parsedFoods||[]
-  if(foods.length===0){toast('请先输入食物');return}
-  api('/api/meals',{method:'POST',body:JSON.stringify({
-    date:T(),meal_type:'lunch',time:new Date().toTimeString().slice(0,5),foods
-  })}).then(()=>{
-    // Save as dish
-    const name=foods.map(f=>f.name).join('+')
-    const cal=foods.reduce((s,f)=>s+f.calories,0)
-    const pro=foods.reduce((s,f)=>s+(f.protein||0),0)
-    const car=foods.reduce((s,f)=>s+(f.carbs||0),0)
-    const fat=foods.reduce((s,f)=>s+(f.fat||0),0)
-    api('/api/dishes',{method:'POST',body:JSON.stringify({name,foods,calories:cal,protein:pro,carbs:car,fat,tags:state.mode})})
-    closeModal('modal-meal')
-    loadAll().then(()=>render())
-  })
-}
-
-function closeModal(id){const e=$('#'+id);if(e)e.remove()}
-
-// ── Actions ──
-function switchMode(){
-  const types=['cardio','strength','happy','cheat']
-  const items=types.map(t=>MODES[t].emoji+' '+MODES[t].label)
-  // Simple picker
-  const idx=prompt(items.join('\n')+'\n\n输入序号(0-3)切换模式',types.indexOf(state.mode))
-  if(idx!==null&&types[parseInt(idx)]){
-    state.mode=types[parseInt(idx)]
-    api('/api/user',{method:'POST',body:JSON.stringify({workout_type:state.mode})})
-    loadGoals()
-    render()
-  }
-}
-
-function editProfile(){
-  const u=state.user||{}
-  const html=`<div class="modal-overlay" id="modal-profile"><div class="modal-box">
-    <span style="font-size:17px;font-weight:600">编辑资料</span>
-    <div style="margin-top:12px">
-      <label>昵称 <input class="input" id="pf-nickname" value="${u.nickname||''}"></label>
-      <label>身高(cm) <input class="input" type="number" id="pf-height" value="${u.height||170}"></label>
-      <label>体重(kg) <input class="input" type="number" id="pf-weight" value="${u.current_weight||70}"></label>
-      <label>目标体重(kg) <input class="input" type="number" id="pf-target" value="${u.target_weight||65}"></label>
-      <label>出生日期 <input class="input" type="date" id="pf-birth" value="${u.birth_date||'1995-01-01'}"></label>
-      <label>活动水平 <select class="input" id="pf-activity">
-        <option value="1.2" ${u.activity_level==1.2?'selected':''}>久坐</option>
-        <option value="1.375" ${u.activity_level==1.375?'selected':''}>轻度</option>
-        <option value="1.55" ${u.activity_level==1.55?'selected':''}>中度</option>
-        <option value="1.725" ${u.activity_level==1.725?'selected':''}>高度</option>
-        <option value="1.9" ${u.activity_level==1.9?'selected':''}>极强度</option>
-      </select></label>
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px">
-      <button class="btn" onclick="closeModal('modal-profile')">取消</button>
-      <button class="btn primary" onclick="saveProfile()">保存</button>
-    </div></div></div>`
-  $('#app').insertAdjacentHTML('beforeend',html)
-}
-
-function saveProfile(){
-  const data={
-    nickname:$('#pf-nickname').value,
-    height:parseFloat($('#pf-height').value)||170,
-    current_weight:parseFloat($('#pf-weight').value)||70,
-    target_weight:parseFloat($('#pf-target').value)||65,
-    birth_date:$('#pf-birth').value||'1995-01-01',
-    activity_level:parseFloat($('#pf-activity').value)||1.55,
-  }
-  api('/api/user',{method:'POST',body:JSON.stringify(data)}).then(()=>{
-    closeModal('modal-profile')
-    loadAll().then(()=>render())
+  const foods=window._foods||[]
+  if(foods.length===0){toast('请先添加食物');return}
+  const mt=document.getElementById('mc-mealType')?.value||'lunch'
+  const time=document.getElementById('mc-time')?.value||now()
+  api('/api/meals',{method:'POST',body:JSON.stringify({date:T,meal_type:mt,time,foods})}).then(()=>{
+    const names=foods.map(f=>f.name).filter(Boolean)
+    if(names.length>0){
+      const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
+      const pro=foods.reduce((s,f)=>s+(f.protein||0)*1,0)
+      const car=foods.reduce((s,f)=>s+(f.carbs||0)*1,0)
+      const fat=foods.reduce((s,f)=>s+(f.fat||0)*1,0)
+      api('/api/dishes',{method:'POST',body:JSON.stringify({name:names.join('+'),foods,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
+    }
+    document.getElementById('modal').remove()
+    loadAll().then(()=>r())
     toast('已保存')
   })
 }
 
-// ── Data loading ──
-function loadAll(){
-  return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadGoals()])
-}
-function loadUser(){return api('/api/user').then(u=>{state.user=u;state.mode=u.workout_type||'happy'})}
-function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{
-  state.meals=ms;let cal=0,pro=0,carbs=0,fat=0
-  ms.forEach(m=>{try{const f=JSON.parse(m.foods);f.forEach(x=>{cal+=x.calories||0;pro+=x.protein||0;carbs+=x.carbs||0;fat+=x.fat||0})}catch(e){}})
-  state.mealsTotal=Math.round(cal);state.mealsProtein=Math.round(pro);state.mealsCarbs=Math.round(carbs);state.mealsFat=Math.round(fat)
-})}
-function loadWorkouts(){return api('/api/workouts?date='+T()).then(ws=>{state.workouts=ws})}
-function loadDishes(){return api('/api/dishes').then(ds=>{state.dishes=ds})}
-function loadGoals(){
-  const u=state.user||{}
-  return api('/api/nutrition',{method:'POST',body:JSON.stringify({
-    current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',
-    gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:state.mode
-  })}).then(g=>{state.goals=g})
+// ── Workout ──
+function workout(){
+  let h=`<div class="nav"><span class="nav-t">运动</span><span class="text-sub">${T}</span></div>`
+  if(S.workouts.length===0) h+=`<div class="card"><div class="text-sub text-center" style="padding:20px">暂无训练记录</div></div>`
+  else S.workouts.forEach(w=>{
+    let exs=[];try{exs=JSON.parse(w.exercises||'[]')}catch(e){}
+    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${w.type||'训练'}</span>
+      <div class="mt8">${exs.map(e=>`<span class="tag">${e.name} ${(e.sets||[]).length}组</span>`).join(' ')}</div>
+      <div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
+  })
+  h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
+  $('#app').innerHTML=h
 }
 
-function delMeal(id){if(confirm('删除?')){api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>render()))}}
+function addWorkoutModal(){
+  let h=`<div class="modal-overlay" id="modal"><div class="modal-box">
+    <div class="modal-title">记录训练</div>
+    <div class="flex g8 mb8">
+      <select class="input sm" id="wo-type"><option value="strength">无氧</option><option value="cardio">有氧</option></select>
+      <input class="input sm" style="width:70px" id="wo-dur" placeholder="分钟" type="number" value="45">
+      <input class="input sm" style="width:70px" id="wo-cal" placeholder="消耗" type="number" value="300">
+    </div>
+    <div id="wo-exs"></div>
+    <button class="btn outline sm" onclick="addEx()">+ 添加动作</button>
+    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存</button></div></div></div>`
+  $('#app').insertAdjacentHTML('beforeend',h)
+}
 
-function gotoDiet(){state.tab='diet';render()}
-function gotoWorkout(){state.tab='workout';render()}
+function addEx(){
+  const el=document.getElementById('wo-exs')
+  el.innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称" value=""><input class="input sm" placeholder="组" type="number" value="4"><input class="input sm" placeholder="次" type="number" value="12"><input class="input sm" placeholder="kg" type="number" value="0"></div>`
+}
 
-// ── Init ──
-$$('.tab').forEach(t=>t.onclick=()=>{state.tab=t.dataset.tab;render()})
-loadAll().then(()=>render())
+function saveWorkout(){
+  const type=document.getElementById('wo-type')?.value||'strength'
+  const dur=parseInt(document.getElementById('wo-dur')?.value)||45
+  const cal=parseInt(document.getElementById('wo-cal')?.value)||300
+  const exs=[]
+  document.querySelectorAll('#wo-exs .input-row').forEach(row=>{
+    const inputs=row.querySelectorAll('input')
+    exs.push({name:inputs[0].value||'训练',sets:[{reps:parseInt(inputs[2]?.value)||12,weight:parseInt(inputs[3]?.value)||0}]})
+  })
+  api('/api/workouts',{method:'POST',body:JSON.stringify({date:T,start_time:now(),duration:dur,type,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{
+    document.getElementById('modal').remove();loadAll().then(()=>r());toast('已保存')
+  })
+}
+
+// ── Me ──
+function me(){
+  const u=S.user||{},g=S.goals||{}
+  const latest=S.measurements&&S.measurements[0]?S.measurements[0]:{}
+  let h=`<div class="nav"><span class="nav-t">我的</span></div>
+    <div class="card text-center"><span style="font-size:22px;font-weight:700">${u.nickname||'健身者'}</span></div>
+    <div class="card"><span class="c-title">身体数据</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+        <div><span class="text-sub">身高</span><br><span class="bold">${u.height||170}cm</span></div>
+        <div><span class="text-sub">体重</span><br><span class="bold">${latest.weight||u.current_weight||70}kg</span></div>
+        <div><span class="text-sub">目标体重</span><br><span class="bold">${u.target_weight||65}kg</span></div>
+        <div><span class="text-sub">年龄</span><br><span class="bold">${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
+      </div>
+      <button class="btn outline w100 mt12" onclick="editProfile()">编辑资料</button>
+      <div class="input-row mt12">
+        <input class="input sm" id="wt-input" placeholder="体重kg" type="number" step="0.1">
+        <input class="input sm" id="bf-input" placeholder="体脂%" type="number" step="0.1">
+        <button class="btn primary sm" onclick="recordWeight()">记录</button>
+      </div>
+    </div>
+    <div class="card"><span class="c-title">营养目标（${MODES[S.mode]?.label||''}）</span>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+        <div><span class="text-sub">BMR</span><br><span class="bold">${g.bmr||0} kcal</span></div>
+        <div><span class="text-sub">TDEE</span><br><span class="bold">${g.tdee||0} kcal</span></div>
+        <div><span class="text-sub">目标热量</span><br><span class="bold">${g.target_calories||0} kcal</span></div>
+        <div><span class="text-sub">蛋白质</span><br><span class="bold">${g.protein||0}g (${((g.protein||0)/(u.current_weight||70)).toFixed(1)}g/kg)</span></div>
+        <div><span class="text-sub">碳水</span><br><span class="bold">${g.carbs||0}g</span></div>
+        <div><span class="text-sub">脂肪</span><br><span class="bold">${g.fat||0}g</span></div>
+      </div>
+    </div>`
+  if(S.measurements&&S.measurements.length>1){
+    h+=`<div class="card"><span class="c-title">体重趋势（近${Math.min(S.measurements.length,10)}条）</span>`
+    S.measurements.slice(0,10).reverse().forEach(m=>h+=`<div class="food-row"><span>${m.date}</span><span class="bold">${m.weight}kg</span>${m.body_fat?`<span class="text-sub">${m.body_fat}%</span>`:''}</div>`)
+    h+=`</div>`
+  }
+  $('#app').innerHTML=h
+}
+
+function editProfile(){
+  const u=S.user||{}
+  $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal"><div class="modal-box">
+    <div class="modal-title">编辑资料</div>
+    <div class="flex g8 mb8"><input class="input" placeholder="昵称" id="pf-nn" value="${u.nickname||''}"></div>
+    <div class="input-row mb8"><input class="input" type="number" placeholder="身高cm" id="pf-ht" value="${u.height||170}"><input class="input" type="number" placeholder="体重kg" id="pf-wt" value="${u.current_weight||70}"></div>
+    <div class="input-row mb8"><input class="input" type="number" placeholder="目标kg" id="pf-tw" value="${u.target_weight||65}"><input class="input" type="date" id="pf-bd" value="${u.birth_date||'1995-01-01'}"></div>
+    <select class="input mb8" id="pf-al">
+      <option value="1.2" ${u.activity_level==1.2?'selected':''}>久坐</option><option value="1.375" ${u.activity_level==1.375?'selected':''}>轻度</option><option value="1.55" ${u.activity_level==1.55?'selected':''}>中度</option><option value="1.725" ${u.activity_level==1.725?'selected':''}>高度</option><option value="1.9" ${u.activity_level==1.9?'selected':''}>极强度</option>
+    </select>
+    <div class="flex g8"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveProfile()">保存</button></div></div></div>`)
+}
+
+function saveProfile(){
+  const d={nickname:$('#pf-nn')?.value||'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
+  api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{document.getElementById('modal').remove();loadAll().then(()=>r());toast('已保存')})
+}
+
+function recordWeight(){
+  const w=+($('#wt-input')?.value);if(!w||w<20)return toast('请输入有效体重')
+  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T,weight:w,body_fat:+($('#bf-input')?.value)||null})}).then(()=>{loadAll().then(()=>r());toast('已记录体重')})
+}
+
+// ── Data ──
+function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements()]).then(()=>loadGoals())}
+function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_type||'happy'})}
+function loadMeals(){return api('/api/meals?date='+T).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
+function loadWorkouts(){return api('/api/workouts?date='+T).then(ws=>{S.workouts=ws})}
+function loadDishes(){return api('/api/dishes').then(ds=>{S.dishes=ds})}
+function loadGoals(){const u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode})}).then(g=>{S.goals=g})}
+function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
+
+// ── Actions ──
+function switchMode(){
+  const types=['cardio','strength','happy','cheat']
+  const idx=prompt('0 有氧日\n1 无氧日\n2 Happy日\n3 放纵日\n\n输入序号切换',types.indexOf(S.mode))
+  if(idx!==null&&types[parseInt(idx)]){S.mode=types[parseInt(idx)];api('/api/user',{method:'POST',body:JSON.stringify({workout_type:S.mode})});loadGoals().then(()=>r())}
+}
+function delMeal(id){if(confirm('删除？')){api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
+function delWorkout(id){if(confirm('删除？')){api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
+
+// ── Boot ──
+loadAll().then(()=>r())
 </script>
 </body>
 </html>
