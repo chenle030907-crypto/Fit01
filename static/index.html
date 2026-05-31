@@ -302,17 +302,14 @@ function analyzePhoto(input){
       let name=r.name||'未识别菜品（点击修改）',grams=r.estimated_grams||200,conf=r.confidence||'medium'
       $('#mc-photo-name').textContent=name
       window._photoResult={name:name,estimated_grams:grams,ingredients:r.ingredients||[],confidence:conf,
-        baseGrams:grams,baseCals:r.calories||r.nutrition?.calories_kcal||715,
-        baseProtein:r.protein||r.nutrition?.protein_g||29,baseCarbs:r.carbs||r.nutrition?.carbs_g||76,
-        baseFat:r.fat||r.nutrition?.fat_g||28}
-      let cal=Math.round(window._photoResult.baseCals),pro=window._photoResult.baseProtein
-      $('#mc-photo-conf').textContent=(conf==='high'?'✅ ':'')+cal+'kcal · 蛋白'+pro+'g · 碳水'+r.carbs+'g · 脂肪'+r.fat+'g'
+        calories:r.calories||0,protein:r.protein||0,carbs:r.carbs||0,fat:r.fat||0}
+      $('#mc-photo-conf').textContent='✅ '+(r.calories||0)+'kcal · 蛋白'+(r.protein||0)+'g · 碳水'+(r.carbs||0)+'g · 脂肪'+(r.fat||0)+'g'
       $('#mc-photo-slider').value=grams
       $('#mc-photo-grams').textContent=grams+'g'
       toast('识别完成: '+name+' '+grams+'g')
     }).catch(()=>{
       clearTimeout(timer)
-      window._photoResult={name:'未识别菜品（点击修改）',estimated_grams:450,confidence:'low',baseGrams:450,baseCals:715,baseProtein:29,baseCarbs:76,baseFat:28}
+      window._photoResult={name:'未识别菜品（点击修改）',estimated_grams:450,confidence:'low',calories:0,protein:0,carbs:0,fat:0}
       $('#mc-photo-name').textContent='未识别菜品（点击修改）'
       $('#mc-photo-conf').textContent='715kcal · 蛋白29g'
       toast('识别超时，请手动输入菜名')
@@ -320,16 +317,22 @@ function analyzePhoto(input){
   }
   reader.readAsDataURL(file)
 }
+let _recalcTimer=null
 function updatePhotoGrams(v){
   $('#mc-photo-grams').textContent=v+'g'
   let r=window._photoResult
-  if(!r||!r.baseGrams)return
-  let ratio=v/r.baseGrams
-  let cal=Math.round((r.baseCals||715)*ratio),pro=Math.round((r.baseProtein||29)*ratio*10)/10
-  let carbs=Math.round((r.baseCarbs||76)*ratio*10)/10,fat=Math.round((r.baseFat||28)*ratio*10)/10
-  $('#mc-photo-name').nextElementSibling.textContent=r.confidence==='high'?'✅ 高置信度':r.confidence==='medium'?'👍 中等置信度':'⚠️ 估算'
-  let confEl=$('#mc-photo-conf')
-  if(confEl)confEl.textContent=(r.confidence==='high'?'✅ ':'')+cal+'kcal · 蛋白'+pro+'g · 碳水'+carbs+'g · 脂肪'+fat+'g'
+  if(!r||!r.name)return
+  $('#mc-photo-conf').textContent='🔄 AI 重新计算中...'
+  clearTimeout(_recalcTimer)
+  _recalcTimer=setTimeout(()=>{
+    api('/api/recalc-nutrition',{method:'POST',body:JSON.stringify({name:r.name,grams:parseInt(v)})}).then(nut=>{
+      if(!nut)return
+      let cal=nut.calories||r.calories||0,pro=(nut.protein||r.protein||0).toFixed(1)
+      let carbs=(nut.carbs||r.carbs||0).toFixed(1),fat=(nut.fat||r.fat||0).toFixed(1)
+      $('#mc-photo-conf').textContent='✅ '+cal+'kcal · 蛋白'+pro+'g · 碳水'+carbs+'g · 脂肪'+fat+'g'
+      r.calories=cal;r.protein=parseFloat(pro);r.carbs=parseFloat(carbs);r.fat=parseFloat(fat)
+    }).catch(()=>{$('#mc-photo-conf').textContent='⚠️ 计算超时，将用估算值'})
+  },400)
 }
 function clearPhotoCard(){
   $('#mc-photo-preview').classList.add('hidden')
@@ -366,9 +369,7 @@ function addPhotoFood(){
     return
   }
   let r=window._photoResult,mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
-  let ratio=g/(r?.baseGrams||450)
-  let cal=Math.round((r?.baseCals||715)*ratio),pro=Math.round((r?.baseProtein||29)*ratio*10)/10
-  let carbs=Math.round((r?.baseCarbs||76)*ratio*10)/10,fat=Math.round((r?.baseFat||28)*ratio*10)/10
+  let cal=r?.calories||715,pro=r?.protein||29,carbs=r?.carbs||76,fat=r?.fat||28
   let foods=[{name:name,amount:g,calories:cal,protein:pro,carbs:carbs,fat:fat,unit:'g',dishName:name}]
   api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:foods})}).then(()=>{
     api('/api/dishes',{method:'POST',body:JSON.stringify({name:name,foods:foods,calories:cal,protein:pro,carbs:carbs,fat:fat,tags:S.mode})})

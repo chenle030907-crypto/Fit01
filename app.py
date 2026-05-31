@@ -355,7 +355,10 @@ def analyze_photo():
     data = request.get_json()
     image_base64 = data.get("image", "")
     if not image_base64: return jsonify({"error": "no image"}), 400
-    prompt = """你是菜品识别专家。识别图片中的菜品，返回JSON:{"name":"菜品中文名","estimated_grams":200,"ingredients":["食材1","食材2"],"confidence":"high/medium/low"}。克数根据图片中食物的分量感来估算。只返回JSON。"""
+    prompt = """你是一个资深 AI 营养师。识别图片中的菜品，严格计算该分量下的真实热量和三大营养素。
+返回纯JSON，不要markdown标记：
+{"name":"精准菜品名称","estimated_grams":450,"calories":715,"protein":29,"carbs":76,"fat":28,"ingredients":["食材1","食材2"],"confidence":"high"}
+热量和营养素必须是你根据菜品分量动态计算出的精确值。"""
     reply = call_vision(prompt, image_base64, temp=0.1, max_tokens=256)
     print(f"[photo] raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
     if reply:
@@ -368,6 +371,18 @@ def analyze_photo():
     else:
         print(f"[photo] AI call failed, using fallback")
     return jsonify(PHOTO_FALLBACK)
+
+# ── Recalculate nutrition for adjusted grams ──
+@app.route("/api/recalc-nutrition", methods=["POST"])
+def recalc_nutrition():
+    data = request.get_json()
+    name = data.get("name","")
+    grams = data.get("grams",300)
+    prompt = f"""你是资深 AI 营养师。菜品"{name}"，用户指定分量{grams}克。请根据该分量精确计算热量和三大营养素。只返回纯JSON：{{"calories":数字,"protein":数字,"carbs":数字,"fat":数字}}。不要任何其他文字。"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=256, json_mode=True)
+    result = parse_ai_json(reply)
+    if result: return jsonify(result)
+    return jsonify({"calories":500,"protein":20,"carbs":50,"fat":15})
 
 # ── Workout Calorie AI ──
 @app.route("/api/workout-calories", methods=["POST"])
