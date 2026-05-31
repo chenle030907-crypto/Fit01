@@ -255,10 +255,10 @@ function recordWeight(){
   let wEl=document.getElementById('wt-in'),w=parseFloat(wEl?.value)
   if(isNaN(w)||w<20||w>300){toast('请输入有效体重(20-300kg)');return}
   let bfEl=document.getElementById('bf-in'),bf=parseFloat(bfEl?.value)
-  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:isNaN(bf)?null:bf})}).then(()=>{
+  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:isNaN(bf)?null:bf})}).then(r=>{
     toast('记录成功！已更新最新体重为：'+w+' kg')
     loadAll().then(render)
-  }).catch(()=>toast('记录失败，请重试'))
+  }).catch(e=>{console.error(e);toast('保存失败，服务器异常')})
 }
 
 // ── Meal modal ──

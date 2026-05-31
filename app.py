@@ -250,26 +250,31 @@ def delete_dish(id):
 def measurements():
     db = get_db()
     if request.method == "GET":
-        rows = db.execute("SELECT * FROM measurements GROUP BY date ORDER BY date DESC LIMIT 90").fetchall()
+        try:
+            rows = db.execute("SELECT * FROM measurements GROUP BY date ORDER BY date DESC LIMIT 90").fetchall()
+        except:
+            rows = db.execute("SELECT * FROM measurements ORDER BY date DESC LIMIT 90").fetchall()
         return jsonify([dict(r) for r in rows])
-    data = request.get_json()
-    date = data.get("date", str(datetime.date.today()))
-    weight = data.get("weight")
-    body_fat = data.get("body_fat")
-    note = data.get("note", "")
-    # Upsert: update if same date exists, insert if not
-    existing = db.execute("SELECT id FROM measurements WHERE date=?", [date]).fetchone()
-    if existing:
-        db.execute("UPDATE measurements SET weight=?,body_fat=?,note=? WHERE id=?",
-            [weight, body_fat, note, existing["id"]])
-    else:
-        db.execute("INSERT INTO measurements (date,weight,body_fat,note) VALUES (?,?,?,?)",
-            [date, weight, body_fat, note])
-    # Sync weight to user profile for TDEE calc
-    if weight:
-        db.execute("UPDATE users SET current_weight=?,updated_at=datetime('now','localtime') WHERE id=1", [weight])
-    db.commit()
-    return jsonify({"ok":True})
+    try:
+        data = request.get_json()
+        date = data.get("date", str(datetime.date.today()))
+        weight = float(data.get("weight", 0))
+        body_fat = data.get("body_fat")
+        if body_fat is not None: body_fat = float(body_fat)
+        note = data.get("note", "")
+        existing = db.execute("SELECT id FROM measurements WHERE date=?", [date]).fetchone()
+        if existing:
+            db.execute("UPDATE measurements SET weight=?,body_fat=?,note=? WHERE id=?",
+                [weight, body_fat, note, existing["id"]])
+        else:
+            db.execute("INSERT INTO measurements (date,weight,body_fat,note) VALUES (?,?,?,?)",
+                [date, weight, body_fat, note])
+        if weight:
+            db.execute("UPDATE users SET current_weight=? WHERE id=1", [weight])
+        db.commit()
+        return jsonify({"ok":True})
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
 
 # ── Gemini AI API ──
 @app.route("/api/parse-food", methods=["POST"])
