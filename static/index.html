@@ -523,7 +523,7 @@ function switchMode(){
 }
 function pickMode(t){document.getElementById('mode-modal').remove();S.mode=t;api('/api/user',{method:'POST',body:JSON.stringify({workout_type:t})});loadGoals().then(()=>r())}
 function delMeal(id){if(confirm('删除？')){api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
-function delWorkout(id){if(confirm('删除？')){api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}}
+function delWorkout(id){if(confirm('删除？')){api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
 
 // ── Boot ──
 r()
