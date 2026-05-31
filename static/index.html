@@ -5,74 +5,97 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Fit No.1</title>
 <style>
-:root{--bg:#F5F5F7;--card:#FFF;--text:#1D1D1F;--sub:#86868B;--border:#E5E5EA;--divider:#F2F2F7;--green:#4CAF50;--orange:#FF9500;--blue:#007AFF;--red:#FF3B30}
+:root{--bg:#F2F2F7;--card:#FFFFFF;--text:#1C1C1E;--sub:#8E8E93;--ter:#C7C7CC;--border:rgba(60,60,67,.1);--divider:rgba(60,60,67,.06);--fill:rgba(120,120,128,.12);--green:#34C759;--orange:#FF9500;--blue:#007AFF;--red:#FF3B30;--indigo:#5856D6}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
-.page{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:90px}
-.nav{position:sticky;top:0;z-index:10;background:rgba(245,245,247,.9);backdrop-filter:blur(10px);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:.5px solid var(--border)}
-.nav-t{font-size:17px;font-weight:600}
-.card{background:var(--card);margin:12px 16px;padding:16px;border-radius:16px}
-.c-title{font-size:14px;color:var(--sub);margin-bottom:8px}
-.c-val{font-size:28px;font-weight:700}
-.c-unit{font-size:14px;color:var(--sub)}
-.mode-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:16px;margin:12px 16px;cursor:pointer}
-.mode-emoji{font-size:24px}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;background:var(--bg);color:var(--text);font-size:17px;line-height:1.47059;font-weight:400;letter-spacing:-0.022em;-webkit-font-smoothing:antialiased}
+.page{max-width:430px;margin:0 auto;min-height:100vh;padding-bottom:100px}
+/* Nav */
+.nav{position:sticky;top:0;z-index:10;background:rgba(242,242,247,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.nav-t{font-size:17px;font-weight:600;letter-spacing:-0.022em}
+/* Cards */
+.card{background:var(--card);margin:16px 16px 0;padding:16px 20px;border-radius:16px}
+.card:last-child{margin-bottom:16px}
+.c-title{font-size:13px;color:var(--sub);font-weight:500;text-transform:uppercase;letter-spacing:-0.01em;margin-bottom:8px}
+.c-val{font-size:28px;font-weight:600;letter-spacing:-0.022em}
+/* Mode bar */
+.mode-bar{display:flex;align-items:center;gap:12px;padding:16px 20px;border-radius:16px;margin:16px 16px 0;cursor:pointer;transition:opacity .15s}
+.mode-bar:active{opacity:.7}
+.mode-emoji{font-size:28px;line-height:1}
 .mode-label{font-size:17px;font-weight:600;flex:1}
-.mode-desc{font-size:12px;color:var(--sub);margin-top:2px}
-.macro-row{display:flex;gap:8px;margin:0 16px 12px}
-.macro-item{flex:1;background:var(--card);border-radius:14px;padding:14px;text-align:center}
-.macro-val{font-size:15px;font-weight:600}
-.macro-lbl{font-size:11px;color:var(--sub);margin-top:4px}
-.btn-row{display:flex;gap:10px;margin:0 16px 12px}
-.btn{flex:1;padding:14px;border-radius:14px;text-align:center;font-size:15px;font-weight:500;border:none;cursor:pointer;background:var(--card)}
+.mode-desc{font-size:13px;color:var(--sub);margin-top:2px;font-weight:400}
+/* Macro */
+.macro-row{display:flex;gap:12px;margin:16px 16px 0}
+.macro-item{flex:1;background:var(--card);border-radius:16px;padding:16px;text-align:center}
+.macro-val{font-size:17px;font-weight:600;display:block}
+.macro-lbl{font-size:12px;color:var(--sub);margin-top:4px;display:block;font-weight:400}
+/* Buttons */
+.btn-row{display:flex;gap:12px;margin:16px 16px 0}
+.btn{flex:1;padding:13px 20px;border-radius:12px;text-align:center;font-size:17px;font-weight:500;border:none;cursor:pointer;background:var(--fill);color:var(--text);letter-spacing:-0.022em;transition:opacity .15s}
+.btn:active{opacity:.6}
 .btn.primary{background:var(--text);color:#fff}
 .btn.outline{background:transparent;border:1px solid var(--border)}
 .btn.danger{color:var(--red)}
-.btn.sm{padding:8px 14px;font-size:13px;flex:0}
-.input{padding:12px 14px;border:1px solid var(--border);border-radius:12px;font-size:15px;background:var(--card);outline:none;width:100%}
-.input:focus{border-color:var(--blue)}
-.input-row{display:flex;gap:8px}
+.btn.sm{padding:8px 14px;font-size:15px;flex:0;border-radius:10px}
+.btn.w100{width:100%;flex:none}
+/* Inputs */
+.input{padding:12px 16px;border:none;border-radius:10px;font-size:17px;background:var(--fill);color:var(--text);outline:none;width:100%;letter-spacing:-0.022em;transition:background .15s}
+.input:focus{background:rgba(120,120,128,.18)}
+.input.sm{padding:10px 14px;font-size:15px;border-radius:8px}
+select.input{-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%238E8E93' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.input-row{display:flex;gap:8px;align-items:center}
+/* Utilities */
 .flex{display:flex}.g8{gap:8px}.w100{width:100%}
 .text-center{text-align:center}.text-sub{color:var(--sub);font-size:13px}.text-sm{font-size:13px}.text-right{text-align:right}
-.ml-auto{margin-left:auto}
-.big-num{font-size:48px;font-weight:700;letter-spacing:-1px}
+.ml-auto{margin-left:auto}.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mb8{margin-bottom:8px}
+.big-num{font-size:48px;font-weight:700;letter-spacing:-0.022em}
+/* Chips */
 .chip-row{display:flex;gap:6px;overflow-x:auto;padding:4px 0;flex-wrap:wrap}
-.chip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:13px;white-space:nowrap;cursor:pointer}
-.chip.active{background:var(--text);color:#fff;border-color:var(--text)}
-.food-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:.5px solid var(--divider)}
+.chip{background:var(--fill);border:none;border-radius:20px;padding:8px 14px;font-size:14px;white-space:nowrap;cursor:pointer;color:var(--text);transition:opacity .15s;letter-spacing:-0.01em}
+.chip:active{opacity:.6}
+.chip.active{background:var(--text);color:#fff}
+/* Food rows */
+.food-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:.33px solid var(--divider)}
 .food-row:last-child{border-bottom:none}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:rgba(245,245,247,.95);backdrop-filter:blur(10px);border-top:.5px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
-.tab{flex:1;text-align:center;padding:10px 0 6px;font-size:11px;color:var(--sub);cursor:pointer}
+/* Bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(242,242,247,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-top:.33px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom,0)}
+.tab{flex:1;text-align:center;padding:8px 0 4px;font-size:10px;color:var(--sub);cursor:pointer;font-weight:500;letter-spacing:.01em}
 .tab.active{color:var(--green)}
-.tab-icon{font-size:22px;display:block;margin-bottom:2px}
-.toast{position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 20px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity .2s;pointer-events:none}
+.tab-icon{font-size:24px;display:block;margin-bottom:2px;line-height:1}
+/* Toast */
+.toast{position:fixed;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(28,28,30,.92);color:#fff;padding:10px 24px;border-radius:24px;font-size:14px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none;backdrop-filter:blur(10px);letter-spacing:-0.01em}
 .toast.show{opacity:1}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);display:flex;align-items:flex-end;justify-content:center;z-index:100}
-.modal-box{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 30px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto}
-.modal-title{font-size:17px;font-weight:600;margin-bottom:16px;text-align:center}
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.3);display:flex;align-items:flex-end;justify-content:center;z-index:100;animation:fadeIn .2s}
+.modal-box{background:var(--card);border-radius:20px 20px 0 0;padding:24px 20px 34px;width:100%;max-width:430px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease-out}
+.modal-title{font-size:17px;font-weight:600;margin-bottom:20px;text-align:center;letter-spacing:-0.022em}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .hidden{display:none!important}
 .bold{font-weight:600}
-.unit-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px;pointer-events:none}
-.unit-wrap{position:relative}
-.progress-bar{height:8px;background:var(--divider);border-radius:4px;overflow:hidden}
-.progress-fill{height:100%;border-radius:4px;transition:width .3s}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.ruler-wrap{position:relative;height:88px;overflow:hidden;margin:0;user-select:none;-webkit-user-select:none;touch-action:pan-x;cursor:grab}
+/* Unit labels */
+.unit-wrap{position:relative;display:inline-block}
+.unit-label{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px;pointer-events:none;font-weight:500}
+/* Progress */
+.progress-bar{height:6px;background:var(--fill);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .4s ease-out}
+/* Ruler */
+.ruler-wrap{position:relative;height:80px;overflow:hidden;margin:0;user-select:none;-webkit-user-select:none;touch-action:pan-x;cursor:grab}
 .ruler-wrap:active{cursor:grabbing}
-.ruler-wrap::before,.ruler-wrap::after{content:'';position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
+.ruler-wrap::before,.ruler-wrap::after{content:'';position:absolute;top:0;bottom:0;width:50px;z-index:2;pointer-events:none}
 .ruler-wrap::before{left:0;background:linear-gradient(to right,var(--card) 0%,transparent 100%)}
 .ruler-wrap::after{right:0;background:linear-gradient(to left,var(--card) 0%,transparent 100%)}
 .ruler-track{display:flex;align-items:flex-end;height:100%;padding:0 50%}
-.ruler-tick{flex-shrink:0;position:relative}
-.ruler-tick.major{height:48px;background:var(--text);width:1.5px}
-.ruler-tick.mid{height:32px;background:var(--sub);width:1px}
-.ruler-tick.minor{height:20px;background:var(--border);width:0.5px}
-.ruler-indicator{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--green);transform:translateX(-50%);z-index:3;border-radius:1px;box-shadow:0 0 8px rgba(76,175,80,.3)}
-.ruler-value{text-align:center;font-size:36px;font-weight:700;margin:12px 0 0;font-variant-numeric:tabular-nums;letter-spacing:-1px;transition:color .15s}
-.ruler-value.changed{color:var(--green)}
-.ruler-unit{text-align:center;font-size:13px;color:var(--sub);margin-bottom:4px}
+.ruler-tick{flex-shrink:0}
+.ruler-tick.major{height:42px;background:var(--text);width:1.5px}
+.ruler-tick.mid{height:28px;background:var(--sub);width:1px}
+.ruler-tick.minor{height:16px;background:var(--ter);width:.5px}
+.ruler-indicator{position:absolute;left:50%;top:0;bottom:0;width:2.5px;background:var(--green);transform:translateX(-50%);z-index:3;border-radius:2px;box-shadow:0 0 12px rgba(52,199,89,.25)}
+.ruler-value{text-align:center;font-size:36px;font-weight:700;margin:8px 0 0;font-variant-numeric:tabular-nums;letter-spacing:-0.022em}
+.ruler-unit{text-align:center;font-size:13px;color:var(--sub);margin-bottom:4px;font-weight:500}
 .ruler-label-row{display:flex;justify-content:space-between;padding:0 20px;margin-top:4px}
-.ruler-label{font-size:10px;color:var(--border)}
+.ruler-label{font-size:10px;color:var(--ter);font-weight:500}
+/* Shimmer */
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 </style>
 </head>
 <body>
@@ -86,15 +109,23 @@ const now=()=>new Date().toTimeString().slice(0,5)
 const $=s=>document.querySelector(s)
 const $$=s=>document.querySelectorAll(s)
 const api=(u,o={})=>fetch(u,{headers:{'Content-Type':'application/json'},...o}).then(r=>r.ok?r.json():Promise.reject(r))
-const toast=m=>{let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
-const U=(n,u)=>`<span class="unit-wrap"><input class="input sm" value="${n}" style="padding-right:24px">${u?`<span class="unit-label">${u}</span>`:''}</span>`
+const toast=m=>{let t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
 
-const MODES={cardio:{l:'有氧日',e:'🏃',d:'高碳水供能',bg:'#E8F0FE',c:'#007AFF'},
-  strength:{l:'无氧日',e:'💪',d:'高蛋白修复',bg:'#FFF3E0',c:'#FF9500'},
-  happy:{l:'Happy日',e:'😊',d:'休息恢复',bg:'#E8F5E9',c:'#4CAF50'},
-  cheat:{l:'放纵日',e:'🎉',d:'随便吃',bg:'#FFEBEE',c:'#FF3B30'}}
+const MODES={cardio:{l:'有氧日',e:'🏃',d:'高碳水供能',bg:'rgba(0,122,255,.08)',c:'#007AFF'},
+  strength:{l:'无氧日',e:'💪',d:'高蛋白修复',bg:'rgba(255,149,0,.08)',c:'#FF9500'},
+  happy:{l:'Happy日',e:'😊',d:'休息恢复',bg:'rgba(52,199,89,.08)',c:'#34C759'},
+  cheat:{l:'放纵日',e:'🎉',d:'随便吃',bg:'rgba(255,59,48,.08)',c:'#FF3B30'}}
 
 let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500,waterDrinks:[]}
+
+const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',fields:['分钟','速度km/h']},
+  walking:{name:'爬坡/快走',emoji:'🚶',fields:['分钟','坡度%','速度km/h']},
+  cycling:{name:'动感单车',emoji:'🚴',fields:['分钟','阻力']},
+  rowing:{name:'划船机',emoji:'🚣',fields:['分钟']},
+  elliptical:{name:'椭圆机',emoji:'🧗',fields:['分钟','阻力']},
+  jump:{name:'跳绳',emoji:'🪢',fields:['分钟']},
+  swim:{name:'游泳',emoji:'🏊',fields:['分钟']}}
+const STRENGTH_EXAMPLES=['卧推','深蹲','硬拉','引体向上','划船','推举','弯举','臂屈伸','卷腹','平板支撑']
 
 // ── Nav ──
 function nav(){
@@ -124,24 +155,20 @@ function home(){
   $('#app').innerHTML=`
     <div class="nav"><span class="nav-t">Fit No.1</span><span class="text-sub">${T()}</span></div>
     <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()"><span class="mode-emoji">${c.e}</span><div><span class="mode-label" style="color:${c.c}">${c.l}</span><span class="mode-desc">${c.d} · 点击切换</span></div></div>
-    <div class="card text-center"><span class="text-sub">今日热量缺口</span><br><span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><br><span style="color:${dc};font-size:14px;font-weight:500">${ds}</span></div>
-    <div class="macro-row">
-      ${renderMacroBar('蛋白',Math.round(S.mealsProtein||0),g.protein||0,'var(--orange)')}
-      ${renderMacroBar('碳水',Math.round(S.mealsCarbs||0),g.carbs||0,'var(--green)')}
-      ${renderMacroBar('脂肪',Math.round(S.mealsFat||0),g.fat||0,'var(--blue)')}
-    </div>
+    <div class="card text-center"><span class="c-title">今日热量缺口</span><span class="big-num" style="color:${dc};margin:4px 0">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><div style="font-size:14px;font-weight:500;color:${dc};margin-top:2px">${ds}</div></div>
+    <div class="macro-row">${renderMacroBar('蛋白',Math.round(S.mealsProtein||0),g.protein||0,'var(--orange)')}${renderMacroBar('碳水',Math.round(S.mealsCarbs||0),g.carbs||0,'var(--green)')}${renderMacroBar('脂肪',Math.round(S.mealsFat||0),g.fat||0,'var(--blue)')}</div>
     <div class="card"><span class="c-title">💧 饮水 · ${pct}%</span>
-      <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val" style="font-size:28px">${eff}</span><span class="text-sub">/ ${wt} ml</span></div>
-      ${raw!==eff?`<div class="text-sm text-sub" style="margin-bottom:4px">实际 ${raw}ml，等效纯水 ${eff}ml</div>`:''}
+      <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val">${eff}</span><span class="text-sub">/ ${wt} ml</span></div>
+      ${raw!==eff?`<div class="text-sm text-sub" style="margin-bottom:6px">实际 ${raw}ml，等效纯水 ${eff}ml</div>`:''}
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${bc}"></div></div>
       <div class="input-row mt12" style="flex-wrap:wrap">
         <span class="unit-wrap" style="flex:1"><input class="input sm" id="w-amt" value="250" type="number" style="width:100%;text-align:center;font-size:18px;font-weight:600;padding-right:28px"><span class="unit-label">ml</span></span>
         <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${(S.waterDrinks||[]).map(d=>`<option>${d.name}</option>`).join('')}<option>其他</option></select>
         <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="width:100px">
-        <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
+        <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 44px">+</button>
       </div>
-      <div class="text-sub text-sm mt4">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="undoWater(${w.id})">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
-    <div class="flex g8 mt8"><button class="btn sm outline" onclick="quickWaterFixed(200)">💧 200ml</button><button class="btn sm outline" onclick="quickWaterFixed(350)">💧 350ml</button><button class="btn sm outline" onclick="quickWaterFixed(500)">💧 500ml</button></div>
+      <div class="text-sm text-sub mt8">${S.water&&S.water.length>0?S.water.slice(-3).reverse().map(w=>`<span style="cursor:pointer" onclick="undoWater(${w.id})">${w.drink_type} ${w.amount}ml${w.effective_ml!==w.amount?'→'+w.effective_ml+'ml':''} ✕</span>`).join(' · '):'今天还没喝水'}</div>
+      <div class="flex g8 mt8"><button class="btn sm outline" onclick="quickWaterFixed(200)">💧200ml</button><button class="btn sm outline" onclick="quickWaterFixed(350)">💧350ml</button><button class="btn sm outline" onclick="quickWaterFixed(500)">💧500ml</button></div>
     </div>
     <div class="btn-row"><button class="btn primary" onclick="S.tab='diet';render()">🍽️ 记录饮食</button><button class="btn primary" onclick="S.tab='workout';render()">💪 记录运动</button></div>
     ${lw?`<div class="card" onclick="S.tab='me';render()"><span class="c-title">最新体重</span><span class="c-val">${lw}kg</span></div>`:''}
@@ -153,7 +180,7 @@ function diet(){
   let tp={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'},mb={breakfast:[],lunch:[],dinner:[],snack:[]}
   S.meals.forEach(m=>{if(mb[m.meal_type])mb[m.meal_type].push(m)})
   let h=`<div class="nav"><span class="nav-t">饮食</span><span class="text-sub">${T()}</span></div>
-    <div class="card text-center"><span class="text-sub">今日摄入</span><br><span class="big-num">${S.mealsTotal||0}</span><span class="c-unit"> kcal</span></div>`
+    <div class="card text-center"><span class="c-title">今日摄入</span><span class="big-num">${S.mealsTotal||0}</span><span class="c-unit"> kcal</span></div>`
   Object.entries(tp).forEach(([t,lb])=>{
     let ml=mb[t]||[]
     h+=`<div class="card"><span class="c-title">${lb} · ${ml.length}餐</span>`
@@ -166,7 +193,7 @@ function diet(){
     })
     h+=`</div>`
   })
-  h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addMealModal()">+ 添加饮食</button></div>`
+  h+=`<div style="padding:16px 16px 0"><button class="btn primary w100" onclick="addMealModal()">+ 添加饮食</button></div>`
   $('#app').innerHTML=h
 }
 
@@ -179,7 +206,7 @@ function workout(){
     let ic=w.type==='cardio'
     h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${ic?'🏃 有氧':'💪 无氧'}</span><div class="mt8">${exs.map(e=>ic?`<span class="chip">${e.name||'有氧'}</span>${e.segments?`<div class="text-sm text-sub mt4">${e.segments.map(s=>s.name+' '+s.minutes+'min').join(' | ')}</div>`:''}`:`<span class="chip">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div><div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
   })
-  h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
+  h+=`<div style="padding:16px 16px 0"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
   $('#app').innerHTML=h
 }
 
@@ -196,10 +223,10 @@ function me(){
         <div><span class="text-sub">年龄</span><br><span class="bold">${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
       </div>
       <button class="btn outline w100 mt12" onclick="editProfile()">编辑资料</button>
-      <div class="card mt12" style="padding:12px 0 16px"><span class="c-title">⚖️ 体重</span><div class="ruler-value" id="wt-val">${lw.weight||u.current_weight||70}</div><div class="ruler-unit">公斤 kg</div><div class="ruler-wrap" id="wt-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="wt-track"></div></div><div class="ruler-label-row"><span>30</span><span>60</span><span>90</span><span>120</span><span>150</span></div></div>
-      <div class="card mt8" style="padding:12px 0 16px"><span class="c-title">📊 体脂率</span><div class="ruler-value" id="bf-val">${lw.body_fat||'--'}</div><div class="ruler-unit">百分比 %</div><div class="ruler-wrap" id="bf-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="bf-track"></div></div><div class="ruler-label-row"><span>5</span><span>15</span><span>25</span><span>35</span><span>50</span></div></div>
-      <button class="btn primary w100 mt8" onclick="recordWeight()">记录体重</button>
     </div>
+    <div class="card" style="padding:12px 0 16px"><span class="c-title" style="padding:0 20px">⚖️ 体重</span><div class="ruler-value" id="wt-val">${lw.weight||u.current_weight||70}</div><div class="ruler-unit">公斤 kg</div><div class="ruler-wrap" id="wt-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="wt-track"></div></div><div class="ruler-label-row"><span>30</span><span>60</span><span>90</span><span>120</span><span>150</span></div></div>
+    <div class="card" style="padding:12px 0 16px;margin-top:8px"><span class="c-title" style="padding:0 20px">📊 体脂率</span><div class="ruler-value" id="bf-val">${lw.body_fat||'--'}</div><div class="ruler-unit">百分比 %</div><div class="ruler-wrap" id="bf-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="bf-track"></div></div><div class="ruler-label-row"><span>5</span><span>15</span><span>25</span><span>35</span><span>50</span></div></div>
+    <button class="btn primary" style="margin:8px 16px 0;width:calc(100% - 32px)" onclick="recordWeight()">记录体重</button>
     <div class="card"><span class="c-title">营养目标（${(MODES[S.mode]||MODES.happy).l}）</span>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
         <div><span class="text-sub">BMR</span><br><span class="bold">${g.bmr||0} kcal</span></div><div><span class="text-sub">TDEE</span><br><span class="bold">${g.tdee||0} kcal</span></div>
@@ -216,22 +243,67 @@ function me(){
   setTimeout(initRulers,100)
 }
 
-// ── Water functions ──
-function toggleCustomDrink(){document.getElementById('w-custom').classList.toggle('hidden',$('#w-type').value!=='其他')}
+// ── Ruler ──
+function initRulers(){
+  let u=S.user||{},lw=S.measurements&&S.measurements[0]?S.measurements[0]:{}
+  buildRuler('wt',lw.weight||u.current_weight||70,30,150,0.1)
+  buildRuler('bf',lw.body_fat||18,5,50,0.1)
+}
+function buildRuler(id,val,min,max,step){
+  let track=$('#'+id+'-track'),wrap=$('#'+id+'-ruler'),valEl=$('#'+id+'-val')
+  if(!track||!wrap)return
+  let totalTicks=Math.round((max-min)/step),html=''
+  for(let i=0;i<=totalTicks;i++){
+    let cls=i%10===0?'major':i%5===0?'mid':'minor'
+    html+=`<div class="ruler-tick ${cls}"></div>`
+  }
+  track.innerHTML=html;track.style.gap='6px'
+  let pxPerTick=7,tickIdx=Math.round((val-min)/step)
+  window['_'+id+'Val']=val
+  if(valEl)valEl.textContent=val.toFixed(1)
+  function sync(){
+    let rect=track.getBoundingClientRect(),wr=wrap.getBoundingClientRect()
+    let cx=wr.left+wr.width/2,offset=cx-rect.left
+    let idx=Math.max(0,Math.min(totalTicks,Math.round(offset/pxPerTick)))
+    let v=Math.round((min+idx*step)*10)/10
+    if(valEl)valEl.textContent=v.toFixed(1)
+    window['_'+id+'Val']=v
+  }
+  wrap.scrollLeft=tickIdx*pxPerTick
+  wrap.onscroll=sync
+  wrap.addEventListener('touchmove',sync,{passive:true})
+  let dragging=false,sx=0,sl=0
+  wrap.addEventListener('pointerdown',e=>{dragging=true;sx=e.clientX;sl=wrap.scrollLeft;wrap.setPointerCapture(e.pointerId)})
+  wrap.addEventListener('pointermove',e=>{if(dragging){wrap.scrollLeft=sl+(sx-e.clientX);sync()}})
+  wrap.addEventListener('pointerup',()=>{dragging=false})
+  setTimeout(sync,300)
+}
+function recordWeight(){
+  let w=window._wtVal||parseFloat($('#wt-val')?.textContent),bf=window._bfVal||parseFloat($('#bf-val')?.textContent)
+  if(isNaN(w)||w<20||w>300){toast('请滑动刻度尺选择体重');return}
+  if(isNaN(bf))bf=null
+  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:bf})}).then(()=>{
+    toast('记录成功！已更新最新体重为：'+w+' kg')
+    loadAll().then(render)
+  }).catch(e=>{toast('保存失败，服务器异常')})
+}
+
+// ── Water ──
+function toggleCustomDrink(){let el=$('#w-custom');if(el)el.classList.toggle('hidden',$('#w-type').value!=='其他')}
+function quickAddWater(){
+  let a=parseInt($('#w-amt')?.value||250),t=$('#w-type')?.value||'矿泉水'
+  if(!a||a<10)return toast('请输入饮水量')
+  if(t==='其他'){t=$('#w-custom')?.value?.trim();if(!t)return toast('请输入饮品名称')}
+  api('/api/water',{method:'POST',body:JSON.stringify({date:T(),amount:a,drink_type:t})}).then(()=>{loadWater().then(render);toast('+'+a+'ml '+t)})
+}
 function quickWaterFixed(ml){
   let t=$('#w-type')?.value||'矿泉水'
   if(t==='其他'){t=$('#w-custom')?.value?.trim();if(!t)t='水'}
   api('/api/water',{method:'POST',body:JSON.stringify({date:T(),amount:ml,drink_type:t})}).then(()=>{loadWater().then(render);toast('+'+ml+'ml '+t)})
 }
-function quickAddWater(){
-  let a=parseInt($('#w-amt')?.value||250),t=$('#w-type')?.value||'矿泉水'
-  if(!a||a<10)return toast('请输入饮水量')
-  if(t==='其他'){t=$('#w-custom')?.value?.trim();if(!t)return toast('请输入饮品名称')}
-  api('/api/water',{method:'POST',body:JSON.stringify({date:T(),amount:a,drink_type:t})}).then(()=>{loadWater().then(render);toast(`+${a}ml ${t}`)})
-}
 function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(render);toast('已撤销')})}
 
-// ── Data loading ──
+// ── Data ──
 function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements(),loadWater(),loadWaterTarget()]).then(loadGoals)}
 function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_type||'happy'})}
 function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
@@ -244,8 +316,8 @@ function loadWaterTarget(){let u=S.user||{};return api('/api/water-target',{meth
 
 // ── Mode switch ──
 function switchMode(){
-  let types=['cardio','strength','happy','cheat'],h=`<div class="modal-overlay" id="mode-m" onclick="$('#mode-m').remove()"><div class="modal-box" onclick="event.stopPropagation()" style="border-radius:20px"><div class="modal-title">选择今日模式</div>`
-  types.forEach(t=>{let c=MODES[t];h+=`<div style="background:${c.bg};margin-bottom:8px;padding:14px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickMode('${t}')"><span style="font-size:28px">${c.e}</span><div style="flex:1"><span style="font-size:16px;font-weight:600">${c.l}</span><span style="font-size:12px;color:var(--sub);display:block">${c.d}</span></div>${S.mode===t?'<span style="color:var(--green);font-size:20px">✓</span>':''}</div>`})
+  let types=['cardio','strength','happy','cheat'],h=`<div class="modal-overlay" id="mode-m" onclick="$('#mode-m').remove()"><div class="modal-box" onclick="event.stopPropagation()"><div class="modal-title">选择今日模式</div>`
+  types.forEach(t=>{let c=MODES[t];h+=`<div style="background:${c.bg};margin-bottom:10px;padding:16px 20px;border-radius:14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:opacity .15s" onclick="pickMode('${t}')"><span style="font-size:28px">${c.e}</span><div style="flex:1"><span style="font-size:17px;font-weight:600;color:${c.c}">${c.l}</span><span style="font-size:13px;color:var(--sub);display:block">${c.d}</span></div>${S.mode===t?'<span style="color:var(--green);font-size:22px;font-weight:600">✓</span>':''}</div>`})
   h+=`</div></div>`
   document.body.insertAdjacentHTML('beforeend',h)
 }
@@ -257,8 +329,8 @@ function delWorkout(id){if(confirm('删除？'))api('/api/workouts/'+id,{method:
 function editProfile(){
   let u=S.user||{}
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="pf-m"><div class="modal-box"><div class="modal-title">编辑资料</div>
-    <div class="input-row mb8"><span class="unit-wrap"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:24px"><span class="unit-label">cm</span></span><span class="unit-wrap"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:24px"><span class="unit-label">kg</span></span></div>
-    <div class="input-row mb8"><span class="unit-wrap"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:24px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}"></div>
+    <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:28px"><span class="unit-label">cm</span></span><span class="unit-wrap" style="flex:1"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:28px"><span class="unit-label">kg</span></span></div>
+    <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:28px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}" style="flex:1"></div>
     <select class="input mb8" id="pf-al">${[{v:1.2,l:'久坐'},{v:1.375,l:'轻度'},{v:1.55,l:'中度'},{v:1.725,l:'高度'},{v:1.9,l:'极强度'}].map(o=>`<option value="${o.v}" ${u.activity_level==o.v?'selected':''}>${o.l}</option>`).join('')}</select>
     <div class="flex g8"><button class="btn w100" onclick="$('#pf-m').remove()">取消</button><button class="btn primary w100" onclick="saveProfile()">保存</button></div></div></div>`)
 }
@@ -266,6 +338,7 @@ function saveProfile(){
   let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
   api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadAll().then(render);toast('已保存')})
 }
+
 // ── Meal modal ──
 function addMealModal(){window._foods=[];window._ingredients=[]
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mc-m"><div class="modal-box">
@@ -276,16 +349,16 @@ function addMealModal(){window._foods=[];window._ingredients=[]
     <input type="file" id="mc-photo" accept="image/*" capture="environment" style="display:none" onchange="analyzePhoto(this)">
     <div id="mc-photo-preview" class="mt8 hidden">
       <img id="mc-photo-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px">
-      <div class="card mt8" style="background:var(--divider);margin:8px 0 0;padding:12px">
+      <div class="card mt8" style="background:var(--fill);margin:8px 0 0;padding:14px">
         <span class="bold" id="mc-photo-name" style="cursor:pointer" title="点击修改菜名" onclick="editPhotoName()">--</span><span class="text-sub" style="margin-left:8px" id="mc-photo-conf"></span>
         <div class="mt8"><span class="text-sub">份量：</span><b id="mc-photo-grams">200g</b></div>
-        <input type="range" id="mc-photo-slider" min="50" max="600" value="200" oninput="updatePhotoGrams(this.value)" style="width:100%;margin-top:4px">
+        <input type="range" id="mc-photo-slider" min="50" max="600" value="200" oninput="updatePhotoGrams(this.value)" style="width:100%;margin-top:4px;accent-color:var(--green)">
         <div class="flex text-sm text-sub" style="justify-content:space-between"><span>🥗 小盘 50g</span><span>🍱 正常 200g</span><span>🍽️ 大盘 600g</span></div>
         <button class="btn primary sm mt8" onclick="addPhotoFood()">确认添加该菜品</button>
       </div>
     </div>
     <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
-    <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2" onfocus="clearPhotoCard()"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:24px" onfocus="clearPhotoCard()"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
+    <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2" onfocus="clearPhotoCard()"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:28px;width:100%" onfocus="clearPhotoCard()"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
     <div id="mc-ings" class="mt8"></div>
     <div class="input-row mt8"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）"></div>
     <button class="btn outline w100 mt8" id="mc-parse" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
@@ -294,7 +367,26 @@ function addMealModal(){window._foods=[];window._ingredients=[]
     <div class="flex g8 mt16"><button class="btn w100" onclick="$('#mc-m').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`)
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
 }
+
+function clearPhotoCard(){$('#mc-photo-preview').classList.add('hidden');$('#mc-photo-name').textContent='--';window._photoResult=null;let inp=document.getElementById('mc-photo');if(inp)inp.value=''}
 function takePhoto(){$('#mc-photo').click()}
+function showPhotoSkeleton(){
+  $('#mc-photo-img').src=''
+  $('#mc-photo-img').style.cssText='width:100%;height:150px;background:linear-gradient(90deg,var(--fill) 25%,var(--card) 50%,var(--fill) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px'
+  $('#mc-photo-preview').classList.remove('hidden')
+  $('#mc-photo-name').textContent='AI 营养师分析中...'
+  $('#mc-photo-conf').textContent='正在全速解析食材'
+}
+function editPhotoName(){
+  let el=$('#mc-photo-name'),old=el.textContent
+  if(old==='识别中...'||old.includes('分析中'))return
+  let inp=document.createElement('input')
+  inp.className='input';inp.value=old==='--'||old.includes('未识别')||old.includes('超时')?'':old
+  inp.style.cssText='font-size:17px;font-weight:600;padding:6px 10px;margin:-4px 0';inp.id='mc-photo-name-input'
+  inp.onblur=function(){let v=this.value.trim()||'未识别菜品';el.textContent=v;this.replaceWith(el)}
+  inp.onkeydown=function(e){if(e.key==='Enter')this.blur()}
+  el.replaceWith(inp);inp.focus()
+}
 function analyzePhoto(input){
   let file=input.files[0];if(!file)return
   let reader=new FileReader()
@@ -303,14 +395,10 @@ function analyzePhoto(input){
     $('#mc-photo-img').src=e.target.result
     $('#mc-photo-img').style.cssText='width:100%;max-height:200px;object-fit:cover;border-radius:12px'
     showPhotoSkeleton()
-    $('#mc-photo-slider').value=200
-    $('#mc-photo-grams').textContent='200g'
-    toast('AI 正在识别菜品...')
     let timer=setTimeout(()=>{toast('网络较慢，请稍候...')},5000)
     api('/api/analyze-photo',{method:'POST',body:JSON.stringify({image:base64})}).then(r=>{
       clearTimeout(timer)
       let name=r.name||'未识别菜品（点击修改）',grams=r.estimated_grams||200,conf=r.confidence||'medium'
-      $('#mc-photo-name').textContent=name
       window._photoResult={name:name,estimated_grams:grams,ingredients:r.ingredients||[],confidence:conf,
         calories:r.calories||0,protein:r.protein||0,carbs:r.carbs||0,fat:r.fat||0}
       $('#mc-photo-conf').textContent='✅ '+(r.calories||0)+'kcal · 蛋白'+(r.protein||0)+'g · 碳水'+(r.carbs||0)+'g · 脂肪'+(r.fat||0)+'g'
@@ -321,7 +409,7 @@ function analyzePhoto(input){
       clearTimeout(timer)
       window._photoResult={name:'未识别菜品（点击修改）',estimated_grams:450,confidence:'low',calories:0,protein:0,carbs:0,fat:0}
       $('#mc-photo-name').textContent='未识别菜品（点击修改）'
-      $('#mc-photo-conf').textContent='715kcal · 蛋白29g'
+      $('#mc-photo-conf').textContent='请重试或手动输入'
       toast('识别超时，请手动输入菜名')
     })
   }
@@ -344,47 +432,17 @@ function updatePhotoGrams(v){
     }).catch(()=>{$('#mc-photo-conf').textContent='⚠️ 计算超时，将用估算值'})
   },400)
 }
-function clearPhotoCard(){
-  $('#mc-photo-preview').classList.add('hidden')
-  $('#mc-photo-name').textContent='--'
-  window._photoResult=null
-  let inp=document.getElementById('mc-photo');if(inp)inp.value=''
-}
-function showPhotoSkeleton(){
-  $('#mc-photo-img').src=''
-  $('#mc-photo-img').style.cssText='width:100%;height:150px;background:linear-gradient(90deg,#E5E5EA 25%,#F5F5F7 50%,#E5E5EA 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:12px'
-  $('#mc-photo-preview').classList.remove('hidden')
-  $('#mc-photo-name').textContent='AI 营养师分析中...'
-  $('#mc-photo-conf').textContent='正在全速解析食材'
-  $('#mc-photo-slider').value=300
-  $('#mc-photo-grams').textContent='...'
-}
-function editPhotoName(){
-  let el=$('#mc-photo-name'),old=el.textContent
-  if(old==='识别中...'||old.includes('分析中'))return
-  let inp=document.createElement('input')
-  inp.className='input';inp.value=old==='--'||old.includes('未识别')||old.includes('超时')?'':old
-  inp.style.cssText='font-size:16px;font-weight:600;padding:4px 8px;margin:-4px 0';inp.id='mc-photo-name-input'
-  inp.onblur=function(){let v=this.value.trim()||'未识别菜品';el.textContent=v;this.replaceWith(el)}
-  inp.onkeydown=function(e){if(e.key==='Enter')this.blur()}
-  el.replaceWith(inp);inp.focus()
-}
 function addPhotoFood(){
   if(!window._photoResult)return toast('请先拍照识别')
   let g=parseInt($('#mc-photo-slider').value)
   let name=$('#mc-photo-name').textContent
-  if(!name||name==='--'||name.includes('未识别')||name.includes('超时')||name.includes('识别中')){
-    toast('请先点击菜名修改为正确名称')
-    editPhotoName()
-    return
-  }
+  if(!name||name==='--'||name.includes('未识别')||name.includes('超时')||name.includes('分析中')){toast('请先点击菜名修改为正确名称');editPhotoName();return}
   let r=window._photoResult,mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
   let cal=r?.calories||715,pro=r?.protein||29,carbs=r?.carbs||76,fat=r?.fat||28
   let foods=[{name:name,amount:g,calories:cal,protein:pro,carbs:carbs,fat:fat,unit:'g',dishName:name}]
   api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:foods})}).then(()=>{
     api('/api/dishes',{method:'POST',body:JSON.stringify({name:name,foods:foods,calories:cal,protein:pro,carbs:carbs,fat:fat,tags:S.mode})})
-    $('#mc-m').remove();loadAll().then(render)
-    toast(name+' '+g+'g · '+cal+'kcal 已添加')
+    $('#mc-m').remove();loadAll().then(render);toast(name+' '+g+'g · '+cal+'kcal 已添加')
   }).catch(()=>toast('添加失败'))
 }
 function addIngredient(){
@@ -400,16 +458,16 @@ function parseIngredients(){
   toast('AI 正在计算...')
   api('/api/parse-food',{method:'POST',body:JSON.stringify({text:txt})}).then(r=>{
     if(r.foods&&r.foods.length){window._foods=r.foods;let cal=r.foods.reduce((s,f)=>s+(f.calories||0),0),pro=r.foods.reduce((s,f)=>s+(f.protein||0),0),carbs=r.foods.reduce((s,f)=>s+(f.carbs||0),0),fat=r.foods.reduce((s,f)=>s+(f.fat||0),0)
-      $('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--divider)"><span class="c-title" style="color:var(--green)">✅ 解析完成</span><span class="c-val">${Math.round(cal)}</span><span class="c-unit"> kcal</span><div class="text-sm mt4">蛋白 ${pro.toFixed(1)}g · 碳水 ${carbs.toFixed(1)}g · 脂肪 ${fat.toFixed(1)}g</div></div>`
-      toast(`解析完成 · ${Math.round(cal)}kcal`)
+      $('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--fill)"><span class="c-title" style="color:var(--green)">✅ 解析完成</span><span class="c-val">${Math.round(cal)}</span><span class="c-unit"> kcal</span><div class="text-sm mt4">蛋白 ${pro.toFixed(1)}g · 碳水 ${carbs.toFixed(1)}g · 脂肪 ${fat.toFixed(1)}g</div></div>`
+      toast('解析完成 · '+Math.round(cal)+'kcal')
     }else toast('解析失败')
   })
 }
-function useDish(id){api('/api/dishes').then(ds=>{let d=ds.find(x=>x.id===id);if(!d)return;let fs;try{fs=JSON.parse(d.foods)}catch(e){return};window._foods=fs;window._ingredients=fs.map(f=>f.name+' '+f.amount+'g');$('#mc-dn').value=d.name;refreshIngredients();$('#mc-parse').style.display='none';$('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--divider)"><span class="c-title" style="color:var(--green)">已选用: ${d.name}</span><span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span></div>`})}
+function useDish(id){api('/api/dishes').then(ds=>{let d=ds.find(x=>x.id===id);if(!d)return;let fs;try{fs=JSON.parse(d.foods)}catch(e){return};window._foods=fs;window._ingredients=fs.map(f=>f.name+' '+f.amount+'g');$('#mc-dn').value=d.name;refreshIngredients();$('#mc-parse').style.display='none';$('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--fill)"><span class="c-title" style="color:var(--green)">已选用: ${d.name}</span><span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span></div>`})}
 function deleteDish(id){if(!confirm('删除？'))return;api('/api/dishes/'+id,{method:'DELETE'}).then(()=>{toast('已删除');api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el)el.innerHTML=(ds||[]).slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})})}
 function saveMeal(){
   let fs=window._foods||[];if(!fs.length)return toast('请先解析食材')
-  let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now(),dn=$('#mc-dn')?.value?.trim()||fs.map(f=>f.name).join('+')
+  let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now(),dn=$('#mc-dn')?.value?.trim()||fs.map(f=>f.name).sort().join('+')
   fs.forEach(f=>{f.dishName=dn})
   api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:fs})}).then(()=>{
     let cal=fs.reduce((s,f)=>s+(f.calories||0),0),pro=fs.reduce((s,f)=>s+(f.protein||0),0),car=fs.reduce((s,f)=>s+(f.carbs||0),0),fat=fs.reduce((s,f)=>s+(f.fat||0),0)
@@ -419,15 +477,6 @@ function saveMeal(){
 }
 
 // ── Workout modal ──
-const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',fields:['分钟','速度km/h']},
-  walking:{name:'爬坡/快走',emoji:'🚶',fields:['分钟','坡度%','速度km/h']},
-  cycling:{name:'动感单车',emoji:'🚴',fields:['分钟','阻力']},
-  rowing:{name:'划船机',emoji:'🚣',fields:['分钟']},
-  elliptical:{name:'椭圆机',emoji:'🧗',fields:['分钟','阻力']},
-  jump:{name:'跳绳',emoji:'🪢',fields:['分钟']},
-  swim:{name:'游泳',emoji:'🏊',fields:['分钟']}}
-const STRENGTH_EXAMPLES=['卧推','深蹲','硬拉','引体向上','划船','推举','弯举','臂屈伸','卷腹','平板支撑']
-
 function addWorkoutModal(){
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="wo-m"><div class="modal-box">
     <div class="modal-title">记录训练</div>
@@ -443,56 +492,44 @@ function toggleWoType(){
   if(isCardio&&!$('#wo-segs').children.length)addCardioSeg('running')
 }
 function addStrengthRow(name=''){
-  $('#wo-exs').insertAdjacentHTML('beforeend',`<div class="card mt8" style="padding:14px;background:var(--bg)">
-    <div class="input-row mb8"><input class="input" placeholder="动作名称（输入或点击下方预设）" value="${name}" style="font-size:16px;font-weight:600;padding:14px 16px"></div>
+  $('#wo-exs').insertAdjacentHTML('beforeend',`<div class="card mt8" style="padding:14px;background:var(--bg);margin:8px 0 0">
+    <div class="input-row mb8"><input class="input" placeholder="动作名称（输入或点击下方预设）" value="${name}" style="font-size:17px;font-weight:600;padding:14px 16px"></div>
     <div class="input-row" style="gap:12px">
-      <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="4" value="4" style="padding:14px 34px 14px 14px;font-size:16px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">组</span></span>
-      <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="12" value="12" style="padding:14px 34px 14px 14px;font-size:16px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">次</span></span>
-      <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="0" value="0" style="padding:14px 34px 14px 14px;font-size:16px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">kg</span></span>
+      <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="4" value="4" style="padding:14px 34px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">组</span></span>
+      <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="12" value="12" style="padding:14px 34px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">次</span></span>
+      <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="0" value="0" style="padding:14px 34px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">kg</span></span>
     </div>
     <button class="btn sm danger mt8" onclick="this.closest('.card').remove();estimateCalories()">× 移除</button></div>`)
   setTimeout(estimateCalories,300)
 }
-function quickStrengthEx(name){addStrengthRow(name)}
-function quickCardio(key){
-  window._woType=key
-  let p=CARDIO_PRESETS[key],dur=parseInt($('#wo-dr')?.value||45)
-  $('#wo-cal').value='...'  // Will be AI-computed
-  $('#wo-custom-ex').classList.add('hidden')
-  $('#wo-segs').innerHTML=`<div class="card mt8" style="background:var(--divider)"><span style="font-size:18px">${p.emoji} ${p.name}</span><span class="text-sub ml-auto">消耗将由AI计算</span></div>`
-  p.fields.forEach(f=>{$('#wo-segs').innerHTML+=`<div class="input-row mt4"><span class="text-sm text-sub" style="width:60px">${f}</span><input class="input sm" type="number" value="${f.includes('分钟')?dur:3}" style="flex:1"></div>`})
-  $('#wo-segs').innerHTML+=`<button class="btn outline sm mt4" onclick="quickCardioCustom()">+ 自定义运动</button>`
-  // Trigger AI calorie estimate
+function addCardioSeg(exName=''){
+  let n=$('#wo-segs').children.length+1,dur=parseInt($('#wo-dr')?.value||45)
+  let namePart=exName?`<span style="font-size:17px;font-weight:600">${CARDIO_PRESETS[exName]?.emoji||''} ${CARDIO_PRESETS[exName]?.name||exName}</span>`:`<input class="input" placeholder="运动名称（如：跑步、跳绳）" value="" style="font-size:17px;font-weight:600;flex:2">`
+  $('#wo-segs').insertAdjacentHTML('beforeend',`<div class="card mt8" style="padding:14px;background:var(--bg);margin:8px 0 0">
+    <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px"><span class="text-sub">第${n}段</span><button class="btn sm danger" onclick="this.closest('.card').remove();estimateCalories()">×</button></div>
+    <div class="input-row mb8">${namePart}<span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="${dur}" value="${dur}" style="padding:14px 32px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">分钟</span></span></div>
+  </div>`)
   estimateCalories()
 }
+function fillCardioSeg(key){
+  let filled=false
+  $('#wo-segs').querySelectorAll('.card input[placeholder*="运动名称"]').forEach(inp=>{if(!inp.value.trim()&&!filled){inp.value=CARDIO_PRESETS[key]?.name||key;filled=true}})
+  if(!filled)addCardioSeg(key)
+}
+function quickCardio(key){if(!$('#wo-segs').children.length)addCardioSeg(key);else fillCardioSeg(key)}
 let _estTimer=null
 function estimateCalories(){
   clearTimeout(_estTimer)
   _estTimer=setTimeout(()=>{
-    let dur=parseInt($('#wo-dr')?.value||45),tp=$('#wo-tp')?.value||'strength'
-    let segs=[]
+    let dur=parseInt($('#wo-dr')?.value||45),tp=$('#wo-tp')?.value||'strength',segs=[]
     $('#wo-segs').querySelectorAll('.card').forEach(card=>{
       let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||card.querySelector('span')?.textContent?.trim()||'有氧'
       let d=parseInt(inps[1]?.value)||0;if(d>0)segs.push(n+' '+d+'min')
     })
     let desc=tp==='cardio'&&segs.length?segs.join(', ')+' 总'+dur+'分钟组合有氧':'力量训练 '+dur+'分钟'
-    if(tp==='strength'){
-      let exs=[]
-      $('#wo-exs').querySelectorAll('.card').forEach(r=>{let inps=r.querySelectorAll('input');exs.push(inps[0]?.value?.trim()||'训练')})
-      desc=tp==='strength'&&exs.length?exs.join(',')+' 共'+dur+'分钟':'力量训练 '+dur+'分钟'
-    }
-    api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:S.user?.current_weight||70,description:desc})}).then(r=>{
-      if(r.calories)$('#wo-cal').value=r.calories
-    }).catch(()=>{})
+    api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:S.user?.current_weight||70,description:desc})}).then(r=>{if(r.calories)$('#wo-cal').value=r.calories}).catch(()=>{})
   },300)
 }
-$('#wo-dr')?.addEventListener('input',estimateCalories)
-function quickCardioCustom(){
-  $('#wo-custom-ex').classList.remove('hidden')
-  $('#wo-custom-ex').focus()
-  $('#wo-cal').val(300)
-}
-$('#wo-dr')?.addEventListener('input',function(){if(window._woType)quickCardio(window._woType)})
 function saveWorkout(){
   let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||45,cal=parseInt($('#wo-cal')?.value)||300,u=S.user||{},exs=[],desc=''
   if(tp==='strength'){
@@ -515,57 +552,10 @@ function saveWorkout(){
   toast('AI 计算消耗中...')
   api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,description:desc})}).then(r=>{
     let finalCal=r.calories||cal
-    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:finalCal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+finalCal+'kcal '+r.note||'')})
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:finalCal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+finalCal+'kcal')})
   }).catch(()=>{
     api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练已记录 · '+cal+'kcal')})
   })
-}
-
-// ── Ruler Picker ──
-function initRulers(){
-  let u=S.user||{},lw=S.measurements&&S.measurements[0]?S.measurements[0]:{}
-  buildRuler('wt',lw.weight||u.current_weight||70,30,150,0.1)
-  buildRuler('bf',lw.body_fat||18,5,50,0.1)
-}
-function buildRuler(id,val,min,max,step){
-  let track=$('#'+id+'-track'),wrap=$('#'+id+'-ruler'),valEl=$('#'+id+'-val')
-  if(!track||!wrap)return
-  let totalTicks=Math.round((max-min)/step),html=''
-  for(let i=0;i<=totalTicks;i++){
-    let cls=i%10===0?'major':i%5===0?'mid':'minor',w=i%10===0?1.5:i%5===0?1:0.5
-    html+=`<div class="ruler-tick ${cls}" style="width:${w}px"></div>`
-  }
-  track.innerHTML=html;track.style.gap='3px'
-  let pxPerTick=6,tickIdx=Math.round((val-min)/step)
-  window['_'+id+'Val']=val
-  if(valEl)valEl.textContent=val.toFixed(1)
-  function sync(){
-    let rect=track.getBoundingClientRect(),wr=wrap.getBoundingClientRect()
-    let cx=wr.left+wr.width/2,offset=cx-rect.left
-    let idx=Math.max(0,Math.min(totalTicks,Math.round(offset/pxPerTick)))
-    let v=Math.round((min+idx*step)*10)/10
-    if(valEl)valEl.textContent=v.toFixed(1)
-    window['_'+id+'Val']=v
-  }
-  // Set initial scroll position to center on current value
-  let centerOffset=tickIdx*pxPerTick
-  wrap.scrollLeft=centerOffset
-  wrap.onscroll=sync
-  wrap.addEventListener('touchmove',sync,{passive:true})
-  let dragging=false,sx=0,sl=0
-  wrap.addEventListener('pointerdown',e=>{dragging=true;sx=e.clientX;sl=wrap.scrollLeft;wrap.setPointerCapture(e.pointerId)})
-  wrap.addEventListener('pointermove',e=>{if(dragging){wrap.scrollLeft=sl+(sx-e.clientX);sync()}})
-  wrap.addEventListener('pointerup',()=>{dragging=false})
-  setTimeout(sync,300)
-}
-function recordWeight(){
-  let w=window._wtVal||parseFloat($('#wt-val')?.textContent),bf=window._bfVal||parseFloat($('#bf-val')?.textContent)
-  if(isNaN(w)||w<20||w>300){toast('请滑动刻度尺选择体重');return}
-  if(isNaN(bf))bf=null
-  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:bf})}).then(()=>{
-    toast('记录成功！已更新最新体重为：'+w+' kg')
-    loadAll().then(render)
-  }).catch(e=>{toast('保存失败，服务器异常')})
 }
 
 // ── Boot ──
