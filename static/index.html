@@ -365,7 +365,7 @@ function delMeal(id){if(confirm('删除？')){api('/api/meals/'+id,{method:'DELE
 function delWorkout(id){if(confirm('删除？')){api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
 
 // ── Boot ──
-loadAll().then(()=>r())
+loadAll().then(()=>r()).catch(e=>{console.error(e);r()})
 </script>
 </body>
 </html>
