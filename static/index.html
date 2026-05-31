@@ -409,13 +409,13 @@ function saveMeal(){
 }
 
 // ── Workout modal ──
-const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',calPerMin:9,fields:['分钟','速度km/h']},
-  walking:{name:'爬坡/快走',emoji:'🚶',calPerMin:6,fields:['分钟','坡度%','速度km/h']},
-  cycling:{name:'动感单车',emoji:'🚴',calPerMin:7,fields:['分钟','阻力']},
-  rowing:{name:'划船机',emoji:'🚣',calPerMin:7,fields:['分钟']},
-  elliptical:{name:'椭圆机',emoji:'🧗',calPerMin:5,fields:['分钟','阻力']},
-  jump:{name:'跳绳',emoji:'🪢',calPerMin:9,fields:['分钟']},
-  swim:{name:'游泳',emoji:'🏊',calPerMin:8,fields:['分钟']}}
+const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',fields:['分钟','速度km/h']},
+  walking:{name:'爬坡/快走',emoji:'🚶',fields:['分钟','坡度%','速度km/h']},
+  cycling:{name:'动感单车',emoji:'🚴',fields:['分钟','阻力']},
+  rowing:{name:'划船机',emoji:'🚣',fields:['分钟']},
+  elliptical:{name:'椭圆机',emoji:'🧗',fields:['分钟','阻力']},
+  jump:{name:'跳绳',emoji:'🪢',fields:['分钟']},
+  swim:{name:'游泳',emoji:'🏊',fields:['分钟']}}
 const STRENGTH_EXAMPLES=['卧推','深蹲','硬拉','引体向上','划船','推举','弯举','臂屈伸','卷腹','平板支撑']
 
 function addWorkoutModal(){
@@ -436,13 +436,33 @@ function quickStrengthEx(name){$('#wo-exs').innerHTML+=`<div class="input-row mt
 function quickCardio(key){
   window._woType=key
   let p=CARDIO_PRESETS[key],dur=parseInt($('#wo-dr')?.value||45)
-  let estCal=Math.round(p.calPerMin*dur*(S.user?.current_weight||70)/70)
-  $('#wo-cal').value=estCal
+  $('#wo-cal').value='...'  // Will be AI-computed
   $('#wo-custom-ex').classList.add('hidden')
-  $('#wo-segs').innerHTML=`<div class="card mt8" style="background:var(--divider)"><span style="font-size:18px">${p.emoji} ${p.name}</span><span class="text-sub ml-auto">≈${p.calPerMin} kcal/min</span></div>`
+  $('#wo-segs').innerHTML=`<div class="card mt8" style="background:var(--divider)"><span style="font-size:18px">${p.emoji} ${p.name}</span><span class="text-sub ml-auto">消耗将由AI计算</span></div>`
   p.fields.forEach(f=>{$('#wo-segs').innerHTML+=`<div class="input-row mt4"><span class="text-sm text-sub" style="width:60px">${f}</span><input class="input sm" type="number" value="${f.includes('分钟')?dur:3}" style="flex:1"></div>`})
   $('#wo-segs').innerHTML+=`<button class="btn outline sm mt4" onclick="quickCardioCustom()">+ 自定义运动</button>`
+  // Trigger AI calorie estimate
+  estimateCalories()
 }
+let _estTimer=null
+function estimateCalories(){
+  clearTimeout(_estTimer)
+  _estTimer=setTimeout(()=>{
+    let dur=parseInt($('#wo-dr')?.value||45),tp=$('#wo-tp')?.value||'strength'
+    let name=tp==='cardio'?(CARDIO_PRESETS[window._woType]?.name||$('#wo-custom-ex').value.trim()||'有氧'):'力量训练'
+    if(!name)return
+    let desc=name+' '+dur+'分钟'
+    if(tp==='strength'){
+      let exs=[]
+      $('#wo-exs').querySelectorAll('.input-row').forEach(r=>{let inps=r.querySelectorAll('input');exs.push(inps[0]?.value?.trim()||'训练')})
+      desc=tp==='strength'&&exs.length?exs.join(',')+' 共'+dur+'分钟':'力量训练 '+dur+'分钟'
+    }
+    api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:S.user?.current_weight||70,description:desc})}).then(r=>{
+      if(r.calories)$('#wo-cal').value=r.calories
+    }).catch(()=>{})
+  },300)
+}
+$('#wo-dr')?.addEventListener('input',estimateCalories)
 function quickCardioCustom(){
   $('#wo-custom-ex').classList.remove('hidden')
   $('#wo-custom-ex').focus()
@@ -462,8 +482,13 @@ function saveWorkout(){
   }
   if(!exs.length)return toast('请添加训练内容')
   desc+='总时长'+dr+'min'
-  toast('保存中...')
-  api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+cal+'kcal')})
+  toast('AI 计算消耗中...')
+  api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,description:desc})}).then(r=>{
+    let finalCal=r.calories||cal
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:finalCal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练完成 · '+finalCal+'kcal '+r.note||'')})
+  }).catch(()=>{
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练已记录 · '+cal+'kcal')})
+  })
 }
 
 // ── Boot ──
