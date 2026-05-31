@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>动食日记</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:#F5F5F7;color:#1D1D1F;font-size:15px}
+body.night{background:#1C1C1E;color:#E5E5EA}
+.page{max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:80px}
+/* Nav Bar */
+.nav{position:sticky;top:0;z-index:10;background:rgba(245,245,247,0.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:0.5px solid #E5E5EA}
+.nav-t{font-size:17px;font-weight:600}
+.night .nav{background:rgba(28,28,30,0.9);border-color:#2C2C2E}
+/* Cards */
+.card{background:white;margin:12px 16px;padding:16px;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.night .card{background:#2C2C2E}
+.card-title{font-size:14px;color:#86868B;margin-bottom:8px;display:block}
+/* Mode Bar */
+.mode-bar{display:flex;align-items:center;gap:8px;padding:14px 16px;border-radius:16px;margin:12px 16px;cursor:pointer}
+.mode-emoji{font-size:24px}
+.mode-label{font-size:17px;font-weight:600;flex:1}
+.mode-desc{font-size:12px;margin-top:2px;display:block}
+/* Big Number */
+.big-num{font-size:48px;font-weight:700;letter-spacing:-1px;text-align:center;display:block}
+.big-label{font-size:13px;color:#86868B;text-align:center;display:block}
+/* Macro Row */
+.macro-row{display:flex;gap:8px;margin:0 16px 12px}
+.macro-item{flex:1;background:white;border-radius:14px;padding:12px;text-align:center}
+.night .macro-item{background:#2C2C2E}
+.macro-val{font-size:15px;font-weight:600;display:block}
+.macro-lbl{font-size:11px;color:#86868B;margin-top:2px;display:block}
+/* Buttons */
+.btn-row{display:flex;gap:12px;margin:0 16px 12px}
+.btn{flex:1;padding:14px;border-radius:14px;text-align:center;font-size:15px;font-weight:500;border:none;cursor:pointer;background:white}
+.night .btn{background:#2C2C2E}
+.btn.primary{background:#1D1D1F;color:white}
+.night .btn.primary{background:#E5E5EA;color:#1D1D1F}
+.btn.danger{color:#FF3B30}
+/* Input */
+.input-row{display:flex;gap:8px;margin:12px 16px}
+.input{flex:1;padding:12px 16px;border:1px solid #E5E5EA;border-radius:12px;font-size:15px;background:white;outline:none}
+.night .input{background:#2C2C2E;border-color:#3A3A3C;color:#E5E5EA}
+.input.small{flex:0 0 80px;text-align:center}
+/* Food List */
+.food-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid #F2F2F7}
+.night .food-item{border-color:#2C2C2E}
+/* Dish chips */
+.dish-row{display:flex;gap:8px;overflow-x:auto;padding:8px 16px;flex-wrap:wrap}
+.dish-chip{background:white;border-radius:20px;padding:8px 14px;font-size:13px;white-space:nowrap;cursor:pointer;border:none}
+.night .dish-chip{background:#2C2C2E}
+.dish-chip.active{background:#1D1D1F;color:white}
+.night .dish-chip.active{background:#E5E5EA;color:#1D1D1F}
+/* Toast */
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.85);color:white;padding:10px 20px;border-radius:20px;font-size:14px;z-index:999;opacity:0;transition:opacity 0.3s}
+.toast.show{opacity:1}
+/* hidden pages */
+.hidden{display:none!important}
+/* Meal section */
+.meal-block{margin:0 16px 12px}
+.meal-type-label{font-size:14px;font-weight:600;color:#86868B;margin-bottom:4px;display:block}
+.meal-entry{background:white;border-radius:12px;padding:10px 14px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+.night .meal-entry{background:#2C2C2E}
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;max-width:420px;margin:0 auto;background:rgba(245,245,247,0.95);border-top:0.5px solid #E5E5EA;display:flex;padding-bottom:env(safe-area-inset-bottom);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.night .bottom-nav{background:rgba(28,28,30,0.95);border-color:#2C2C2E}
+.tab{flex:1;text-align:center;padding:8px 0;font-size:11px;color:#86868B;cursor:pointer}
+.tab.active{color:#4CAF50}
+.tab-icon{font-size:22px;display:block}
+/* Modal */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-box{background:white;border-radius:16px;padding:24px;width:300px;max-width:90%}
+.night .modal-box{background:#2C2C2E}
+</style>
+</head>
+<body>
+<div class="page" id="app"></div>
+<div class="bottom-nav">
+  <div class="tab active" data-tab="home"><span class="tab-icon">📊</span>首页</div>
+  <div class="tab" data-tab="diet"><span class="tab-icon">🍽️</span>饮食</div>
+  <div class="tab" data-tab="workout"><span class="tab-icon">💪</span>运动</div>
+  <div class="tab" data-tab="me"><span class="tab-icon">👤</span>我的</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=s=>document.querySelector(s)
+const $$=s=>document.querySelectorAll(s)
+const api=(url,opts={})=>fetch(url,{headers:{'Content-Type':'application/json'},...opts}).then(r=>r.json())
+const T=()=>new Date().toISOString().slice(0,10)
+const fmt=n=>n.toFixed(1)
+const MODES={cardio:{label:'有氧日',emoji:'🏃',desc:'高碳水供能',color:'#007AFF',bg:'#E8F0FE'},
+  strength:{label:'无氧日',emoji:'💪',desc:'高蛋白修复',color:'#FF9500',bg:'#FFF3E0'},
+  happy:{label:'Happy日',emoji:'😊',desc:'休息恢复低卡',color:'#4CAF50',bg:'#E8F5E9'},
+  cheat:{label:'放纵日',emoji:'🎉',desc:'大吃特吃',color:'#FF3B30',bg:'#FFEBEE'}}
+let state={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy'}
+
+function toast(msg){
+  const t=$('#toast');t.textContent=msg;t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),2000)
+}
+
+// ── Render ──
+function render(){
+  const p=state.tab
+  if(p==='home') renderHome()
+  else if(p==='diet') renderDiet()
+  else if(p==='workout') renderWorkout()
+  else if(p==='me') renderMe()
+  $$('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===p))
+}
+
+// ── Home ──
+function renderHome(){
+  const m=state.mode||'happy'
+  const c=MODES[m]
+  const g=state.goals||{}
+  const deficit=(state.mealsTotal||0)-(g.tdee||2000)
+  const ds=deficit<-200?'热量缺口':deficit>200?'热量盈余':'热量平衡'
+  const dc=deficit<-200?'#4CAF50':deficit>200?'#FF3B30':'#FF9500'
+  $('#app').innerHTML=`
+    <div class="page">
+      <div class="nav"><span class="nav-t">动食日记</span><span>${T()}</span></div>
+      <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()">
+        <span class="mode-emoji">${c.emoji}</span>
+        <div><span class="mode-label" style="color:${c.color}">${c.label}</span><span class="mode-desc">${c.desc} · 点击切换</span></div>
+      </div>
+      <div class="card" style="text-align:center">
+        <span class="big-label">今日热量缺口</span>
+        <span class="big-num" style="color:${dc}">${deficit>0?'+':''}${deficit}</span>
+        <span class="big-label" style="color:${dc}">${ds} · kcal</span>
+      </div>
+      <div class="macro-row">
+        <div class="macro-item"><span class="macro-val" style="color:#FF9500">${Math.round(state.mealsProtein||0)}/${g.protein||0}g</span><span class="macro-lbl">蛋白质</span></div>
+        <div class="macro-item"><span class="macro-val" style="color:#4CAF50">${Math.round(state.mealsCarbs||0)}/${g.carbs||0}g</span><span class="macro-lbl">碳水</span></div>
+        <div class="macro-item"><span class="macro-val" style="color:#007AFF">${Math.round(state.mealsFat||0)}/${g.fat||0}g</span><span class="macro-lbl">脂肪</span></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn primary" onclick="gotoDiet()">记录饮食</button>
+        <button class="btn primary" onclick="gotoWorkout()">记录运动</button>
+      </div>
+    </div>`
+}
+
+// ── Diet ──
+function renderDiet(){
+  const types={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}
+  const mealsByType={breakfast:[],lunch:[],dinner:[],snack:[]}
+  state.meals.forEach(m=>{if(mealsByType[m.meal_type])mealsByType[m.meal_type].push(m)})
+  let html=`<div class="page"><div class="nav"><span class="nav-t">饮食</span><span>${T()}</span></div>`
+  html+=`<div class="card"><span class="big-label">今日摄入</span><span class="big-num">${state.mealsTotal||0}</span><span class="big-label">kcal</span></div>`
+  for(const [t,label] of Object.entries(types)){
+    html+=`<div class="meal-block"><span class="meal-type-label">${label}</span>`
+    const meals=mealsByType[t]||[]
+    if(meals.length===0) html+=`<div class="meal-entry"><span style="color:#C7C7CC">暂无记录</span></div>`
+    else meals.forEach(m=>{
+      let foods=[]
+      try{foods=JSON.parse(m.foods)}catch(e){}
+      html+=`<div class="meal-entry"><div><span>${m.time||''}</span><span style="font-size:12px;color:#86868B;margin-left:8px">${foods.map(f=>f.name).join('、')}</span></div><div><span style="font-weight:600">${foods.reduce((s,f)=>s+f.calories,0)}kcal</span><button onclick="delMeal(${m.id})" class="btn danger" style="font-size:12px;padding:4px 8px;margin-left:8px">×</button></div></div>`
+    })
+    html+=`</div>`
+  }
+  html+=`<div class="btn-row"><button class="btn primary" onclick="addMeal()">+ 添加饮食</button></div></div>`
+  $('#app').innerHTML=html
+}
+
+// ── Workout ──
+function renderWorkout(){
+  let html=`<div class="page"><div class="nav"><span class="nav-t">运动</span><span>${T()}</span></div>`
+  if(state.workouts.length===0) html+=`<div class="card"><span class="big-label" style="text-align:center">暂无训练</span></div>`
+  else state.workouts.forEach(w=>{
+    html+=`<div class="card"><span class="card-title">${w.start_time||''} · ${w.duration||0}分钟 · ${w.calories||0}kcal</span></div>`
+  })
+  html+=`<div class="btn-row"><button class="btn primary" onclick="addWorkout()">+ 记录训练</button></div></div>`
+  $('#app').innerHTML=html
+}
+
+// ── Me ──
+function renderMe(){
+  const u=state.user||{}
+  $('#app').innerHTML=`
+    <div class="page">
+      <div class="nav"><span class="nav-t">我的</span></div>
+      <div class="card"><span style="font-size:22px;font-weight:700">${u.nickname||'健身者'}</span></div>
+      <div class="card">
+        <span class="card-title">身体数据</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+          <div><span style="color:#86868B;font-size:12px">身高</span><br><span>${u.height||170}cm</span></div>
+          <div><span style="color:#86868B;font-size:12px">体重</span><br><span>${u.current_weight||70}kg</span></div>
+          <div><span style="color:#86868B;font-size:12px">目标</span><br><span>${u.target_weight||65}kg</span></div>
+          <div><span style="color:#86868B;font-size:12px">年龄</span><br><span>${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
+        </div>
+        <button class="btn primary" style="width:100%;margin-top:12px" onclick="editProfile()">编辑资料</button>
+      </div>
+      <div class="card">
+        <span class="card-title">营养目标</span>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+          <div><span style="color:#86868B;font-size:12px">BMR</span><br><span>${state.goals.bmr||0} kcal</span></div>
+          <div><span style="color:#86868B;font-size:12px">TDEE</span><br><span>${state.goals.tdee||0} kcal</span></div>
+          <div><span style="color:#86868B;font-size:12px">目标热量</span><br><span>${state.goals.target_calories||0} kcal</span></div>
+          <div><span style="color:#86868B;font-size:12px">蛋白质</span><br><span>${state.goals.protein||0}g</span></div>
+        </div>
+      </div>
+    </div>`
+}
+
+// ── Modals ──
+function addMeal(){
+  const m=state.mode||'happy'
+  api('/api/dishes?tag='+m).then(d=>{state.dishes=d})
+  let selected=[]
+  let html=`<div class="modal-overlay" id="modal-meal"><div class="modal-box" style="width:90%;max-height:80vh;overflow-y:auto">
+    <span style="font-size:17px;font-weight:600">添加饮食</span>
+    <div class="input-row"><input class="input" id="food-input" placeholder="如: 番茄炒蛋 200g, 米饭 150g"><button class="btn primary" onclick="parseFood()">AI解析</button></div>
+    <div id="parsed-foods"></div>
+    <div id="dish-suggestions" style="margin-top:8px">
+      <span class="card-title">推荐菜品</span>
+      <div class="dish-row" id="dish-list"></div>
+    </div>`
+  if(state.dishes&&state.dishes.length>0){
+    html+=`<div class="dish-row">${state.dishes.map(d=>`<button class="dish-chip" onclick="pickDish(${d.id},'${d.name}')">${d.name}<br><small>${d.calories}kcal</small></button>`).join('')}</div>`
+  }
+  html+=`<div style="margin-top:12px;display:flex;gap:8px">
+    <button class="btn" onclick="closeModal('modal-meal')">取消</button>
+    <button class="btn primary" onclick="saveMeal()">保存</button></div></div></div>`
+  $('#app').insertAdjacentHTML('beforeend',html)
+}
+
+function parseFood(){
+  const text=$('#food-input').value
+  if(!text.trim()) return
+  api('/api/parse-food',{method:'POST',body:JSON.stringify({text})}).then(r=>{
+    if(r.foods){
+      let h=''
+      r.foods.forEach((f,i)=>{
+        h+=`<div class="food-item"><span>${f.name} ${f.amount}g</span><span>${f.calories}kcal | 蛋白${f.protein}g</span></div>`
+      })
+      $('#parsed-foods').innerHTML=h
+      window._parsedFoods=r.foods
+      toast(`解析 ${r.foods.length} 项食材`)
+    }else{toast('解析失败,请重试')}
+  })
+}
+
+function saveMeal(){
+  const foods=window._parsedFoods||[]
+  if(foods.length===0){toast('请先输入食物');return}
+  api('/api/meals',{method:'POST',body:JSON.stringify({
+    date:T(),meal_type:'lunch',time:new Date().toTimeString().slice(0,5),foods
+  })}).then(()=>{
+    // Save as dish
+    const name=foods.map(f=>f.name).join('+')
+    const cal=foods.reduce((s,f)=>s+f.calories,0)
+    const pro=foods.reduce((s,f)=>s+(f.protein||0),0)
+    const car=foods.reduce((s,f)=>s+(f.carbs||0),0)
+    const fat=foods.reduce((s,f)=>s+(f.fat||0),0)
+    api('/api/dishes',{method:'POST',body:JSON.stringify({name,foods,calories:cal,protein:pro,carbs:car,fat,tags:state.mode})})
+    closeModal('modal-meal')
+    loadAll().then(()=>render())
+  })
+}
+
+function closeModal(id){const e=$('#'+id);if(e)e.remove()}
+
+// ── Actions ──
+function switchMode(){
+  const types=['cardio','strength','happy','cheat']
+  const items=types.map(t=>MODES[t].emoji+' '+MODES[t].label)
+  // Simple picker
+  const idx=prompt(items.join('\n')+'\n\n输入序号(0-3)切换模式',types.indexOf(state.mode))
+  if(idx!==null&&types[parseInt(idx)]){
+    state.mode=types[parseInt(idx)]
+    api('/api/user',{method:'POST',body:JSON.stringify({workout_type:state.mode})})
+    loadGoals()
+    render()
+  }
+}
+
+function editProfile(){
+  const u=state.user||{}
+  const html=`<div class="modal-overlay" id="modal-profile"><div class="modal-box">
+    <span style="font-size:17px;font-weight:600">编辑资料</span>
+    <div style="margin-top:12px">
+      <label>昵称 <input class="input" id="pf-nickname" value="${u.nickname||''}"></label>
+      <label>身高(cm) <input class="input" type="number" id="pf-height" value="${u.height||170}"></label>
+      <label>体重(kg) <input class="input" type="number" id="pf-weight" value="${u.current_weight||70}"></label>
+      <label>目标体重(kg) <input class="input" type="number" id="pf-target" value="${u.target_weight||65}"></label>
+      <label>出生日期 <input class="input" type="date" id="pf-birth" value="${u.birth_date||'1995-01-01'}"></label>
+      <label>活动水平 <select class="input" id="pf-activity">
+        <option value="1.2" ${u.activity_level==1.2?'selected':''}>久坐</option>
+        <option value="1.375" ${u.activity_level==1.375?'selected':''}>轻度</option>
+        <option value="1.55" ${u.activity_level==1.55?'selected':''}>中度</option>
+        <option value="1.725" ${u.activity_level==1.725?'selected':''}>高度</option>
+        <option value="1.9" ${u.activity_level==1.9?'selected':''}>极强度</option>
+      </select></label>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn" onclick="closeModal('modal-profile')">取消</button>
+      <button class="btn primary" onclick="saveProfile()">保存</button>
+    </div></div></div>`
+  $('#app').insertAdjacentHTML('beforeend',html)
+}
+
+function saveProfile(){
+  const data={
+    nickname:$('#pf-nickname').value,
+    height:parseFloat($('#pf-height').value)||170,
+    current_weight:parseFloat($('#pf-weight').value)||70,
+    target_weight:parseFloat($('#pf-target').value)||65,
+    birth_date:$('#pf-birth').value||'1995-01-01',
+    activity_level:parseFloat($('#pf-activity').value)||1.55,
+  }
+  api('/api/user',{method:'POST',body:JSON.stringify(data)}).then(()=>{
+    closeModal('modal-profile')
+    loadAll().then(()=>render())
+    toast('已保存')
+  })
+}
+
+// ── Data loading ──
+function loadAll(){
+  return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadGoals()])
+}
+function loadUser(){return api('/api/user').then(u=>{state.user=u;state.mode=u.workout_type||'happy'})}
+function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{
+  state.meals=ms;let cal=0,pro=0,carbs=0,fat=0
+  ms.forEach(m=>{try{const f=JSON.parse(m.foods);f.forEach(x=>{cal+=x.calories||0;pro+=x.protein||0;carbs+=x.carbs||0;fat+=x.fat||0})}catch(e){}})
+  state.mealsTotal=Math.round(cal);state.mealsProtein=Math.round(pro);state.mealsCarbs=Math.round(carbs);state.mealsFat=Math.round(fat)
+})}
+function loadWorkouts(){return api('/api/workouts?date='+T()).then(ws=>{state.workouts=ws})}
+function loadDishes(){return api('/api/dishes').then(ds=>{state.dishes=ds})}
+function loadGoals(){
+  const u=state.user||{}
+  return api('/api/nutrition',{method:'POST',body:JSON.stringify({
+    current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',
+    gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:state.mode
+  })}).then(g=>{state.goals=g})
+}
+
+function delMeal(id){if(confirm('删除?')){api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>render()))}}
+
+function gotoDiet(){state.tab='diet';render()}
+function gotoWorkout(){state.tab='workout';render()}
+
+// ── Init ──
+$$('.tab').forEach(t=>t.onclick=()=>{state.tab=t.dataset.tab;render()})
+loadAll().then(()=>render())
+</script>
+</body>
+</html>

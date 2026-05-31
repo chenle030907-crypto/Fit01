@@ -1,0 +1,4 @@
+dongshi.db
+__pycache__/
+.env
+*.pyc
