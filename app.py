@@ -280,6 +280,22 @@ def get_hydration(drink_type, amount, api_key=None):
         except: pass
     return amount
 
+# ── Photo Food Analysis ──
+@app.route("/api/analyze-photo", methods=["POST"])
+def analyze_photo():
+    data = request.get_json()
+    image_base64 = data.get("image", "")
+    if not image_base64: return jsonify({"error": "no image"}), 400
+    prompt = """你是菜品识别专家。识别图片中的菜品，返回JSON:{"name":"菜品中文名","estimated_grams":200,"ingredients":["食材1","食材2"],"confidence":"high/medium/low"}。克数根据图片中食物的分量感来估算。只返回JSON。"""
+    # AI call placeholder — user provides API
+    reply = call_ai(prompt, temp=0.1, max_tokens=256)
+    try:
+        if reply:
+            m = __import__("re").search(r"\{[\s\S]*\}", reply)
+            if m: return jsonify(json.loads(m.group(0)))
+    except: pass
+    return jsonify({"name": "未知菜品", "estimated_grams": 200, "ingredients": [], "confidence": "low"})
+
 # ── Workout Calorie AI ──
 @app.route("/api/workout-calories", methods=["POST"])
 def workout_calories():

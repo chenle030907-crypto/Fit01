@@ -249,7 +249,20 @@ function addMealModal(){window._foods=[];window._ingredients=[]
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mc-m"><div class="modal-box">
     <div class="modal-title">添加饮食</div>
     <div class="flex g8 mb8"><select class="input sm" id="mc-tp"><option value="lunch">午餐</option><option value="breakfast">早餐</option><option value="dinner">晚餐</option><option value="snack">加餐</option></select><span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-tm" value="${now()}"></div>
-    <span class="text-sub">食材（加食材名+克数）</span>
+    <span class="text-sub">拍照识别（拍菜品自动识别）</span>
+    <div class="input-row mt4"><button class="btn outline w100" onclick="takePhoto()">📷 拍照识别菜品</button></div>
+    <input type="file" id="mc-photo" accept="image/*" capture="environment" style="display:none" onchange="analyzePhoto(this)">
+    <div id="mc-photo-preview" class="mt8 hidden">
+      <img id="mc-photo-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px">
+      <div class="card mt8" style="background:var(--divider);margin:8px 0 0;padding:12px">
+        <span class="bold" id="mc-photo-name">--</span><span class="text-sub" style="margin-left:8px" id="mc-photo-conf"></span>
+        <div class="mt8"><span class="text-sub">份量：</span><b id="mc-photo-grams">200g</b></div>
+        <input type="range" id="mc-photo-slider" min="50" max="600" value="200" oninput="updatePhotoGrams(this.value)" style="width:100%;margin-top:4px">
+        <div class="flex text-sm text-sub" style="justify-content:space-between"><span>🥗 小盘 50g</span><span>🍱 正常 200g</span><span>🍽️ 大盘 600g</span></div>
+        <button class="btn primary sm mt8" onclick="addPhotoFood()">加入食材列表</button>
+      </div>
+    </div>
+    <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
     <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:24px"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
     <div id="mc-ings" class="mt8"></div>
     <div class="input-row mt8"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）"></div>
@@ -258,6 +271,42 @@ function addMealModal(){window._foods=[];window._ingredients=[]
     <span class="text-sub mt8">已保存菜品</span><div class="chip-row mt4" id="mc-dishes"></div>
     <div class="flex g8 mt16"><button class="btn w100" onclick="$('#mc-m').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`)
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
+}
+function takePhoto(){$('#mc-photo').click()}
+function analyzePhoto(input){
+  let file=input.files[0];if(!file)return
+  let reader=new FileReader()
+  reader.onload=function(e){
+    let base64=e.target.result.split(',')[1]
+    $('#mc-photo-img').src=e.target.result
+    $('#mc-photo-preview').classList.remove('hidden')
+    $('#mc-photo-name').textContent='识别中...'
+    toast('AI 正在识别菜品...')
+    api('/api/analyze-photo',{method:'POST',body:JSON.stringify({image:base64})}).then(r=>{
+      $('#mc-photo-name').textContent=r.name||'未知'
+      $('#mc-photo-conf').textContent=r.confidence==='high'?'高置信度':r.confidence==='medium'?'中等':'估算'
+      $('#mc-photo-slider').value=r.estimated_grams||200
+      $('#mc-photo-grams').textContent=(r.estimated_grams||200)+'g'
+      window._photoResult=r
+    }).catch(()=>{toast('识别失败')})
+  }
+  reader.readAsDataURL(file)
+}
+function updatePhotoGrams(v){$('#mc-photo-grams').textContent=v+'g'}
+function addPhotoFood(){
+  let r=window._photoResult
+  if(!r)return toast('请先拍照识别')
+  let g=parseInt($('#mc-photo-slider').value)
+  let name=r.name||'扫描菜品'
+  if(!window._foods)window._foods=[]
+  window._foods.push({name:name,amount:g,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'photo'})
+  if(!window._ingredients)window._ingredients=[]
+  window._ingredients.push(name+' '+g+'g')
+  refreshIngredients()
+  $('#mc-parse').style.display='block'
+  $('#mc-photo-preview').classList.add('hidden')
+  input.value=''
+  toast(name+' '+g+'g 已添加')
 }
 function addIngredient(){
   let n=$('#mc-nm')?.value?.trim(),g=parseInt($('#mc-gr')?.value||100)
