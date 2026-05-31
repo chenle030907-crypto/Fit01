@@ -83,7 +83,7 @@ const MODES={cardio:{label:'有氧日',emoji:'🏃',desc:'高碳水供能',bg:'#
 let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[]}
 
 // ── Render engine ──
-function r(){S.tab==='home'?home():S.tab==='diet'?diet():S.tab==='workout'?workout():S.tab==='me'?me();nav()}
+function r(){if(S.tab==='home')home();else if(S.tab==='diet')diet();else if(S.tab==='workout')workout();else me();nav()}
 function nav(){$('#nav').innerHTML=['home','diet','workout','me'].map(t=>{
   const icons={home:'📊',diet:'🍽️',workout:'💪',me:'👤'}
   const labels={home:'首页',diet:'饮食',workout:'运动',me:'我的'}
