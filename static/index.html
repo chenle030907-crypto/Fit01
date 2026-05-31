@@ -147,7 +147,8 @@ function diet(){
     else meals.forEach(m=>{
       let foods=[];try{foods=JSON.parse(m.foods)}catch(e){}
       const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
-      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm" style="margin-left:8px">${foods.map(f=>f.name).join('、')}</span></div><div class="flex g8"><span class="bold">${cal}kcal</span><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
+      const pro=foods.reduce((s,f)=>s+(f.protein||0),0)
+      h+=`<div class="food-row"><div><span>${m.time||''}</span><span class="text-sm" style="margin-left:8px">${foods.map(f=>f.name).join('、')}</span><div class="text-sm text-sub">${foods.map(f=>f.name+' '+f.amount+'g').join(' · ')}</div></div><div class="flex g8" style="flex-direction:column;align-items:flex-end"><span class="bold">${cal}kcal</span><span class="text-sm text-sub">蛋白${pro.toFixed(1)}g</span><button class="btn sm danger" onclick="delMeal(${m.id})">×</button></div></div>`
     })
     h+=`</div>`
   })
@@ -184,10 +185,23 @@ function addManualFood(){
   if(!name)return toast('请输入食材名称')
   if(!gram||gram<1)return toast('请输入克数')
   if(!window._foods)window._foods=[]
-  window._foods.push({name,amount:gram,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'manual'})
+  // Call AI to get nutrition for this ingredient
   document.getElementById('mc-manual-name').value=''
-  refreshFoodList()
-  toast(`${name} ${gram}g 已添加`)
+  toast('正在查询营养数据...')
+  api('/api/parse-food',{method:'POST',body:JSON.stringify({text:name+' '+gram+'g'})}).then(r=>{
+    if(r.foods&&r.foods.length>0){
+      window._foods.push(r.foods[0])
+      refreshFoodList()
+      toast(`${name} ${gram}g · ${r.foods[0].calories||'?'}kcal`)
+    }else{
+      window._foods.push({name,amount:gram,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'manual'})
+      refreshFoodList()
+      toast(`${name} ${gram}g 已添加（营养待查）`)
+    }
+  }).catch(()=>{
+    window._foods.push({name,amount:gram,calories:0,protein:0,carbs:0,fat:0,unit:'g',category:'manual'})
+    refreshFoodList()
+  })
 }
 
 function parseAndShow(){
@@ -209,9 +223,13 @@ function refreshFoodList(){
   let h=''
   if(foods.length>0){
     const totalCal=foods.reduce((s,f)=>s+(f.calories||0),0)
-    h+=`<div style="font-size:14px;font-weight:600;margin-bottom:6px">已添加 ${foods.length} 项 · ${Math.round(totalCal)} kcal</div>`
+    const totalPro=foods.reduce((s,f)=>s+(f.protein||0),0)
+    const totalCarbs=foods.reduce((s,f)=>s+(f.carbs||0),0)
+    const totalFat=foods.reduce((s,f)=>s+(f.fat||0),0)
+    h+=`<div style="font-size:14px;font-weight:600;margin-bottom:4px">${foods.length} 项 · 合计 ${Math.round(totalCal)}kcal</div>`
+    h+=`<div class="text-sm text-sub" style="margin-bottom:8px">蛋白质 ${totalPro.toFixed(1)}g | 碳水 ${totalCarbs.toFixed(1)}g | 脂肪 ${totalFat.toFixed(1)}g</div>`
     foods.forEach((f,i)=>{
-      h+=`<div class="food-row"><span>${f.name} <span class="text-sm">${f.amount||0}g</span></span><span class="bold">${f.calories||'?'}kcal</span><button class="btn sm danger" onclick="removeFood(${i})">×</button></div>`
+      h+=`<div class="food-row"><span>${f.name} <span class="text-sm">${f.amount||0}g</span></span><span class="bold">${f.calories||'?'}kcal</span><span class="text-sub text-sm">蛋白${(f.protein||0).toFixed(1)}g 碳水${(f.carbs||0).toFixed(1)}g 脂肪${(f.fat||0).toFixed(1)}g</span><button class="btn sm danger" onclick="removeFood(${i})">×</button></div>`
     })
   }
   document.getElementById('mc-result').innerHTML=h
