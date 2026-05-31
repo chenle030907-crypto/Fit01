@@ -58,7 +58,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 .progress-fill{height:100%;border-radius:4px;transition:width .3s}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .ruler-wrap{position:relative;height:80px;overflow:hidden;background:var(--card);border-radius:12px;margin:4px 0;user-select:none;-webkit-user-select:none;touch-action:pan-x}
-.ruler-track{display:flex;align-items:flex-end;height:100%;padding:0 50%;gap:0;transition:transform .15s ease-out}
+.ruler-track{display:flex;align-items:flex-end;height:100%;padding:0 50%;gap:0}
 .ruler-tick{flex-shrink:0;width:2px;position:relative}
 .ruler-tick.major{height:40px;background:var(--text);width:2px}
 .ruler-tick.minor{height:20px;background:var(--border);width:1px}
@@ -529,13 +529,9 @@ function buildRuler(id,val,min,max,step){
     html+=`<div class="ruler-tick ${cls}"></div>`
   }
   track.innerHTML=html
-  let tickWidth=2,tickIdx=Math.round((val-min)/step)
-  // Center the ruler on current value
-  let pxPerTick=3,centerOffset=tickIdx*pxPerTick-wrap.clientWidth/2+pxPerTick/2
-  track.style.transform=`translateX(${-centerOffset}px)`
+  let pxPerTick=3,tickIdx=Math.round((val-min)/step)
   window['_'+id+'Val']=val
   if(valEl)valEl.textContent=val.toFixed(1)
-  // Scroll sync
   function sync(){
     let rect=track.getBoundingClientRect(),wr=wrap.getBoundingClientRect()
     let cx=wr.left+wr.width/2,offset=cx-rect.left
@@ -544,13 +540,16 @@ function buildRuler(id,val,min,max,step){
     if(valEl)valEl.textContent=v.toFixed(1)
     window['_'+id+'Val']=v
   }
+  // Set initial scroll position to center on current value
+  let centerOffset=tickIdx*pxPerTick
+  wrap.scrollLeft=centerOffset
   wrap.onscroll=sync
   wrap.addEventListener('touchmove',sync,{passive:true})
   let dragging=false,sx=0,sl=0
   wrap.addEventListener('pointerdown',e=>{dragging=true;sx=e.clientX;sl=wrap.scrollLeft;wrap.setPointerCapture(e.pointerId)})
   wrap.addEventListener('pointermove',e=>{if(dragging){wrap.scrollLeft=sl+(sx-e.clientX);sync()}})
   wrap.addEventListener('pointerup',()=>{dragging=false})
-  setTimeout(sync,200)
+  setTimeout(sync,300)
 }
 function recordWeight(){
   let w=window._wtVal||parseFloat($('#wt-val')?.textContent),bf=window._bfVal||parseFloat($('#bf-val')?.textContent)
