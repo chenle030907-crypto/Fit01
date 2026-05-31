@@ -7,9 +7,3 @@ services:
     envVars:
       - key: AI_API_KEY
         sync: false
-      - key: DATA_DIR
-        value: /data
-    disk:
-      name: sqlite-data
-      mountPath: /data
-      sizeGB: 1
