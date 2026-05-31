@@ -70,13 +70,15 @@ import re as _re
 def extract_json(text):
     """从混合文本中暴力提取第一个完整 JSON 对象"""
     if not text: return None
-    # 去掉 markdown 代码块标记
-    text = _re.sub(r'```(?:json)?\s*\n?', '', text)
-    text = _re.sub(r'\n?\s*```', '', text)
+    # 去掉所有 markdown 代码块标记（包括跨行的）
+    text = _re.sub(r'```(?:json)?\s*', '', text)
+    text = _re.sub(r'```', '', text)
+    # 去掉深度思考的 * 开头注释行和 (Self-correction: ...) 等
+    text = _re.sub(r'^\*[^\n]*\n', '', text, flags=_re.MULTILINE)
+    text = _re.sub(r'\(Self-correction:[^)]*\)', '', text)
     # 找到第一个 { 到最后一个 } 之间的内容
     start = text.find('{')
     if start == -1: return None
-    # 从后往前找最后一个 }
     end = text.rfind('}')
     if end == -1 or end <= start: return None
     return text[start:end+1]
@@ -106,7 +108,7 @@ def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
     if not API_KEY: return None
     try:
         body = {"model":"qwen-flash","messages":[{"role":"user","content":prompt}],
-                "temperature":temp,"max_tokens":max_tokens}
+                "temperature":temp,"max_tokens":max_tokens,"enable_thinking":False}
         if json_mode: body["response_format"] = {"type": "json_object"}
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
@@ -125,7 +127,8 @@ def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
             json={"model":"qwen-vl-plus","messages":[{"role":"user","content":[
                 {"type":"text","text":prompt},
                 {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
-            ]}],"temperature":temp,"max_tokens":max_tokens},
+            ]}],"temperature":temp,"max_tokens":max_tokens,
+            "enable_thinking":False},
             timeout=15
         )
         data = r.json()
