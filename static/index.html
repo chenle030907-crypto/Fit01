@@ -186,10 +186,22 @@ function addMealModal(){
   // Load saved dishes
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{
     const el=document.getElementById('mc-saved-dishes')
-    if(el&&ds.length>0)el.innerHTML=ds.slice(0,10).map(d=>`<button class="chip" onclick="useDish(${d.id})">${d.name}<br><small>${d.calories}kcal</small></button>`).join('')
+    if(el&&ds.length>0)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin-right:6px;margin-bottom:6px"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin-right:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:white;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')
   })
 }
 
+function deleteDish(id){
+  if(!confirm('删除这个菜品？'))return
+  api('/api/dishes/'+id,{method:'DELETE'}).then(()=>{
+    toast('已删除')
+    // Refresh saved dishes in current modal
+    api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{
+      const el=document.getElementById('mc-saved-dishes')
+      if(el&&ds.length>0)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin-right:6px;margin-bottom:6px"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin-right:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:white;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')
+      else if(el)el.innerHTML='<span class="text-sub text-sm">暂无保存的菜品</span>'
+    })
+  })
+}
 function useDish(id){
   api('/api/dishes').then(ds=>{const d=ds.find(x=>x.id===id);if(!d)return
     let foods;try{foods=JSON.parse(d.foods)}catch(e){return}
