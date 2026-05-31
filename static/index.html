@@ -172,15 +172,39 @@ function addMealModal(){
     <span class="text-sub">食材（输入食材名+克数，可多次添加）</span>
     <div class="input-row mt4">
       <input class="input" id="mc-manual-name" placeholder="食材名称 如: 鸡蛋" style="flex:2">
-      <input class="input sm" id="mc-manual-gram" placeholder="克数" type="number" value="100" style="flex:1">
+      <div style="position:relative;flex:1"><input class="input sm" id="mc-manual-gram" placeholder="100" type="number" value="100" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">g</span></div>
       <button class="btn primary sm" onclick="addIngredient()">+</button>
     </div>
     <div id="mc-ingredients" class="mt8"></div>
     <div class="input-row mt8"><input class="input" id="mc-dish-name" placeholder="菜品名称（如：番茄炒蛋）"></div>
     <button class="btn outline w100 mt8" id="mc-parse-btn" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
-    <div id="mc-result" class="mt8"></div>`
+    <div id="mc-result" class="mt8"></div>
+    <span class="text-sub mt8">已保存的菜品（点击直接添加）</span>
+    <div class="chip-row mt4" id="mc-saved-dishes"></div>`
   html+=`<div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`
   $('#app').insertAdjacentHTML('beforeend',html)
+  // Load saved dishes
+  api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{
+    const el=document.getElementById('mc-saved-dishes')
+    if(el&&ds.length>0)el.innerHTML=ds.slice(0,10).map(d=>`<button class="chip" onclick="useDish(${d.id})">${d.name}<br><small>${d.calories}kcal</small></button>`).join('')
+  })
+}
+
+function useDish(id){
+  api('/api/dishes').then(ds=>{const d=ds.find(x=>x.id===id);if(!d)return
+    let foods;try{foods=JSON.parse(d.foods)}catch(e){return}
+    window._foods=foods
+    window._ingredients=foods.map(f=>`${f.name} ${f.amount}g`)
+    document.getElementById('mc-dish-name').value=d.name
+    refreshIngredients()
+    document.getElementById('mc-parse-btn').style.display='none'
+    document.getElementById('mc-result').innerHTML=`
+      <div class="card" style="margin:8px 0 0;background:var(--divider)">
+        <span class="c-title" style="color:var(--green)">已选用: ${d.name}</span>
+        <span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span>
+        <div class="text-sm mt4">蛋白质 ${(d.protein||0).toFixed(1)}g · 碳水 ${(d.carbs||0).toFixed(1)}g · 脂肪 ${(d.fat||0).toFixed(1)}g</div>
+      </div>`
+  })
 }
 
 function addIngredient(){
@@ -279,7 +303,7 @@ function addWorkoutModal(){
     <div class="modal-title">记录训练</div>
     <div class="flex g8 mb8">
       <select class="input sm" id="wo-type" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select>
-      <input class="input sm" style="width:80px" id="wo-dur" placeholder="总时长(分)" type="number" value="45">
+      <div style="position:relative;width:90px"><input class="input sm" style="width:100%;padding-right:28px" id="wo-dur" placeholder="45" type="number" value="45"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">min</span></div>
     </div>
     <div id="wo-strength-panel">
       <span class="text-sub">动作</span>
@@ -304,14 +328,13 @@ function toggleWoType(){
 
 function addStrengthEx(){
   const el=document.getElementById('wo-exs')
-  el.innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称" value=""><input class="input sm" placeholder="组数" type="number" value="4"><input class="input sm" placeholder="次数" type="number" value="12"><input class="input sm" placeholder="重量kg" type="number" value="0"></div>`
+  el.innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称" value=""><div style="position:relative;flex:0 0 60px"><input class="input sm" placeholder="4" type="number" value="4" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">组</span></div><div style="position:relative;flex:0 0 60px"><input class="input sm" placeholder="12" type="number" value="12" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">次</span></div><div style="position:relative;flex:0 0 60px"><input class="input sm" placeholder="0" type="number" value="0" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">kg</span></div></div>`
 }
 
 function addCardioSeg(){
   const el=document.getElementById('wo-segs')
   const n=el.children.length+1
-  el.innerHTML+=`<div class="input-row mt8" style="align-items:center"><span class="text-sm text-sub">第${n}段</span><input class="input sm" placeholder="坡度%" type="number" value="12"><input class="input sm" placeholder="速度" type="number" value="3.5" step="0.1"><input class="input sm" placeholder="分钟" type="number" value="5"><button class="btn sm danger" onclick="this.parentElement.remove()">×</button></div>`
-}
+  el.innerHTML+=`<div class="input-row mt8" style="align-items:center"><span class="text-sm text-sub">第${n}段</span><div style="position:relative;flex:1"><input class="input sm" placeholder="12" type="number" value="12" style="padding-right:22px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">%</span></div><div style="position:relative;flex:1"><input class="input sm" placeholder="3.5" type="number" value="3.5" step="0.1" style="padding-right:30px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:10px">km/h</span></div><div style="position:relative;flex:1"><input class="input sm" placeholder="5" type="number" value="5" style="padding-right:28px"><span style="position:absolute;right:6px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">min</span></div><button class="btn sm danger" onclick="this.parentElement.remove()">×</button></div>`
 
 function saveWorkout(){
   const type=document.getElementById('wo-type')?.value||'strength'
@@ -369,8 +392,8 @@ function me(){
       </div>
       <button class="btn outline w100 mt12" onclick="editProfile()">编辑资料</button>
       <div class="input-row mt12">
-        <input class="input sm" id="wt-input" placeholder="体重kg" type="number" step="0.1">
-        <input class="input sm" id="bf-input" placeholder="体脂%" type="number" step="0.1">
+        <div style="position:relative;flex:1"><input class="input sm" id="wt-input" placeholder="68" type="number" step="0.1" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">kg</span></div>
+        <div style="position:relative;flex:1"><input class="input sm" id="bf-input" placeholder="18" type="number" step="0.1" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">%</span></div>
         <button class="btn primary sm" onclick="recordWeight()">记录</button>
       </div>
     </div>
@@ -397,8 +420,8 @@ function editProfile(){
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="modal"><div class="modal-box">
     <div class="modal-title">编辑资料</div>
     <div class="flex g8 mb8"><input class="input" placeholder="昵称" id="pf-nn" value="${u.nickname||''}"></div>
-    <div class="input-row mb8"><input class="input" type="number" placeholder="身高cm" id="pf-ht" value="${u.height||170}"><input class="input" type="number" placeholder="体重kg" id="pf-wt" value="${u.current_weight||70}"></div>
-    <div class="input-row mb8"><input class="input" type="number" placeholder="目标kg" id="pf-tw" value="${u.target_weight||65}"><input class="input" type="date" id="pf-bd" value="${u.birth_date||'1995-01-01'}"></div>
+    <div class="input-row mb8"><div style="position:relative;flex:1"><input class="input" type="number" placeholder="170" id="pf-ht" value="${u.height||170}" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">cm</span></div><div style="position:relative;flex:1"><input class="input" type="number" placeholder="70" id="pf-wt" value="${u.current_weight||70}" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">kg</span></div></div>
+    <div class="input-row mb8"><div style="position:relative;flex:1"><input class="input" type="number" placeholder="65" id="pf-tw" value="${u.target_weight||65}" style="padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:12px">kg</span></div><input class="input" type="date" id="pf-bd" value="${u.birth_date||'1995-01-01'}"></div>
     <select class="input mb8" id="pf-al">
       <option value="1.2" ${u.activity_level==1.2?'selected':''}>久坐</option><option value="1.375" ${u.activity_level==1.375?'selected':''}>轻度</option><option value="1.55" ${u.activity_level==1.55?'selected':''}>中度</option><option value="1.725" ${u.activity_level==1.725?'selected':''}>高度</option><option value="1.9" ${u.activity_level==1.9?'selected':''}>极强度</option>
     </select>
@@ -437,7 +460,7 @@ function renderWaterCard(){
     ${raw!==effective?`<div class="text-sm text-sub" style="margin-bottom:4px">实际饮用 ${raw}ml，等效纯水 ${effective}ml</div>`:''}
     <div class="progress-bar" style="height:8px;background:var(--divider);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${barColor};border-radius:4px;transition:width 0.3s"></div></div>
     <div class="input-row mt12" style="flex-wrap:wrap">
-      <input class="input sm" id="w-amt" placeholder="ml" type="number" value="250" style="flex:0 0 70px;text-align:center;font-size:16px;font-weight:600">
+      <div style="position:relative;flex:0 0 80px"><input class="input sm" id="w-amt" placeholder="250" type="number" value="250" style="width:100%;text-align:center;font-size:16px;font-weight:600;padding-right:24px"><span style="position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--sub);font-size:11px">ml</span></div>
       <select class="input sm" id="w-type" onchange="toggleCustomDrink()" style="flex:1">${renderDrinkOptions()}</select>
       <input class="input sm hidden" id="w-custom" placeholder="饮品名" style="flex:0 0 100px;margin-top:4px">
       <button class="btn primary sm" onclick="quickAddWater()" style="flex:0 0 50px">+</button>
