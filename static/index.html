@@ -332,7 +332,7 @@ function editProfile(){
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:28px"><span class="unit-label">cm</span></span><span class="unit-wrap" style="flex:1"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:28px"><span class="unit-label">kg</span></span></div>
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:28px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}" style="flex:1"></div>
     <select class="input mb8" id="pf-al">${[{v:1.2,l:'久坐'},{v:1.375,l:'轻度'},{v:1.55,l:'中度'},{v:1.725,l:'高度'},{v:1.9,l:'极强度'}].map(o=>`<option value="${o.v}" ${u.activity_level==o.v?'selected':''}>${o.l}</option>`).join('')}</select>
-    <div class="flex g8"><button class="btn w100" onclick="$('#pf-m').remove()">取消</button><button class="btn primary w100" onclick="saveProfile()">保存</button></div></div></div>`)
+    <div class="flex g8"><button class="btn primary w100" onclick="saveProfile()">保存</button><button class="btn w100" onclick="$('#pf-m').remove()">取消</button></div></div></div>`)
 }
 function saveProfile(){
   let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
@@ -364,7 +364,7 @@ function addMealModal(){window._foods=[];window._ingredients=[]
     <button class="btn outline w100 mt8" id="mc-parse" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
     <div id="mc-res" class="mt8"></div>
     <span class="text-sub mt8">已保存菜品</span><div class="chip-row mt4" id="mc-dishes"></div>
-    <div class="flex g8 mt16"><button class="btn w100" onclick="$('#mc-m').remove()">取消</button><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button></div></div></div>`)
+    <div class="flex g8 mt16"><button class="btn primary w100" onclick="saveMeal()">添加到饮食</button><button class="btn w100" onclick="$('#mc-m').remove()">取消</button></div></div></div>`)
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
 }
 
@@ -483,7 +483,7 @@ function addWorkoutModal(){
     <div class="flex g8 mb8"><select class="input sm" id="wo-tp" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-dr" type="number" value="45" style="padding-right:28px;width:100%"><span class="unit-label">min</span></span><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-cal" type="number" value="300" style="padding-right:28px;width:100%" placeholder="估算"><span class="unit-label">kcal</span></span></div>
     <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8 w100" onclick="addStrengthRow()">+ 添加动作（可手写名称）</button><div class="chip-row mt8">${STRENGTH_EXAMPLES.map(e=>`<button class="chip" onclick="addStrengthRow('${e}')">${e}</button>`).join('')}</div></div>
     <div id="wo-cd" class="hidden"><span class="text-sub">分段训练</span><div id="wo-segs"></div><button class="btn outline sm mt8 w100" onclick="addCardioSeg()">+ 添加下一段训练</button><div class="chip-row mt8">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="fillCardioSeg('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div></div>
-    <div class="flex g8 mt16"><button class="btn w100" onclick="$('#wo-m').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存训练</button></div></div></div>`)
+    <div class="flex g8 mt16"><button class="btn primary w100" onclick="saveWorkout()">保存训练</button><button class="btn w100" onclick="$('#wo-m').remove()">取消</button></div></div></div>`)
 }
 function toggleWoType(){
   let isCardio=$('#wo-tp').value==='cardio'
