@@ -250,7 +250,7 @@ function addMealModal(){window._foods=[];window._ingredients=[]
     <div class="modal-title">添加饮食</div>
     <div class="flex g8 mb8"><select class="input sm" id="mc-tp"><option value="lunch">午餐</option><option value="breakfast">早餐</option><option value="dinner">晚餐</option><option value="snack">加餐</option></select><span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-tm" value="${now()}"></div>
     <span class="text-sub">拍照识别（拍菜品自动识别）</span>
-    <div class="input-row mt4"><button class="btn outline w100" onclick="takePhoto()">📷 拍照识别菜品</button><button class="btn outline sm" onclick="mockPhoto()">🧪 模拟测试</button></div>
+    <div class="input-row mt4"><button class="btn outline w100" onclick="takePhoto()">📷 拍照识别菜品</button></div>
     <input type="file" id="mc-photo" accept="image/*" capture="environment" style="display:none" onchange="analyzePhoto(this)">
     <div id="mc-photo-preview" class="mt8 hidden">
       <img id="mc-photo-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px">
@@ -273,15 +273,6 @@ function addMealModal(){window._foods=[];window._ingredients=[]
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
 }
 function takePhoto(){$('#mc-photo').click()}
-function mockPhoto(){
-  $('#mc-photo-preview').classList.remove('hidden')
-  $('#mc-photo-name').textContent='青椒肉片鸡蛋炒饭'
-  $('#mc-photo-conf').textContent='✅ 高置信度（模拟）'
-  $('#mc-photo-slider').value=450
-  $('#mc-photo-grams').textContent='450g'
-  window._photoResult={name:'青椒肉片鸡蛋炒饭',estimated_grams:450,ingredients:['青椒','猪肉','鸡蛋','米饭'],confidence:'high'}
-  toast('模拟数据已加载')
-}
 function analyzePhoto(input){
   let file=input.files[0];if(!file)return
   let reader=new FileReader()
