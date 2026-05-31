@@ -245,6 +245,27 @@ def calc_nutrition():
     carbs = max(0, int((target_cal - protein*4 - fat*9)/4))
     return jsonify({"bmr":bmr,"tdee":tdee,"target_calories":target_cal,"protein":protein,"carbs":carbs,"fat":fat,"fiber":30 if g==1 else 25})
 
+# ── Hydration efficiency lookup ──
+HYDRATION_EFFICIENCY = {
+    "矿泉水":1.0,"水":1.0,"纯净水":1.0,"白开水":1.0,"温水":1.0,"凉白开":1.0,
+    "电解质水":0.95,"运动饮料":0.9,"功能饮料":0.85,
+    "黑咖啡":0.75,"咖啡":0.75,"美式":0.75,"拿铁":0.7,"卡布奇诺":0.7,
+    "绿茶":0.85,"红茶":0.85,"乌龙茶":0.85,"花茶":0.85,"抹茶":0.8,
+    "全脂牛奶":0.85,"脱脂牛奶":0.9,"牛奶":0.88,"豆奶":0.88,"豆浆":0.88,
+    "椰子水":0.9,"果汁":0.82,"橙汁":0.82,"苹果汁":0.82,
+    "可乐":0.78,"雪碧":0.78,"汽水":0.78,"苏打水":0.95,
+    "蛋白粉水":0.85,"蛋白饮":0.85,
+}
+
+def get_hydration(drink_type, amount):
+    if not drink_type: return amount
+    key = drink_type.strip()
+    if key in HYDRATION_EFFICIENCY: return int(amount * HYDRATION_EFFICIENCY[key])
+    # Fuzzy match
+    for k, v in HYDRATION_EFFICIENCY.items():
+        if k in key or key in k: return int(amount * v)
+    return amount  # Unknown drinks default to full hydration
+
 # ── Water API ──
 @app.route("/api/water", methods=["GET","POST"])
 def water():
@@ -252,7 +273,12 @@ def water():
     if request.method == "GET":
         date = request.args.get("date", str(datetime.date.today()))
         rows = db.execute("SELECT * FROM water WHERE date=? ORDER BY created_at", [date]).fetchall()
-        return jsonify([dict(r) for r in rows])
+        result = []
+        for r in rows:
+            d = dict(r)
+            d["effective_ml"] = get_hydration(d.get("drink_type",""), d.get("amount",0))
+            result.append(d)
+        return jsonify(result)
     data = request.get_json()
     db.execute("INSERT INTO water (date,amount,drink_type) VALUES (?,?,?)",
         [data.get("date",str(datetime.date.today())), data.get("amount",250), data.get("drink_type","water")])
