@@ -262,7 +262,7 @@ function workout(){
   let h=`<div class="nav"><span class="nav-t">运动</span><span class="text-sub">${T}</span></div>`
   if(S.workouts.length===0) h+=`<div class="card"><div class="text-sub text-center" style="padding:20px">暂无训练记录</div></div>`
   else S.workouts.forEach(w=>{
-    let exs=[];try{exs=JSON.parse(w.exercises||'[]')}catch(e){}
+    let exs=w.exercises;if(typeof exs==='string')try{exs=JSON.parse(exs)}catch(e){exs=[]};if(!Array.isArray(exs))exs=[]
     h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${w.type||'训练'}</span>
       <div class="mt8">${exs.map(e=>`<span class="tag">${e.name} ${(e.sets||[]).length}组</span>`).join(' ')}</div>
       <div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
