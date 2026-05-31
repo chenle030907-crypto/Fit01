@@ -92,22 +92,27 @@ def parse_ai_json(reply):
     return None
 
 # 硬编码兜底
-PHOTO_FALLBACK = {"name":"青椒肉片鸡蛋炒饭","estimated_grams":450,"ingredients":["青椒","猪肉","鸡蛋","米饭"],"confidence":"high","calories":715,"protein":29,"carbs":76,"fat":28}
+PHOTO_FALLBACK = {"name":"未识别菜品（点击修改）","estimated_grams":300,"ingredients":[],"confidence":"low","calories":0,"protein":0,"carbs":0,"fat":0}
 
 def normalize_photo_result(obj):
     """统一字段名：food_name→name, estimated_weight_g→estimated_grams"""
     d = {}
-    d["name"] = obj.get("name") or obj.get("food_name") or obj.get("dish_name") or PHOTO_FALLBACK["name"]
-    d["estimated_grams"] = obj.get("estimated_grams") or obj.get("estimated_weight_g") or obj.get("weight_g") or obj.get("grams") or 450
+    d["name"] = obj.get("name") or obj.get("food_name") or obj.get("dish_name") or ""
+    if not d["name"]: d["name"] = PHOTO_FALLBACK["name"]
+    d["estimated_grams"] = obj.get("estimated_grams") or obj.get("estimated_weight_g") or obj.get("weight_g") or obj.get("grams") or 300
     d["ingredients"] = obj.get("ingredients") or obj.get("foods") or []
     d["confidence"] = obj.get("confidence") or "medium"
+    d["calories"] = obj.get("calories") or (obj.get("nutrition") or {}).get("calories_kcal") or 0
+    d["protein"] = obj.get("protein") or (obj.get("nutrition") or {}).get("protein_g") or 0
+    d["carbs"] = obj.get("carbs") or (obj.get("nutrition") or {}).get("carbs_g") or 0
+    d["fat"] = obj.get("fat") or (obj.get("nutrition") or {}).get("fat_g") or 0
     return d
 
 # ── AI APIs (Qwen) ──
 def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
     if not API_KEY: return None
     try:
-        body = {"model":"qwen-flash","messages":[{"role":"user","content":prompt}],
+        body = {"model":"qwen3.6-flash","messages":[{"role":"user","content":prompt}],
                 "temperature":temp,"max_tokens":max_tokens,"enable_thinking":False}
         if json_mode: body["response_format"] = {"type": "json_object"}
         r = requests.post(
@@ -124,7 +129,7 @@ def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-            json={"model":"qwen-vl-plus","messages":[{"role":"user","content":[
+            json={"model":"qwen3.6-flash","messages":[{"role":"user","content":[
                 {"type":"text","text":prompt},
                 {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
             ]}],"temperature":temp,"max_tokens":max_tokens,
