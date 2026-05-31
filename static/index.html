@@ -229,7 +229,7 @@ function saveMeal(){
   const mt=document.getElementById('mc-mealType')?.value||'lunch'
   const time=document.getElementById('mc-time')?.value||now()
   api('/api/meals',{method:'POST',body:JSON.stringify({date:T,meal_type:mt,time,foods})}).then(()=>{
-    const names=foods.map(f=>f.name).filter(Boolean)
+    const names=foods.map(f=>f.name).filter(Boolean).sort()
     if(names.length>0){
       const cal=foods.reduce((s,f)=>s+(f.calories||0),0)
       const pro=foods.reduce((s,f)=>s+(f.protein||0)*1,0)
