@@ -255,7 +255,7 @@ function addMealModal(){window._foods=[];window._ingredients=[]
     <div id="mc-photo-preview" class="mt8 hidden">
       <img id="mc-photo-img" style="width:100%;max-height:200px;object-fit:cover;border-radius:12px">
       <div class="card mt8" style="background:var(--divider);margin:8px 0 0;padding:12px">
-        <span class="bold" id="mc-photo-name">--</span><span class="text-sub" style="margin-left:8px" id="mc-photo-conf"></span>
+        <span class="bold" id="mc-photo-name" style="cursor:pointer" title="点击修改菜名" onclick="editPhotoName()">--</span><span class="text-sub" style="margin-left:8px" id="mc-photo-conf"></span>
         <div class="mt8"><span class="text-sub">份量：</span><b id="mc-photo-grams">200g</b></div>
         <input type="range" id="mc-photo-slider" min="50" max="600" value="200" oninput="updatePhotoGrams(this.value)" style="width:100%;margin-top:4px">
         <div class="flex text-sm text-sub" style="justify-content:space-between"><span>🥗 小盘 50g</span><span>🍱 正常 200g</span><span>🍽️ 大盘 600g</span></div>
@@ -288,7 +288,7 @@ function analyzePhoto(input){
     let timer=setTimeout(()=>{toast('网络较慢，请稍候...')},5000)
     api('/api/analyze-photo',{method:'POST',body:JSON.stringify({image:base64})}).then(r=>{
       clearTimeout(timer)
-      let name=r.name||'未识别',grams=r.estimated_grams||200,conf=r.confidence||'medium'
+      let name=r.name||'未识别菜品（点击修改）',grams=r.estimated_grams||200,conf=r.confidence||'medium'
       $('#mc-photo-name').textContent=name
       $('#mc-photo-conf').textContent=conf==='high'?'✅ 高置信度':conf==='medium'?'👍 中等置信度':'⚠️ 估算值'
       $('#mc-photo-slider').value=grams
@@ -297,19 +297,34 @@ function analyzePhoto(input){
       toast('识别完成: '+name+' '+grams+'g')
     }).catch(()=>{
       clearTimeout(timer)
-      $('#mc-photo-name').textContent='识别超时'
+      $('#mc-photo-name').textContent='未识别菜品（点击修改）'
       $('#mc-photo-conf').textContent='请重试或手动输入'
-      toast('识别超时，请切换到手动输入')
+      toast('识别超时，请手动输入菜名')
     })
   }
   reader.readAsDataURL(file)
 }
 function updatePhotoGrams(v){$('#mc-photo-grams').textContent=v+'g'}
+function editPhotoName(){
+  let el=$('#mc-photo-name'),old=el.textContent
+  if(old==='识别中...')return
+  let inp=document.createElement('input')
+  inp.className='input';inp.value=old==='--'||old.includes('未识别')||old.includes('超时')?'':old
+  inp.style.cssText='font-size:16px;font-weight:600;padding:4px 8px;margin:-4px 0';inp.id='mc-photo-name-input'
+  inp.onblur=function(){let v=this.value.trim()||'未识别菜品';el.textContent=v;this.replaceWith(el)}
+  inp.onkeydown=function(e){if(e.key==='Enter')this.blur()}
+  el.replaceWith(inp);inp.focus()
+}
 function addPhotoFood(){
-  let r=window._photoResult
-  if(!r)return toast('请先拍照识别')
+  if(!window._photoResult)return toast('请先拍照识别')
   let g=parseInt($('#mc-photo-slider').value)
-  let name=r.name||'扫描菜品',mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
+  let name=$('#mc-photo-name').textContent
+  if(!name||name==='--'||name.includes('未识别')||name.includes('超时')||name.includes('识别中')){
+    toast('请先点击菜名修改为正确名称')
+    editPhotoName()
+    return
+  }
+  let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
   toast('正在查询营养数据...')
   api('/api/parse-food',{method:'POST',body:JSON.stringify({text:name+' '+g+'g'})}).then(pr=>{
     let foods=pr.foods||[{name:name,amount:g,calories:0,protein:0,carbs:0,fat:0,unit:'g'}]
