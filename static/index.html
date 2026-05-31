@@ -57,6 +57,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 .progress-bar{height:8px;background:var(--divider);border-radius:4px;overflow:hidden}
 .progress-fill{height:100%;border-radius:4px;transition:width .3s}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.ruler-wrap{position:relative;height:80px;overflow:hidden;background:var(--card);border-radius:12px;margin:4px 0;user-select:none;-webkit-user-select:none;touch-action:pan-x}
+.ruler-track{display:flex;align-items:flex-end;height:100%;padding:0 50%;gap:0;transition:transform .15s ease-out}
+.ruler-tick{flex-shrink:0;width:2px;position:relative}
+.ruler-tick.major{height:40px;background:var(--text);width:2px}
+.ruler-tick.minor{height:20px;background:var(--border);width:1px}
+.ruler-tick.mid{height:28px;background:var(--sub);width:1.5px}
+.ruler-indicator{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--green);transform:translateX(-50%);z-index:1;border-radius:2px}
+.ruler-value{text-align:center;font-size:32px;font-weight:700;margin:8px 0 4px;font-variant-numeric:tabular-nums}
+.ruler-unit{text-align:center;font-size:13px;color:var(--sub);margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -180,11 +189,9 @@ function me(){
         <div><span class="text-sub">年龄</span><br><span class="bold">${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
       </div>
       <button class="btn outline w100 mt12" onclick="editProfile()">编辑资料</button>
-      <div class="input-row mt12">
-        <span class="unit-wrap"><input class="input sm" id="wt-in" type="number" step="0.1" placeholder="68" style="padding-right:24px"><span class="unit-label">kg</span></span>
-        <span class="unit-wrap"><input class="input sm" id="bf-in" type="number" step="0.1" placeholder="18" style="padding-right:24px"><span class="unit-label">%</span></span>
-        <button class="btn primary sm" onclick="recordWeight()">记录</button>
-      </div>
+      <div class="mt12"><span class="text-sub">体重</span><div class="ruler-value" id="wt-val">${lw.weight||u.current_weight||70}</div><div class="ruler-unit">kg</div><div class="ruler-wrap" id="wt-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="wt-track"></div></div></div>
+      <div class="mt12"><span class="text-sub">体脂率</span><div class="ruler-value" id="bf-val">${lw.body_fat||'--'}</div><div class="ruler-unit">%</div><div class="ruler-wrap" id="bf-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="bf-track"></div></div></div>
+      <button class="btn primary w100 mt12" onclick="recordWeight()">记录体重</button>
     </div>
     <div class="card"><span class="c-title">营养目标（${(MODES[S.mode]||MODES.happy).l}）</span>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
@@ -199,6 +206,7 @@ function me(){
     h+=`</div>`
   }
   $('#app').innerHTML=h
+  setTimeout(initRulers,100)
 }
 
 // ── Water functions ──
@@ -251,16 +259,6 @@ function saveProfile(){
   let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
   api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadAll().then(render);toast('已保存')})
 }
-function recordWeight(){
-  let wEl=document.getElementById('wt-in'),w=parseFloat(wEl?.value)
-  if(isNaN(w)||w<20||w>300){toast('请输入有效体重(20-300kg)');return}
-  let bfEl=document.getElementById('bf-in'),bf=parseFloat(bfEl?.value)
-  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:isNaN(bf)?null:bf})}).then(r=>{
-    toast('记录成功！已更新最新体重为：'+w+' kg')
-    loadAll().then(render)
-  }).catch(e=>{console.error(e);toast('保存失败，服务器异常')})
-}
-
 // ── Meal modal ──
 function addMealModal(){window._foods=[];window._ingredients=[]
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mc-m"><div class="modal-box">
@@ -514,6 +512,54 @@ function saveWorkout(){
   }).catch(()=>{
     api('/api/workouts',{method:'POST',body:JSON.stringify({date:T(),start_time:now(),duration:dr,type:tp,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{$('#wo-m').remove();loadAll().then(render);toast('训练已记录 · '+cal+'kcal')})
   })
+}
+
+// ── Ruler Picker ──
+function initRulers(){
+  let u=S.user||{},lw=S.measurements&&S.measurements[0]?S.measurements[0]:{}
+  buildRuler('wt',lw.weight||u.current_weight||70,30,150,0.1)
+  buildRuler('bf',lw.body_fat||18,5,50,0.1)
+}
+function buildRuler(id,val,min,max,step){
+  let track=$('#'+id+'-track'),wrap=$('#'+id+'-ruler'),valEl=$('#'+id+'-val')
+  if(!track||!wrap)return
+  let totalTicks=Math.round((max-min)/step),html=''
+  for(let i=0;i<=totalTicks;i++){
+    let cls=i%10===0?'major':i%5===0?'mid':'minor'
+    html+=`<div class="ruler-tick ${cls}"></div>`
+  }
+  track.innerHTML=html
+  let tickWidth=2,tickIdx=Math.round((val-min)/step)
+  // Center the ruler on current value
+  let pxPerTick=3,centerOffset=tickIdx*pxPerTick-wrap.clientWidth/2+pxPerTick/2
+  track.style.transform=`translateX(${-centerOffset}px)`
+  window['_'+id+'Val']=val
+  if(valEl)valEl.textContent=val.toFixed(1)
+  // Scroll sync
+  function sync(){
+    let rect=track.getBoundingClientRect(),wr=wrap.getBoundingClientRect()
+    let cx=wr.left+wr.width/2,offset=cx-rect.left
+    let idx=Math.max(0,Math.min(totalTicks,Math.round(offset/pxPerTick)))
+    let v=Math.round((min+idx*step)*10)/10
+    if(valEl)valEl.textContent=v.toFixed(1)
+    window['_'+id+'Val']=v
+  }
+  wrap.onscroll=sync
+  wrap.addEventListener('touchmove',sync,{passive:true})
+  let dragging=false,sx=0,sl=0
+  wrap.addEventListener('pointerdown',e=>{dragging=true;sx=e.clientX;sl=wrap.scrollLeft;wrap.setPointerCapture(e.pointerId)})
+  wrap.addEventListener('pointermove',e=>{if(dragging){wrap.scrollLeft=sl+(sx-e.clientX);sync()}})
+  wrap.addEventListener('pointerup',()=>{dragging=false})
+  setTimeout(sync,200)
+}
+function recordWeight(){
+  let w=window._wtVal||parseFloat($('#wt-val')?.textContent),bf=window._bfVal||parseFloat($('#bf-val')?.textContent)
+  if(isNaN(w)||w<20||w>300){toast('请滑动刻度尺选择体重');return}
+  if(isNaN(bf))bf=null
+  api('/api/measurements',{method:'POST',body:JSON.stringify({date:T(),weight:w,body_fat:bf})}).then(()=>{
+    toast('记录成功！已更新最新体重为：'+w+' kg')
+    loadAll().then(render)
+  }).catch(e=>{toast('保存失败，服务器异常')})
 }
 
 // ── Boot ──
