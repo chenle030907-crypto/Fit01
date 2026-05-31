@@ -263,8 +263,9 @@ function workout(){
   if(S.workouts.length===0) h+=`<div class="card"><div class="text-sub text-center" style="padding:20px">暂无训练记录</div></div>`
   else S.workouts.forEach(w=>{
     let exs=w.exercises;if(typeof exs==='string')try{exs=JSON.parse(exs)}catch(e){exs=[]};if(!Array.isArray(exs))exs=[]
-    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${w.type||'训练'}</span>
-      <div class="mt8">${exs.map(e=>`<span class="tag">${e.name} ${(e.sets||[]).length}组</span>`).join(' ')}</div>
+    const isCardio=w.type==='cardio'
+    h+=`<div class="card"><span class="c-title">${w.start_time||''} · ${w.duration||0}分钟 · ${isCardio?'🏃 有氧':'💪 无氧'}</span>
+      <div class="mt8">${exs.map(e=>isCardio?`<span class="tag">坡度${e.incline||0}% ${e.speed||0}速 ${e.minutes||0}min</span>`:`<span class="tag">${e.name} ${e.sets||0}组×${e.reps||0}次×${e.weight||0}kg</span>`).join(' ')}</div>
       <div class="flex" style="justify-content:space-between;margin-top:8px"><span class="bold" style="color:var(--red)">-${w.calories||0} kcal</span><button class="btn sm danger" onclick="delWorkout(${w.id})">删除</button></div></div>`
   })
   h+=`<div style="padding:12px 16px"><button class="btn primary w100" onclick="addWorkoutModal()">+ 记录训练</button></div>`
@@ -272,35 +273,84 @@ function workout(){
 }
 
 function addWorkoutModal(){
-  let h=`<div class="modal-overlay" id="modal"><div class="modal-box">
+  window._woSegments=[]
+  window._woExercises=[]
+  let h=`<div class="modal-overlay" id="modal" onclick="document.getElementById('modal').remove()"><div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title">记录训练</div>
     <div class="flex g8 mb8">
-      <select class="input sm" id="wo-type"><option value="strength">无氧</option><option value="cardio">有氧</option></select>
-      <input class="input sm" style="width:70px" id="wo-dur" placeholder="分钟" type="number" value="45">
-      <input class="input sm" style="width:70px" id="wo-cal" placeholder="消耗" type="number" value="300">
+      <select class="input sm" id="wo-type" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select>
+      <input class="input sm" style="width:80px" id="wo-dur" placeholder="总时长(分)" type="number" value="45">
     </div>
-    <div id="wo-exs"></div>
-    <button class="btn outline sm" onclick="addEx()">+ 添加动作</button>
-    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存</button></div></div></div>`
+    <div id="wo-strength-panel">
+      <span class="text-sub">动作</span>
+      <div id="wo-exs"></div>
+      <button class="btn outline sm mt8" onclick="addStrengthEx()">+ 添加动作</button>
+    </div>
+    <div id="wo-cardio-panel" class="hidden">
+      <span class="text-sub">爬坡分段</span>
+      <div id="wo-segs"></div>
+      <button class="btn outline sm mt8" onclick="addCardioSeg()">+ 添加分段</button>
+    </div>
+    <div id="wo-result" class="mt8"></div>
+    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveWorkout()">保存训练</button></div></div></div>`
   $('#app').insertAdjacentHTML('beforeend',h)
 }
 
-function addEx(){
+function toggleWoType(){
+  const type=document.getElementById('wo-type')?.value
+  document.getElementById('wo-strength-panel').classList.toggle('hidden',type!=='strength')
+  document.getElementById('wo-cardio-panel').classList.toggle('hidden',type!=='cardio')
+}
+
+function addStrengthEx(){
   const el=document.getElementById('wo-exs')
-  el.innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称" value=""><input class="input sm" placeholder="组" type="number" value="4"><input class="input sm" placeholder="次" type="number" value="12"><input class="input sm" placeholder="kg" type="number" value="0"></div>`
+  el.innerHTML+=`<div class="input-row mt8"><input class="input" placeholder="动作名称" value=""><input class="input sm" placeholder="组数" type="number" value="4"><input class="input sm" placeholder="次数" type="number" value="12"><input class="input sm" placeholder="重量kg" type="number" value="0"></div>`
+}
+
+function addCardioSeg(){
+  const el=document.getElementById('wo-segs')
+  const n=el.children.length+1
+  el.innerHTML+=`<div class="input-row mt8" style="align-items:center"><span class="text-sm text-sub">第${n}段</span><input class="input sm" placeholder="坡度%" type="number" value="12"><input class="input sm" placeholder="速度" type="number" value="3.5" step="0.1"><input class="input sm" placeholder="分钟" type="number" value="5"><button class="btn sm danger" onclick="this.parentElement.remove()">×</button></div>`
 }
 
 function saveWorkout(){
   const type=document.getElementById('wo-type')?.value||'strength'
   const dur=parseInt(document.getElementById('wo-dur')?.value)||45
-  const cal=parseInt(document.getElementById('wo-cal')?.value)||300
-  const exs=[]
-  document.querySelectorAll('#wo-exs .input-row').forEach(row=>{
-    const inputs=row.querySelectorAll('input')
-    exs.push({name:inputs[0].value||'训练',sets:[{reps:parseInt(inputs[2]?.value)||12,weight:parseInt(inputs[3]?.value)||0}]})
-  })
-  api('/api/workouts',{method:'POST',body:JSON.stringify({date:T,start_time:now(),duration:dur,type,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{
-    document.getElementById('modal').remove();loadAll().then(()=>r());toast('已保存')
+  const u=S.user||{}
+  let exs=[],desc=''
+  if(type==='strength'){
+    document.querySelectorAll('#wo-exs .input-row').forEach(row=>{
+      const inputs=row.querySelectorAll('input')
+      const name=inputs[0]?.value?.trim()||'训练'
+      const sets=parseInt(inputs[1]?.value)||4
+      const reps=parseInt(inputs[2]?.value)||12
+      const weight=parseInt(inputs[3]?.value)||0
+      exs.push({name,sets,reps,weight})
+      desc+=`${name} ${sets}组×${reps}次×${weight}kg; `
+    })
+  }else{
+    document.querySelectorAll('#wo-segs .input-row').forEach(row=>{
+      const inputs=row.querySelectorAll('input')
+      const incline=parseFloat(inputs[0]?.value)||0
+      const speed=parseFloat(inputs[1]?.value)||0
+      const minutes=parseInt(inputs[2]?.value)||0
+      exs.push({name:'爬坡',incline,speed,minutes})
+      desc+=`坡度${incline}% 速度${speed} ${minutes}min; `
+    })
+  }
+  if(exs.length===0)return toast('请添加训练内容')
+  desc+=`总时长${dur}min`
+  toast('AI 正在计算消耗...')
+  api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,description:desc})}).then(r=>{
+    const cal=r.calories||300
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T,start_time:now(),duration:dur,type,exercises:JSON.stringify(exs),calories:cal})}).then(()=>{
+      document.getElementById('modal')?.remove();loadAll().then(()=>r());toast(`训练完成 · ${cal}kcal ${r.note||''}`)
+    })
+  }).catch(()=>{
+    const cal=type==='cardio'?dur*8:dur*6
+    api('/api/workouts',{method:'POST',body:JSON.stringify({date:T,start_time:now(),duration:dur,type,exercises:JSON.stringify(exs),calories:Math.round(cal*(u.current_weight||70)/70)})}).then(()=>{
+      document.getElementById('modal')?.remove();loadAll().then(()=>r());toast(`训练已记录(估算)`)
+    })
   })
 }
 

@@ -280,6 +280,23 @@ def get_hydration(drink_type, amount, api_key=None):
         except: pass
     return amount
 
+# ── Workout Calorie AI ──
+@app.route("/api/workout-calories", methods=["POST"])
+def workout_calories():
+    data = request.get_json()
+    weight = data.get("weight", 70)
+    desc = data.get("description", "")
+    if not desc.strip(): return jsonify({"calories": 0, "note": "no data"})
+    prompt = f"""你是运动科学专家。用户体重{weight}kg。训练内容:{desc}。请根据运动科学公式精确计算总消耗热量(考虑坡度、速度、体重、时长)。只返回JSON:{{"calories":数字,"note":"简短说明(中文)"}}"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=256)
+    try:
+        match = __import__("re").search(r"\{[\s\S]*\}", reply or "")
+        if match:
+            result = json.loads(match.group(0))
+            return jsonify(result)
+    except: pass
+    return jsonify({"calories": 300, "note": "估算值"})
+
 # ── Water API ──
 @app.route("/api/water", methods=["GET","POST"])
 def water():
