@@ -57,15 +57,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;backg
 .progress-bar{height:8px;background:var(--divider);border-radius:4px;overflow:hidden}
 .progress-fill{height:100%;border-radius:4px;transition:width .3s}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.ruler-wrap{position:relative;height:80px;overflow:hidden;background:var(--card);border-radius:12px;margin:4px 0;user-select:none;-webkit-user-select:none;touch-action:pan-x}
-.ruler-track{display:flex;align-items:flex-end;height:100%;padding:0 50%;gap:0}
-.ruler-tick{flex-shrink:0;width:2px;position:relative}
-.ruler-tick.major{height:40px;background:var(--text);width:2px}
-.ruler-tick.minor{height:20px;background:var(--border);width:1px}
-.ruler-tick.mid{height:28px;background:var(--sub);width:1.5px}
-.ruler-indicator{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--green);transform:translateX(-50%);z-index:1;border-radius:2px}
-.ruler-value{text-align:center;font-size:32px;font-weight:700;margin:8px 0 4px;font-variant-numeric:tabular-nums}
-.ruler-unit{text-align:center;font-size:13px;color:var(--sub);margin-bottom:8px}
+.ruler-wrap{position:relative;height:88px;overflow:hidden;margin:0;user-select:none;-webkit-user-select:none;touch-action:pan-x;cursor:grab}
+.ruler-wrap:active{cursor:grabbing}
+.ruler-wrap::before,.ruler-wrap::after{content:'';position:absolute;top:0;bottom:0;width:60px;z-index:2;pointer-events:none}
+.ruler-wrap::before{left:0;background:linear-gradient(to right,var(--card) 0%,transparent 100%)}
+.ruler-wrap::after{right:0;background:linear-gradient(to left,var(--card) 0%,transparent 100%)}
+.ruler-track{display:flex;align-items:flex-end;height:100%;padding:0 50%}
+.ruler-tick{flex-shrink:0;position:relative}
+.ruler-tick.major{height:48px;background:var(--text);width:1.5px}
+.ruler-tick.mid{height:32px;background:var(--sub);width:1px}
+.ruler-tick.minor{height:20px;background:var(--border);width:0.5px}
+.ruler-indicator{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--green);transform:translateX(-50%);z-index:3;border-radius:1px;box-shadow:0 0 8px rgba(76,175,80,.3)}
+.ruler-value{text-align:center;font-size:36px;font-weight:700;margin:12px 0 0;font-variant-numeric:tabular-nums;letter-spacing:-1px;transition:color .15s}
+.ruler-value.changed{color:var(--green)}
+.ruler-unit{text-align:center;font-size:13px;color:var(--sub);margin-bottom:4px}
+.ruler-label-row{display:flex;justify-content:space-between;padding:0 20px;margin-top:4px}
+.ruler-label{font-size:10px;color:var(--border)}
 </style>
 </head>
 <body>
@@ -189,9 +196,9 @@ function me(){
         <div><span class="text-sub">年龄</span><br><span class="bold">${new Date().getFullYear()-parseInt((u.birth_date||'1995').slice(0,4))}岁</span></div>
       </div>
       <button class="btn outline w100 mt12" onclick="editProfile()">编辑资料</button>
-      <div class="mt12"><span class="text-sub">体重</span><div class="ruler-value" id="wt-val">${lw.weight||u.current_weight||70}</div><div class="ruler-unit">kg</div><div class="ruler-wrap" id="wt-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="wt-track"></div></div></div>
-      <div class="mt12"><span class="text-sub">体脂率</span><div class="ruler-value" id="bf-val">${lw.body_fat||'--'}</div><div class="ruler-unit">%</div><div class="ruler-wrap" id="bf-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="bf-track"></div></div></div>
-      <button class="btn primary w100 mt12" onclick="recordWeight()">记录体重</button>
+      <div class="card mt12" style="padding:12px 0 16px"><span class="c-title">⚖️ 体重</span><div class="ruler-value" id="wt-val">${lw.weight||u.current_weight||70}</div><div class="ruler-unit">公斤 kg</div><div class="ruler-wrap" id="wt-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="wt-track"></div></div><div class="ruler-label-row"><span>30</span><span>60</span><span>90</span><span>120</span><span>150</span></div></div>
+      <div class="card mt8" style="padding:12px 0 16px"><span class="c-title">📊 体脂率</span><div class="ruler-value" id="bf-val">${lw.body_fat||'--'}</div><div class="ruler-unit">百分比 %</div><div class="ruler-wrap" id="bf-ruler"><div class="ruler-indicator"></div><div class="ruler-track" id="bf-track"></div></div><div class="ruler-label-row"><span>5</span><span>15</span><span>25</span><span>35</span><span>50</span></div></div>
+      <button class="btn primary w100 mt8" onclick="recordWeight()">记录体重</button>
     </div>
     <div class="card"><span class="c-title">营养目标（${(MODES[S.mode]||MODES.happy).l}）</span>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
@@ -525,11 +532,11 @@ function buildRuler(id,val,min,max,step){
   if(!track||!wrap)return
   let totalTicks=Math.round((max-min)/step),html=''
   for(let i=0;i<=totalTicks;i++){
-    let cls=i%10===0?'major':i%5===0?'mid':'minor'
-    html+=`<div class="ruler-tick ${cls}"></div>`
+    let cls=i%10===0?'major':i%5===0?'mid':'minor',w=i%10===0?1.5:i%5===0?1:0.5
+    html+=`<div class="ruler-tick ${cls}" style="width:${w}px"></div>`
   }
-  track.innerHTML=html
-  let pxPerTick=3,tickIdx=Math.round((val-min)/step)
+  track.innerHTML=html;track.style.gap='3px'
+  let pxPerTick=6,tickIdx=Math.round((val-min)/step)
   window['_'+id+'Val']=val
   if(valEl)valEl.textContent=val.toFixed(1)
   function sync(){
