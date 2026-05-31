@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: fit01
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py --port $PORT
+    envVars:
+      - key: AI_API_KEY
+        sync: false
+      - key: DATA_DIR
+        value: /data
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
