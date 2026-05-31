@@ -375,15 +375,31 @@ function quickDrink(name,cal){
 function addWaterModal(){
   let h=`<div class="modal-overlay" id="modal" onclick="document.getElementById('modal').remove()"><div class="modal-box" onclick="event.stopPropagation()">
     <div class="modal-title">记录饮水</div>
-    <div class="chip-row mb8">${(S.waterDrinks||[]).map(d=>`<button class="chip" onclick="addWaterAmount('${escapeHtml(d.name)}',250)">${d.name}<br><small>${d.calories_per_250ml||0}kcal/250ml</small></button>`).join('')}</div>
-    <div class="input-row mt8"><input class="input sm" id="wt-amount" placeholder="毫升" type="number" value="250"><span class="text-sub">ml</span></div>
-    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="addWaterAmount('water',parseInt(document.getElementById('wt-amount')?.value||250))">记录</button></div>
+    <span class="text-sub">喝了多少</span>
+    <div class="input-row mt8"><input class="input" id="wt-amount" placeholder="毫升" type="number" value="250" style="text-align:center;font-size:24px;font-weight:700"><span class="text-sub" style="font-size:16px">ml</span></div>
+    <span class="text-sub mt8">喝的什么</span>
+    <div class="chip-row mt8">${(S.waterDrinks||[]).map(d=>`<button class="chip" onclick="selectDrink('${escapeHtml(d.name)}')" id="chip-${escapeHtml(d.name)}">${d.name}</button>`).join('')}
+    <button class="chip" onclick="selectDrink('__custom__')" id="chip-custom">➕ 其他</button></div>
+    <div id="custom-drink-wrap" class="hidden mt8"><input class="input" id="wt-custom" placeholder="饮品名称（如：蛋白粉水）"></div>
+    <div class="flex g8 mt16"><button class="btn w100" onclick="document.getElementById('modal').remove()">取消</button><button class="btn primary w100" onclick="saveWater()">记录</button></div>
   </div></div>`
   document.body.insertAdjacentHTML('beforeend',h)
 }
-function addWaterAmount(type,amount){
+window._selectedDrink='water'
+function selectDrink(name){
+  window._selectedDrink=name
+  document.querySelectorAll('#modal .chip').forEach(c=>c.classList.remove('active'))
+  const chip=document.getElementById('chip-'+name)
+  if(chip)chip.classList.add('active')
+  document.getElementById('custom-drink-wrap').classList.toggle('hidden',name!=='__custom__')
+}
+function saveWater(){
+  const amount=parseInt(document.getElementById('wt-amount')?.value||250)
+  if(!amount||amount<10)return toast('请输入饮水量')
+  let type=window._selectedDrink||'water'
+  if(type==='__custom__'){type=document.getElementById('wt-custom')?.value?.trim();if(!type)return toast('请输入饮品名称')}
+  document.getElementById('modal')?.remove()
   api('/api/water',{method:'POST',body:JSON.stringify({date:T,amount,drink_type:type})}).then(()=>{
-    document.getElementById('modal')?.remove()
     loadWater().then(()=>r())
     toast(`+${amount}ml ${type}`)
   })
