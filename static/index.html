@@ -348,9 +348,19 @@ function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurem
 // ── Actions ──
 function switchMode(){
   const types=['cardio','strength','happy','cheat']
-  const idx=prompt('0 有氧日\n1 无氧日\n2 Happy日\n3 放纵日\n\n输入序号切换',types.indexOf(S.mode))
-  if(idx!==null&&types[parseInt(idx)]){S.mode=types[parseInt(idx)];api('/api/user',{method:'POST',body:JSON.stringify({workout_type:S.mode})});loadGoals().then(()=>r())}
+  let h=`<div class="modal-overlay" id="mode-modal" onclick="document.getElementById('mode-modal').remove()"><div class="modal-box" onclick="event.stopPropagation()" style="border-radius:20px">
+    <div class="modal-title">选择今日模式</div>`
+  types.forEach(t=>{
+    const c=MODES[t]
+    h+=`<div class="mode-option ${S.mode===t?'active':''}" style="background:${c.bg};margin-bottom:8px;padding:14px 16px;border-radius:14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="pickMode('${t}')">
+      <span style="font-size:28px">${c.emoji}</span><div style="flex:1"><span style="font-size:16px;font-weight:600">${c.label}</span><span style="font-size:12px;color:#86868B;display:block">${c.desc}</span></div>
+      ${S.mode===t?'<span style="color:#4CAF50;font-size:20px">✓</span>':''}
+    </div>`
+  })
+  h+=`</div></div>`
+  document.body.insertAdjacentHTML('beforeend',h)
 }
+function pickMode(t){document.getElementById('mode-modal').remove();S.mode=t;api('/api/user',{method:'POST',body:JSON.stringify({workout_type:t})});loadGoals().then(()=>r())}
 function delMeal(id){if(confirm('删除？')){api('/api/meals/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
 function delWorkout(id){if(confirm('删除？')){api('/api/workouts/'+id,{method:'DELETE'}).then(()=>loadAll().then(()=>r()))}}
 
