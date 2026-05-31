@@ -257,14 +257,28 @@ HYDRATION_EFFICIENCY = {
     "蛋白粉水":0.85,"蛋白饮":0.85,
 }
 
-def get_hydration(drink_type, amount):
+HYDRATION_CACHE = {}
+def get_hydration(drink_type, amount, api_key=None):
     if not drink_type: return amount
     key = drink_type.strip()
     if key in HYDRATION_EFFICIENCY: return int(amount * HYDRATION_EFFICIENCY[key])
-    # Fuzzy match
     for k, v in HYDRATION_EFFICIENCY.items():
         if k in key or key in k: return int(amount * v)
-    return amount  # Unknown drinks default to full hydration
+    # Cache hit
+    if key in HYDRATION_CACHE: return int(amount * HYDRATION_CACHE[key])
+    # AI fallback
+    if api_key:
+        try:
+            prompt = f"""你是营养学专家。请评估"{key}"这种饮品的水合效率（hydration efficiency）。水合效率是指：喝下该饮品后，实际被身体吸收利用的水分比例。纯水=1.0，咖啡因利尿约0.75，高糖饮料约0.78，牛奶约0.88，运动饮料约0.9。只返回一个0到1之间的小数，不要解释。"""
+            reply = call_ai(prompt, temp=0.1, max_tokens=16)
+            if reply:
+                match = __import__("re").search(r"0?\.\d+", reply)
+                if match:
+                    eff = float(match.group(0))
+                    HYDRATION_CACHE[key] = eff
+                    return int(amount * eff)
+        except: pass
+    return amount
 
 # ── Water API ──
 @app.route("/api/water", methods=["GET","POST"])
@@ -276,7 +290,7 @@ def water():
         result = []
         for r in rows:
             d = dict(r)
-            d["effective_ml"] = get_hydration(d.get("drink_type",""), d.get("amount",0))
+            d["effective_ml"] = get_hydration(d.get("drink_type",""), d.get("amount",0), API_KEY)
             result.append(d)
         return jsonify(result)
     data = request.get_json()
