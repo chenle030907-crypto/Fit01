@@ -7,7 +7,7 @@ import requests
 from flask import Flask, request, jsonify, send_from_directory, g
 
 app = Flask(__name__, static_folder="static", static_url_path="")
-API_KEY = os.environ.get("AI_API_KEY", "")
+API_KEY = os.environ.get("AI_API_KEY", "sk-9ea9964ac43747a58f962748888f69ee")
 DB_PATH = os.path.join(os.environ.get("DATA_DIR", os.path.dirname(__file__)), "dongshi.db")
 PORT = int(os.environ.get("PORT", 8080))
 
@@ -65,16 +65,31 @@ def init_db():
     db.commit()
     db.close()
 
-# ── AI API (DeepSeek, OpenAI-compatible) ──
+# ── AI APIs (Qwen) ──
 def call_ai(prompt, temp=0.1, max_tokens=1024):
     if not API_KEY: return None
     try:
         r = requests.post(
-            "https://api.deepseek.com/v1/chat/completions",
+            "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-            json={"model":"deepseek-chat","messages":[{"role":"user","content":prompt}],
+            json={"model":"qwen-flash","messages":[{"role":"user","content":prompt}],
                   "temperature":temp,"max_tokens":max_tokens},
             timeout=20
+        )
+        return r.json()["choices"][0]["message"]["content"]
+    except: return None
+
+def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
+    if not API_KEY: return None
+    try:
+        r = requests.post(
+            "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+            headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+            json={"model":"qwen-vl-flash","messages":[{"role":"user","content":[
+                {"type":"text","text":prompt},
+                {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
+            ]}],"temperature":temp,"max_tokens":max_tokens},
+            timeout=25
         )
         return r.json()["choices"][0]["message"]["content"]
     except: return None
@@ -287,8 +302,7 @@ def analyze_photo():
     image_base64 = data.get("image", "")
     if not image_base64: return jsonify({"error": "no image"}), 400
     prompt = """你是菜品识别专家。识别图片中的菜品，返回JSON:{"name":"菜品中文名","estimated_grams":200,"ingredients":["食材1","食材2"],"confidence":"high/medium/low"}。克数根据图片中食物的分量感来估算。只返回JSON。"""
-    # AI call placeholder — user provides API
-    reply = call_ai(prompt, temp=0.1, max_tokens=256)
+    reply = call_vision(prompt, image_base64, temp=0.1, max_tokens=256)
     try:
         if reply:
             m = __import__("re").search(r"\{[\s\S]*\}", reply)
