@@ -259,7 +259,7 @@ function addMealModal(){window._foods=[];window._ingredients=[]
         <div class="mt8"><span class="text-sub">份量：</span><b id="mc-photo-grams">200g</b></div>
         <input type="range" id="mc-photo-slider" min="50" max="600" value="200" oninput="updatePhotoGrams(this.value)" style="width:100%;margin-top:4px">
         <div class="flex text-sm text-sub" style="justify-content:space-between"><span>🥗 小盘 50g</span><span>🍱 正常 200g</span><span>🍽️ 大盘 600g</span></div>
-        <button class="btn primary sm mt8" onclick="addPhotoFood()">加入食材列表</button>
+        <button class="btn primary sm mt8" onclick="addPhotoFood()">确认添加该菜品</button>
       </div>
     </div>
     <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
@@ -309,16 +309,19 @@ function addPhotoFood(){
   let r=window._photoResult
   if(!r)return toast('请先拍照识别')
   let g=parseInt($('#mc-photo-slider').value)
-  let name=r.name||'扫描菜品'
-  if(!window._ingredients)window._ingredients=[]
-  window._ingredients.push(name+' '+g+'g')
-  refreshIngredients()
-  $('#mc-parse').style.display='block'
-  $('#mc-photo-preview').classList.add('hidden')
-  let inp=document.getElementById('mc-photo');if(inp)inp.value=''
-  // Auto-trigger AI nutrition parsing
+  let name=r.name||'扫描菜品',mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now()
   toast('正在查询营养数据...')
-  parseIngredients()
+  api('/api/parse-food',{method:'POST',body:JSON.stringify({text:name+' '+g+'g'})}).then(pr=>{
+    let foods=pr.foods||[{name:name,amount:g,calories:0,protein:0,carbs:0,fat:0,unit:'g'}]
+    foods.forEach(f=>{f.dishName=name})
+    api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:foods})}).then(()=>{
+      let cal=foods.reduce((s,f)=>s+(f.calories||0),0),pro=foods.reduce((s,f)=>s+(f.protein||0),0)
+      let car=foods.reduce((s,f)=>s+(f.carbs||0),0),fat=foods.reduce((s,f)=>s+(f.fat||0),0)
+      api('/api/dishes',{method:'POST',body:JSON.stringify({name:name,foods:foods,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
+      $('#mc-m').remove();loadAll().then(render)
+      toast(name+' '+g+'g · '+Math.round(cal)+'kcal 已添加')
+    })
+  }).catch(()=>toast('添加失败'))
 }
 function addIngredient(){
   let n=$('#mc-nm')?.value?.trim(),g=parseInt($('#mc-gr')?.value||100)
