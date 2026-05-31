@@ -1,5 +1,5 @@
 """
-动食日记 - 极简健身饮食记录
+Fit No.1 - 极简健身饮食记录
 Flask + SQLite + Gemini API
 """
 import json, os, sqlite3, datetime

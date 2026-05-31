@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>动食日记</title>
+<title>Fit No.1</title>
 <style>
 :root{--bg:#F5F5F7;--card:#FFFFFF;--text:#1D1D1F;--sub:#86868B;--border:#E5E5EA;--divider:#F2F2F7;--green:#4CAF50;--orange:#FF9500;--blue:#007AFF;--red:#FF3B30}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -104,7 +104,7 @@ function home(){
   const latestW=S.measurements&&S.measurements.length>0?S.measurements[0].weight:(S.user.current_weight||0)
 
   $('#app').innerHTML=`
-    <div class="nav"><span class="nav-t">动食日记</span><span class="text-sub">${T}</span></div>
+    <div class="nav"><span class="nav-t">Fit No.1</span><span class="text-sub">${T}</span></div>
     <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()">
       <span class="mode-emoji">${c.emoji}</span><div><span class="mode-label">${c.label}</span><span class="mode-desc">${c.desc} · 点击切换</span></div>
     </div>

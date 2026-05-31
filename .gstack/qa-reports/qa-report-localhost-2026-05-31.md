@@ -1,4 +1,4 @@
-# QA Report — 动食日记 Fit01
+# QA Report — Fit No.1 Fit01
 
 **Date:** 2026-05-31  
 **Target:** http://localhost:8080  
