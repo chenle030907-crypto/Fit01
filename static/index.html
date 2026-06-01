@@ -167,6 +167,7 @@ function home(){
       <div class="food-row"><span>饮食摄入</span><span class="bold">${eaten} kcal</span></div>
       <div class="food-row" style="border-bottom:none"><span>运动消耗 · 训练${wb}kcal + 步数${S.stepCal||0}kcal</span><span class="bold" style="color:var(--red)">-${totalBurn} kcal</span></div>
     </div>
+    ${g.coachAdvice?`<div class="card" style="background:var(--fill);margin-top:8px"><span class="text-sm">💬 ${g.coachAdvice}</span></div>`:''}
     <div class="macro-row">${renderMacroBar('蛋白',Math.round(S.mealsProtein||0),g.protein||0,'var(--orange)')}${renderMacroBar('碳水',Math.round(S.mealsCarbs||0),g.carbs||0,'var(--green)')}${renderMacroBar('脂肪',Math.round(S.mealsFat||0),g.fat||0,'var(--blue)')}</div>
     <div class="card"><span class="c-title">🚶 步数</span><div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val">${(S.steps||0).toLocaleString()}</span><span class="text-sub">步</span><span class="text-sm" style="color:var(--orange);margin-left:auto">消耗 ≈${S.stepCal||0} kcal</span></div><div class="input-row mt8"><input class="input sm" id="step-in" type="number" placeholder="步数" value="" style="flex:1;text-align:center;font-size:18px;font-weight:600"><button class="btn primary sm" onclick="recordSteps()">更新</button></div></div>
     <div class="card"><span class="c-title">💧 饮水 · ${pct}%</span>
@@ -327,7 +328,7 @@ function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_t
 function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
 function loadWorkouts(){return api('/api/workouts?date='+T()).then(ws=>{S.workouts=ws})}
 function loadDishes(){return api('/api/dishes').then(ds=>{S.dishes=ds})}
-function loadGoals(){let u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode})}).then(g=>{S.goals=g})}
+function loadGoals(){let u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode,training_intensity:u.training_intensity||'中强度'})}).then(g=>{S.goals=g})}
 function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
 function loadWater(){return api('/api/water?date='+T()).then(w=>{S.water=w})}
 function loadWaterTarget(){let u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
@@ -350,10 +351,11 @@ function editProfile(){
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:28px"><span class="unit-label">cm</span></span><span class="unit-wrap" style="flex:1"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:28px"><span class="unit-label">kg</span></span></div>
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:28px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}" style="flex:1"></div>
     <select class="input mb8" id="pf-al">${[{v:1.2,l:'久坐'},{v:1.375,l:'轻度'},{v:1.55,l:'中度'},{v:1.725,l:'高度'},{v:1.9,l:'极强度'}].map(o=>`<option value="${o.v}" ${u.activity_level==o.v?'selected':''}>${o.l}</option>`).join('')}</select>
+    <select class="input mb8" id="pf-ti">${['低强度','中强度','高强度'].map(o=>`<option value="${o}" ${(u.training_intensity||'中强度')==o?'selected':''}>训练强度: ${o}</option>`).join('')}</select>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveProfile()">保存</button><button class="cancel-btn" onclick="$('#pf-m').remove()">取消</button></div></div></div>`)
 }
 function saveProfile(){
-  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55}
+  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55,training_intensity:$('#pf-ti')?.value||'中强度'}
   api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadAll().then(render);toast('已保存')})
 }
 

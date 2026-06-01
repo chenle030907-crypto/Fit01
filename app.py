@@ -31,6 +31,7 @@ def init_db():
             gender INTEGER DEFAULT 1, height REAL DEFAULT 170,
             current_weight REAL DEFAULT 70, target_weight REAL DEFAULT 65,
             birth_date TEXT DEFAULT '1995-01-01', activity_level REAL DEFAULT 1.55,
+            training_intensity TEXT DEFAULT '中强度',
             workout_type TEXT DEFAULT 'happy'
         );
         CREATE TABLE IF NOT EXISTS meals (
@@ -168,7 +169,7 @@ def user():
         u = db.execute("SELECT * FROM users WHERE id=1").fetchone()
         return jsonify(dict(u) if u else {})
     data = request.get_json()
-    fields = ["nickname","gender","height","current_weight","target_weight","birth_date","activity_level","workout_type"]
+    fields = ["nickname","gender","height","current_weight","target_weight","birth_date","activity_level","training_intensity","workout_type"]
     vals = {k: data[k] for k in fields if k in data}
     if vals:
         cols = ", ".join(f"{k}=?" for k in vals)
@@ -327,34 +328,36 @@ def calc_nutrition():
     g = data.get("gender",1)
     al = data.get("activity_level",1.55)
     tw = data.get("target_weight",65)
+    ti = data.get("training_intensity","中强度")
     mode = data.get("mode","happy")
     age = datetime.date.today().year - int(bw[:4])
-    mode_names = {"cardio":"有氧日(高碳水)","strength":"无氧日(高蛋白)","happy":"Happy休息日","cheat":"放纵日"}
-    prompt = f"""你是运动营养学专家。用户{age}岁,性别{'男' if g==1 else '女'},{w}kg,{h}cm,目标{tw}kg,活动系数{al}。今天是{mode_names.get(mode,mode)}。
-根据运动营养学精确计算:
-- BMR基础代谢(Mifflin-St Jeor公式)
-- TDEE日总消耗
-- 今日目标热量(根据模式调整:有氧日+15%,无氧日+10%,Happy日维持,放纵日+30%)
-- 蛋白质g(有氧1.4g/kg,无氧2.0g/kg,Happy1.2g/kg,放纵1.0g/kg)
-- 脂肪g(0.8-1.0g/kg)
-- 碳水g(剩余热量/4)
-- 膳食纤维g(男30g/女25g)
-只返回纯JSON:{{"bmr":数字,"tdee":数字,"target_calories":数字,"protein":数字,"carbs":数字,"fat":数字,"fiber":数字}}"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=256, json_mode=True)
+    weight_phase = "减脂/刷脂期" if tw < w else ("增肌期" if tw > w else "维持期")
+    prompt = f"""【用户生理状态与阶段目标】
+- 身高: {h}cm, 当前体重: {w}kg, 目标体重: {tw}kg, 年龄: {age}岁, 性别: {'男' if g==1 else '女'}
+- 体重阶段: {weight_phase}
+- 长期总体训练强度基调: {ti}
+
+【今日选定模式】{mode}（{'有氧日-大幅放大热量' if mode=='cardio' else '无氧日-主打高蛋白' if mode=='strength' else 'Happy休息日-基础代谢维护' if mode=='happy' else '放纵日-补偿机制放大消耗'}）
+
+【AI营养师计算要求】
+1. 根据身高、当前体重、年龄算出基础代谢BMR
+2. 根据体重差值判定热量方向（减脂期引入安全赤字，增肌期引入盈余）
+3. 结合模式和训练强度精密微调目标卡路里和三大营养素
+4. 有氧日: 结合强度放大热量，高碳水配比；无氧日: 蛋白质1.5-2.0g/kg体重；Happy日: 回归基础代谢线；放纵日: 合理放大消耗目标
+
+只返回纯JSON:{{"bmr":数字,"tdee":数字,"target_calories":数字,"protein":数字,"carbs":数字,"fat":数字,"fiber":数字,"coachAdvice":"一句大白话饮食/训练指导"}}"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=300, json_mode=True)
     result = parse_ai_json(reply)
     if result: return jsonify(result)
     # Fallback
-    age = datetime.date.today().year - int(bw[:4])
     bmr = int(10*w + 6.25*h - 5*age + (5 if g==1 else -161))
     tdee = int(bmr * al)
     adj = -500 if (tw-w)<-5 else (-300 if (tw-w)<-2 else (400 if (tw-w)>5 else 0))
     mode_mult = {"cardio":1.15,"strength":1.10,"happy":1.0,"cheat":1.30}
     target_cal = max(1200, int((tdee + adj) * mode_mult.get(mode, 1.0)))
     ppk = {"cardio":1.4,"strength":2.0,"happy":1.2,"cheat":1.0}.get(mode,1.2)
-    protein = int(w * ppk)
-    fat = int(w * 0.9)
-    carbs = max(0, int((target_cal - protein*4 - fat*9)/4))
-    return jsonify({"bmr":bmr,"tdee":tdee,"target_calories":target_cal,"protein":protein,"carbs":carbs,"fat":fat,"fiber":30 if g==1 else 25})
+    protein = int(w * ppk); fat = int(w * 0.9); carbs = max(0, int((target_cal - protein*4 - fat*9)/4))
+    return jsonify({"bmr":bmr,"tdee":tdee,"target_calories":target_cal,"protein":protein,"carbs":carbs,"fat":fat,"fiber":30 if g==1 else 25,"coachAdvice":"保持均衡饮食，坚持训练"})
 
 # ── Hydration efficiency lookup ──
 HYDRATION_EFFICIENCY = {
