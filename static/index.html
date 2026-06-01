@@ -514,12 +514,13 @@ function addStrengthRow(name=''){
     <button class="btn sm danger mt8" onclick="this.closest('.card').remove();estimateCalories()">× 移除</button></div>`)
 }
 function addCardioSeg(exName=''){
-  let n=$('#wo-segs').children.length+1,dur=parseInt($('#wo-dr')?.value||45)
+  let n=$('#wo-segs').children.length+1
   let namePart=exName?`<span style="font-size:17px;font-weight:600">${CARDIO_PRESETS[exName]?.emoji||''} ${CARDIO_PRESETS[exName]?.name||exName}</span>`:`<input class="input" placeholder="运动名称（如：跑步、跳绳）" value="" style="font-size:17px;font-weight:600;flex:2">`
   $('#wo-segs').insertAdjacentHTML('beforeend',`<div class="card mt8" style="padding:14px;background:var(--bg);margin:8px 0 0">
-    <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px"><span class="text-sub">第${n}段</span><button class="btn sm danger" onclick="this.closest('.card').remove();estimateCalories()">×</button></div>
-    <div class="input-row mb8">${namePart}<span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="${dur}" value="${dur}" style="padding:14px 32px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">分钟</span></span></div>
+    <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px"><span class="text-sub">第${n}段</span><button class="btn sm danger" onclick="this.closest('.card').remove();updateTotalDuration()">×</button></div>
+    <div class="input-row mb8">${namePart}<span class="unit-wrap" style="flex:1"><input class="input sm seg-dur" type="number" placeholder="分钟" value="" style="padding:14px 32px 14px 14px;font-size:17px;text-align:center;width:100%" oninput="updateTotalDuration()"><span class="unit-label" style="font-size:13px;right:10px">分钟</span></span></div>
   </div>`)
+  updateTotalDuration()
 }
 function fillCardioSeg(key){
   let filled=false
@@ -527,6 +528,12 @@ function fillCardioSeg(key){
   if(!filled)addCardioSeg(key)
 }
 function quickCardio(key){if(!$('#wo-segs').children.length)addCardioSeg(key);else fillCardioSeg(key)}
+function updateTotalDuration(){
+  let total=0
+  $('#wo-segs').querySelectorAll('.seg-dur').forEach(inp=>{total+=parseInt(inp.value)||0})
+  if($('#wo-segs').children.length>0){$('#wo-dr').value=total;$('#wo-dr').disabled=true}
+  else{$('#wo-dr').disabled=false}
+}
 function estimateCalories(){
   let tp=$('#wo-tp')?.value||'strength',desc=''
   if(tp==='cardio'){
