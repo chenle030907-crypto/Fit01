@@ -337,7 +337,9 @@ function loadHistory(){return api('/api/user/recent-records?days=7').then(r=>{S.
 function renderHistory(){
   let h=S.history||[];if(!h.length)return''
   let modeColors={'有氧日':'#0071e3,#e1f0ff','无氧日':'#34c759,#eafaf1','Happy日':'#af52de,#f5eafa','放纵日':'#ff9500,#fff9e6'}
-  return`<div class="card" style="margin-top:0"><span class="c-title">历史动态复盘</span>`+
+  let u=S.user||{},td=u.target_date||''
+  let daysLeft='';if(td){try{let t=new Date(td),now=new Date();daysLeft=Math.ceil((t-now)/86400000);daysLeft=daysLeft>0?'还剩'+daysLeft+'天':'已到期'}catch(e){}}
+  return`<div class="card" style="margin-top:0"><div style="display:flex;justify-content:space-between;align-items:center"><span class="c-title">周期动态复盘</span>${td?`<span style="font-size:12px;color:var(--blue);font-weight:500;background:rgba(0,122,255,.1);padding:2px 8px;border-radius:20px">目标日:${td.slice(5)} (${daysLeft})</span>`:''}</div>`+
     h.slice(-7).reverse().map(r=>{
       let net=r.actualCaloriesIn-(r.actualCaloriesBurn||0)
       let over=net-(r.targetCalories||2000)

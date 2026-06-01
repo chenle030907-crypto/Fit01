@@ -420,25 +420,29 @@ def get_hydration(drink_type, amount, api_key=None):
 @app.route("/api/user/recent-records", methods=["GET"])
 def recent_records():
     db = get_db()
-    days = int(request.args.get("days", 7))
-    end = datetime.date.today()
-    start = end - datetime.timedelta(days=days-1)
+    u = db.execute("SELECT * FROM users WHERE id=1").fetchone()
+    if not u: return jsonify([])
+    u = dict(u)
+    target_date = u.get("target_date", "")
+    end_date = datetime.date.today()
+    if target_date:
+        try: end_date = min(end_date, datetime.date.fromisoformat(target_date))
+        except: pass
+    start_date = end_date - datetime.timedelta(days=6)
     records = []
-    current = start
-    while current <= end:
+    current = start_date
+    while current <= end_date:
         ds = current.isoformat()
         meals = db.execute("SELECT * FROM meals WHERE date=?", [ds]).fetchall()
         workouts = db.execute("SELECT * FROM workouts WHERE date=?", [ds]).fetchall()
-        u = db.execute("SELECT * FROM users WHERE id=1").fetchone()
         total_in = 0
         for m in meals:
             try:
                 for f in json.loads(m["foods"]): total_in += f.get("calories", 0)
             except: pass
         total_burn = sum(w["calories"] or 0 for w in workouts)
-        mode = dict(u).get("workout_type", "happy") if u else "happy"
+        mode = u.get("workout_type", "happy")
         mode_names = {"cardio":"有氧日","strength":"无氧日","happy":"Happy日","cheat":"放纵日"}
-        # Get target for that day (rough estimate from stored mode)
         records.append({
             "date": ds,
             "mode": mode_names.get(mode, mode),
