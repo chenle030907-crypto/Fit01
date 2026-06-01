@@ -406,17 +406,41 @@ def recalc_nutrition():
 @app.route("/api/workout-calories", methods=["POST"])
 def workout_calories():
     data = request.get_json()
-    weight = data.get("weight", 70)
+    weight = float(data.get("weight", 70))
+    height = float(data.get("height", 170))
+    tp = data.get("type", "strength")
+    dur = int(data.get("duration", 0))
+    exercises = data.get("exercises", [])
+    segments = data.get("segments", [])
     desc = data.get("description", "")
-    if not desc.strip(): return jsonify({"calories": 0, "note": "no data"})
-    prompt = f"""你是运动科学专家。用户体重{weight}kg。训练内容:{desc}。请根据运动科学公式精确计算总消耗热量(考虑坡度、速度、体重、时长)。只返回JSON:{{"calories":数字,"note":"简短说明(中文)"}}"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=256)
-    try:
-        result = parse_ai_json(reply)
-        if result:
-            return jsonify(result)
-    except: pass
-    return jsonify({"calories": 300, "note": "估算值"})
+
+    # Validation
+    if tp == "cardio":
+        if dur <= 0: return jsonify({"calories": 0, "note": "请输入运动时间"})
+    else:
+        if not exercises: return jsonify({"calories": 0, "note": "请先添加训练动作"})
+        has_valid = any(e.get("name") and e.get("sets", 0) > 0 for e in exercises)
+        if not has_valid: return jsonify({"calories": 0, "note": "请填写动作名称和组数"})
+
+    if tp == "cardio":
+        seg_desc = ", ".join(f"{s.get('name','有氧')}{s.get('minutes',0)}分钟" for s in segments) if segments else f"有氧{dur}分钟"
+        prompt = f"""你是运动科学专家。用户{weight}kg/{height}cm。有氧训练:{seg_desc}。根据运动科学公式精确计算消耗热量(考虑体重、时长、运动强度)。只返回JSON:{{"calories":数字,"note":"说明"}}"""
+    else:
+        ex_desc = ", ".join(f"{e.get('name','训练')}{e.get('sets',0)}组×{e.get('reps',0)}次×{e.get('weight',0)}kg" for e in exercises)
+        total_volume = sum(e.get("sets",0)*e.get("reps",0)*e.get("weight",0) for e in exercises)
+        prompt = f"""你是运动科学专家。用户{weight}kg/{height}cm。力量训练:{ex_desc}。总训练量{total_volume}kg。根据运动科学公式精确计算消耗热量(考虑体重、训练量、动作复合度)。只返回JSON:{{"calories":数字,"note":"说明"}}"""
+
+    reply = call_ai(prompt, temp=0.1, max_tokens=256, json_mode=True)
+    result = parse_ai_json(reply)
+    if result: return jsonify(result)
+    # Fallback formula
+    if tp == "cardio":
+        cal = max(50, int(dur * 7 * weight / 70))
+        return jsonify({"calories": cal, "note": f"{dur}分钟有氧 · {cal}kcal"})
+    else:
+        total_vol = sum(e.get("sets",0)*e.get("reps",0)*e.get("weight",0) for e in exercises)
+        cal = max(30, int(total_vol * 0.1 * weight / 70 + len(exercises) * 30))
+        return jsonify({"calories": cal, "note": f"{len(exercises)}个动作 · {cal}kcal"})
 
 # ── Water API ──
 @app.route("/api/water", methods=["GET","POST"])

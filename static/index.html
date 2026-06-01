@@ -550,8 +550,27 @@ function estimateCalories(){
     desc=parts.join(', ')
   }
   $('#wo-cal').value='...'
-  api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:S.user?.current_weight||70,description:desc})}).then(r=>{
-    if(r.calories){$('#wo-cal').value=r.calories;toast('AI估算: '+r.calories+'kcal')}
+  let payload={weight:S.user?.current_weight||70,height:S.user?.height||170,type:tp,description:desc}
+  // Add detailed exercise data for AI precision
+  if(tp==='cardio'){
+    let dur=parseInt($('#wo-dr')?.value||0);payload.duration=dur
+    let segs=[]
+    $('#wo-segs').querySelectorAll('.card').forEach(card=>{
+      let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||card.querySelector('span')?.textContent?.trim()||'有氧'
+      let d=parseInt(inps[1]?.value)||0;if(d>0)segs.push({name:n,minutes:d})
+    })
+    payload.segments=segs
+  }else{
+    let actions=[]
+    $('#wo-exs').querySelectorAll('.card').forEach(card=>{
+      let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||'',s=parseInt(inps[1]?.value)||0
+      let re=parseInt(inps[2]?.value)||0,w=parseInt(inps[3]?.value)||0
+      if(n&&s>0)actions.push({name:n,sets:s,reps:re,weight:w})
+    })
+    payload.exercises=actions
+  }
+  api('/api/workout-calories',{method:'POST',body:JSON.stringify(payload)}).then(r=>{
+    if(r.calories){$('#wo-cal').value=r.calories;toast(`AI估算: ${r.calories}kcal${r.note?' · '+r.note:''}`)}
     else{$('#wo-cal').value=300}
   }).catch(()=>{$('#wo-cal').value=300})
 }
