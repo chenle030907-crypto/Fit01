@@ -486,7 +486,7 @@ function addWorkoutModal(){
     <div class="modal-title">记录训练</div>
     <div style="display:flex;flex-direction:column;gap:14px;width:100%;margin-bottom:8px">
       <select class="input" id="wo-tp" onchange="toggleWoType()" style="width:100%"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select>
-      <div class="flex g8">
+      <div class="flex g8" id="wo-time-row">
         <span class="unit-wrap" style="flex:1"><input class="input" id="wo-dr" type="number" value="45" style="padding-right:32px;width:100%"><span class="unit-label">min</span></span>
         <span class="unit-wrap" style="flex:1;display:flex;align-items:center;background:var(--fill);border-radius:10px;padding:0 4px 0 14px;height:44px"><input class="input" id="wo-cal" type="number" value="300" style="flex:1;background:transparent;padding:0;border:none;font-size:17px;text-align:right" placeholder="0"><span style="color:var(--sub);font-size:13px;margin:0 8px;white-space:nowrap">kcal</span><button class="btn primary sm" onclick="estimateCalories()" style="border-radius:8px;padding:6px 10px;font-size:12px;white-space:nowrap;flex-shrink:0">AI估算</button></span>
       </div></div>
@@ -499,6 +499,7 @@ function toggleWoType(){
   let isCardio=$('#wo-tp').value==='cardio'
   $('#wo-st').classList.toggle('hidden',isCardio)
   $('#wo-cd').classList.toggle('hidden',!isCardio)
+  let tr=$('#wo-time-row');if(tr)tr.style.display=isCardio?'flex':'none'
   if(isCardio&&!$('#wo-segs').children.length)addCardioSeg('running')
 }
 function addStrengthRow(name=''){
@@ -528,14 +529,27 @@ function fillCardioSeg(key){
 }
 function quickCardio(key){if(!$('#wo-segs').children.length)addCardioSeg(key);else fillCardioSeg(key)}
 function estimateCalories(){
-  let dur=parseInt($('#wo-dr')?.value||45),tp=$('#wo-tp')?.value||'strength',segs=[]
-  if(!dur||dur<1)return toast('请先输入运动时间')
+  let tp=$('#wo-tp')?.value||'strength',desc=''
+  if(tp==='cardio'){
+    let dur=parseInt($('#wo-dr')?.value||0)
+    if(!dur||dur<1)return toast('请先输入有氧运动时间')
+    let segs=[]
+    $('#wo-segs').querySelectorAll('.card').forEach(card=>{
+      let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||card.querySelector('span')?.textContent?.trim()||'有氧'
+      let d=parseInt(inps[1]?.value)||0;if(d>0)segs.push(n+' '+d+'min')
+    })
+    desc=segs.length?segs.join(', ')+' 总'+dur+'分钟':'有氧 '+dur+'分钟'
+  }else{
+    let hasValid=false,parts=[]
+    $('#wo-exs').querySelectorAll('.card').forEach(card=>{
+      let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||''
+      let s=parseInt(inps[1]?.value)||0,re=parseInt(inps[2]?.value)||0,w=parseInt(inps[3]?.value)||0
+      if(n&&s>0){hasValid=true;parts.push(n+' '+s+'组×'+re+'次×'+w+'kg')}
+    })
+    if(!hasValid)return toast('请先添加至少一个训练动作和组数')
+    desc=parts.join(', ')
+  }
   $('#wo-cal').value='...'
-  $('#wo-segs').querySelectorAll('.card').forEach(card=>{
-    let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||card.querySelector('span')?.textContent?.trim()||'有氧'
-    let d=parseInt(inps[1]?.value)||0;if(d>0)segs.push(n+' '+d+'min')
-  })
-  let desc=tp==='cardio'&&segs.length?segs.join(', ')+' 总'+dur+'分钟组合有氧':'力量训练 '+dur+'分钟'
   api('/api/workout-calories',{method:'POST',body:JSON.stringify({weight:S.user?.current_weight||70,description:desc})}).then(r=>{
     if(r.calories){$('#wo-cal').value=r.calories;toast('AI估算: '+r.calories+'kcal')}
     else{$('#wo-cal').value=300}
