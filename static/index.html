@@ -360,7 +360,7 @@ function saveProfile(){
 }
 
 // ── Meal modal ──
-function addMealModal(){window._foods=[];window._ingredients=[]
+function addMealModal(){window._foods=[];window._ingredients=[];setTimeout(syncDishMode,200)
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="mc-m"><div class="modal-box"><div class="modal-body">
     <div class="modal-title">添加饮食</div>
     <div class="flex g8 mb8"><select class="input sm" id="mc-tp"><option value="lunch">午餐</option><option value="breakfast">早餐</option><option value="dinner">晚餐</option><option value="snack">加餐</option></select><span class="text-sub ml-auto">时间</span><input class="input sm" style="width:80px" id="mc-tm" value="${now()}"></div>
@@ -377,8 +377,8 @@ function addMealModal(){window._foods=[];window._ingredients=[]
         <button class="btn primary sm mt8" onclick="addPhotoFood()">确认添加该菜品</button>
       </div>
     </div>
-    <span class="text-sub mt8">整盘菜品估算</span>
-    <div class="input-row mt4"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-dw" type="number" placeholder="克数" value="" style="padding-right:28px;width:100%"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="estimateDish()" style="flex-shrink:0">AI估算</button></div>
+    <span class="text-sub mt8">整盘菜品估算 <span id="mc-dish-hint" class="text-sm"></span></span>
+    <div class="input-row mt4"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-dw" type="number" placeholder="克数" value="" style="padding-right:28px;width:100%"><span class="unit-label">g</span></span><button class="btn primary sm" id="mc-dish-btn" onclick="estimateDish()" style="flex-shrink:0">AI估算</button></div>
     <div id="mc-dish-est" class="mt4"></div>
     <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
     <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2" onfocus="clearPhotoCard()"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:28px;width:100%" onfocus="clearPhotoCard()"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
@@ -473,7 +473,14 @@ function addIngredient(){
   clearPhotoCard()
   if(!window._ingredients)window._ingredients=[];window._ingredients.push(n+' '+g+'g');$('#mc-nm').value='';refreshIngredients();$('#mc-parse').style.display='block'
 }
-function refreshIngredients(){let h='';(window._ingredients||[]).forEach((ing,i)=>{h+=`<div class="food-row"><span>${ing}</span><button class="btn sm danger" onclick="removeIngredient(${i})">×</button></div>`});$('#mc-ings').innerHTML=h}
+function refreshIngredients(){let h='';(window._ingredients||[]).forEach((ing,i)=>{h+=`<div class="food-row"><span>${ing}</span><button class="btn sm danger" onclick="removeIngredient(${i})">×</button></div>`});$('#mc-ings').innerHTML=h;syncDishMode()}
+function syncDishMode(){
+  let hasIngs=window._ingredients&&window._ingredients.length>0
+  let dw=$('#mc-dw'),btn=$('#mc-dish-btn'),hint=$('#mc-dish-hint')
+  if(dw){dw.disabled=hasIngs;dw.style.opacity=hasIngs?'0.4':'1'}
+  if(hint)hint.textContent=hasIngs?'（已启用具体食材计算）':''
+  if(btn)btn.textContent=hasIngs?'食材计算':btn.textContent
+}
 function removeIngredient(i){window._ingredients.splice(i,1);refreshIngredients();if(!window._ingredients.length)$('#mc-parse').style.display='none'}
 function parseIngredients(){
   let txt=(window._ingredients||[]).join(', ');if(!txt)return
@@ -488,9 +495,24 @@ function parseIngredients(){
 function useDish(id){api('/api/dishes').then(ds=>{let d=ds.find(x=>x.id===id);if(!d)return;let fs;try{fs=JSON.parse(d.foods)}catch(e){return};window._foods=fs;window._ingredients=fs.map(f=>f.name+' '+f.amount+'g');$('#mc-dn').value=d.name;refreshIngredients();$('#mc-parse').style.display='none';$('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--fill)"><span class="c-title" style="color:var(--green)">已选用: ${d.name}</span><span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span></div>`})}
 function deleteDish(id){if(!confirm('删除？'))return;api('/api/dishes/'+id,{method:'DELETE'}).then(()=>{toast('已删除');api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el)el.innerHTML=(ds||[]).slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})})}
 function estimateDish(){
+  let hasIngs=window._ingredients&&window._ingredients.length>0
+  // Branch 1: has specific ingredients - AI calculates from ingredient list
+  if(hasIngs){
+    let name=$('#mc-dn')?.value?.trim()||'自定义菜品'
+    let u=S.user||{};$('#mc-dish-est').innerHTML='<span class="text-sm text-sub">🔄 AI 正在计算食材营养...</span>'
+    api('/api/ai/estimate-diet',{method:'POST',body:JSON.stringify({dishName:name,weightGrams:window._ingredients.length*100,userProfile:{currentWeight:u.current_weight||70,targetWeight:u.target_weight||65,height:u.height||170},ingredients:(window._ingredients||[])})}).then(r=>{
+      if(!window._foods)window._foods=[]
+      let ingNames=(window._ingredients||[]).join(',')
+      window._foods.push({name:name,amount:window._ingredients.length*100,calories:r.calories||0,protein:r.protein||0,carbs:r.carbon||0,fat:r.fat||0,unit:'g',dishName:name})
+      $('#mc-dish-est').innerHTML=`<span class="text-sm" style="color:var(--green)">✅ ${r.calories||0}kcal · 蛋白${r.protein||0}g · 碳水${r.carbon||0}g · 脂肪${r.fat||0}g</span>`
+      toast(`${name} · ${r.calories||0}kcal`)
+    }).catch(()=>{$('#mc-dish-est').innerHTML='';toast('估算失败')})
+    return
+  }
+  // Branch 2: no ingredients - need dish name + grams
   let name=$('#mc-dn')?.value?.trim(),g=parseInt($('#mc-dw')?.value||0)
   if(!name)return toast('请输入菜品名称')
-  if(!g||g<1)return toast('请输入克数')
+  if(!g||g<1)return toast('请输入克数（或先添加具体食材）')
   let u=S.user||{};$('#mc-dish-est').innerHTML='<span class="text-sm text-sub">🔄 AI 估算中...</span>'
   api('/api/ai/estimate-diet',{method:'POST',body:JSON.stringify({dishName:name,weightGrams:g,userProfile:{currentWeight:u.current_weight||70,targetWeight:u.target_weight||65,height:u.height||170}})}).then(r=>{
     if(!window._foods)window._foods=[]
