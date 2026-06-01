@@ -325,7 +325,8 @@ def calc_nutrition():
     bmr = int(10*w + 6.25*h - 5*age + (5 if g==1 else -161))
     tdee = int(bmr * al)
     adj = -500 if (tw-w)<-5 else (-300 if (tw-w)<-2 else (400 if (tw-w)>5 else 0))
-    target_cal = max(1200, tdee + adj) * (1.3 if mode=="cheat" else 1)
+    mode_mult = {"cardio":1.15,"strength":1.10,"happy":1.0,"cheat":1.30}
+    target_cal = max(1200, int((tdee + adj) * mode_mult.get(mode, 1.0)))
     ppk = {"cardio":1.4,"strength":2.0,"happy":1.2,"cheat":1.0}.get(mode,1.2)
     protein = int(w * ppk)
     fat = int(w * 0.9)
