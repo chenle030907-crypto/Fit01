@@ -120,7 +120,7 @@ const MODES={cardio:{l:'有氧日',e:'🏃',d:'高碳水供能',bg:'rgba(0,122,2
   happy:{l:'Happy日',e:'😊',d:'休息恢复',bg:'rgba(52,199,89,.08)',c:'#34C759'},
   cheat:{l:'放纵日',e:'🎉',d:'随便吃',bg:'rgba(255,59,48,.08)',c:'#FF3B30'}}
 
-let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500,waterDrinks:[]}
+let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500,waterDrinks:[],steps:0,stepCal:0}
 
 const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',fields:['分钟','速度km/h']},
   walking:{name:'爬坡/快走',emoji:'🚶',fields:['分钟','坡度%','速度km/h']},
@@ -151,7 +151,7 @@ function renderMacroBar(label,val,target,color){
 function home(){
   let m=S.mode||'happy',c=MODES[m],g=S.goals||{}
   let eaten=S.mealsTotal||0,wb=(S.workouts||[]).reduce((s,w)=>s+(w.calories||0),0)
-  let deficit=eaten-(g.tdee||2000)-wb,ds=deficit<-300?'热量缺口':deficit>300?'热量盈余':'热量平衡',dc=deficit<-300?'var(--green)':deficit>300?'var(--red)':'var(--orange)'
+  let deficit=eaten-(g.tdee||2000)-wb-(S.stepCal||0),ds=deficit<-300?'热量缺口':deficit>300?'热量盈余':'热量平衡',dc=deficit<-300?'var(--green)':deficit>300?'var(--red)':'var(--orange)'
   let eff=S.water.reduce((s,w)=>s+(w.effective_ml||w.amount||0),0),raw=S.water.reduce((s,w)=>s+(w.amount||0),0)
   let wt=S.waterTarget||2500,pct=Math.min(100,Math.round(eff/wt*100))
   let bc=pct<30?'var(--red)':pct<70?'var(--orange)':'var(--green)'
@@ -161,6 +161,7 @@ function home(){
     <div class="mode-bar" style="background:${c.bg}" onclick="switchMode()"><span class="mode-emoji">${c.e}</span><div><span class="mode-label" style="color:${c.c}">${c.l}</span><span class="mode-desc">${c.d} · 点击切换</span></div></div>
     <div class="card text-center"><span class="c-title">今日热量缺口</span><span class="big-num" style="color:${dc};margin:4px 0">${deficit>0?'+':''}${deficit}</span><span class="c-unit"> kcal</span><div style="font-size:14px;font-weight:500;color:${dc};margin-top:2px">${ds}</div></div>
     <div class="macro-row">${renderMacroBar('蛋白',Math.round(S.mealsProtein||0),g.protein||0,'var(--orange)')}${renderMacroBar('碳水',Math.round(S.mealsCarbs||0),g.carbs||0,'var(--green)')}${renderMacroBar('脂肪',Math.round(S.mealsFat||0),g.fat||0,'var(--blue)')}</div>
+    <div class="card"><span class="c-title">🚶 步数</span><div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val">${(S.steps||0).toLocaleString()}</span><span class="text-sub">步</span><span class="text-sm" style="color:var(--orange);margin-left:auto">消耗 ≈${S.stepCal||0} kcal</span></div><div class="input-row mt8"><input class="input sm" id="step-in" type="number" placeholder="步数" value="" style="flex:1;text-align:center;font-size:18px;font-weight:600"><button class="btn primary sm" onclick="recordSteps()">更新</button></div></div>
     <div class="card"><span class="c-title">💧 饮水 · ${pct}%</span>
       <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val">${eff}</span><span class="text-sub">/ ${wt} ml</span></div>
       ${raw!==eff?`<div class="text-sm text-sub" style="margin-bottom:6px">实际 ${raw}ml，等效纯水 ${eff}ml</div>`:''}
@@ -281,6 +282,12 @@ function buildRuler(id,val,min,max,step){
   wrap.addEventListener('pointermove',e=>{if(dragging){wrap.scrollLeft=sl+(sx-e.clientX);sync()}})
   wrap.addEventListener('pointerup',()=>{dragging=false})
   setTimeout(sync,300)
+}
+function recordSteps(){
+  let s=parseInt($('#step-in')?.value);if(isNaN(s)||s<0)return toast('请输入步数')
+  S.steps=s;S.stepCal=Math.round(s*0.04*(S.user?.current_weight||70)/70)
+  toast('步数已更新: '+s.toLocaleString()+'步 · ≈'+S.stepCal+'kcal')
+  render()
 }
 function recordWeight(){
   let w=window._wtVal||parseFloat($('#wt-val')?.textContent),bf=window._bfVal||parseFloat($('#bf-val')?.textContent)
