@@ -169,7 +169,7 @@ def user():
         u = db.execute("SELECT * FROM users WHERE id=1").fetchone()
         return jsonify(dict(u) if u else {})
     data = request.get_json()
-    fields = ["nickname","gender","height","current_weight","target_weight","birth_date","activity_level","training_intensity","workout_type"]
+    fields = ["nickname","gender","height","current_weight","target_weight","birth_date","activity_level","training_intensity","workout_type","target_date"]
     vals = {k: data[k] for k in fields if k in data}
     if vals:
         cols = ", ".join(f"{k}=?" for k in vals)
@@ -329,23 +329,45 @@ def calc_nutrition():
     al = data.get("activity_level",1.55)
     tw = data.get("target_weight",65)
     ti = data.get("training_intensity","中强度")
+    td = data.get("target_date","")
+    cd = data.get("current_date", str(datetime.date.today()))
     mode = data.get("mode","happy")
     age = datetime.date.today().year - int(bw[:4])
     weight_phase = "减脂/刷脂期" if tw < w else ("增肌期" if tw > w else "维持期")
+    time_info = ""
+    if td:
+        try:
+            target_dt = datetime.date.fromisoformat(td)
+            current_dt = datetime.date.fromisoformat(cd)
+            days = (target_dt - current_dt).days
+            weeks = round(days/7, 1)
+            time_info = f"\n- 目标达成时限: 从{cd}到{td},共{days}天({weeks}周)"
+            weight_diff = abs(tw - w)
+            if weight_diff > 0 and weeks > 0:
+                weekly_rate = round(weight_diff/weeks, 1)
+                time_info += f"\n- 需每周改变约{weekly_rate}kg"
+                if weekly_rate > 1:
+                    time_info += "（⚠️ 速度偏激进，请AI重点提醒健康风险）"
+                elif weekly_rate > 0.5:
+                    time_info += "（中等速度，需严格饮食控制）"
+                else:
+                    time_info += "（安全平稳区间）"
+        except: pass
     prompt = f"""【用户生理状态与阶段目标】
 - 身高: {h}cm, 当前体重: {w}kg, 目标体重: {tw}kg, 年龄: {age}岁, 性别: {'男' if g==1 else '女'}
 - 体重阶段: {weight_phase}
-- 长期总体训练强度基调: {ti}
+- 长期总体训练强度基调: {ti}{time_info}
 
 【今日选定模式】{mode}（{'有氧日-大幅放大热量' if mode=='cardio' else '无氧日-主打高蛋白' if mode=='strength' else 'Happy休息日-基础代谢维护' if mode=='happy' else '放纵日-补偿机制放大消耗'}）
 
 【AI营养师计算要求】
 1. 根据身高、当前体重、年龄算出基础代谢BMR
-2. 根据体重差值判定热量方向（减脂期引入安全赤字，增肌期引入盈余）
-3. 结合模式和训练强度精密微调目标卡路里和三大营养素
-4. 有氧日: 结合强度放大热量，高碳水配比；无氧日: 蛋白质1.5-2.0g/kg体重；Happy日: 回归基础代谢线；放纵日: 合理放大消耗目标
+2. 根据体重差值和目标时限评估任务难度
+3. 如果时限紧迫: 收紧热量摄入，最大化蛋白质防肌肉流失
+4. 如果时限充裕: 分配平稳可持续的每日热量与营养素
+5. 如果时限过于极端（如1周瘦10kg），在coachAdvice中给出专业警告
 
-只返回纯JSON:{{"bmr":数字,"tdee":数字,"target_calories":数字,"protein":数字,"carbs":数字,"fat":数字,"fiber":数字,"coachAdvice":"一句大白话饮食/训练指导"}}"""
+只返回纯JSON:{{"bmr":数字,"tdee":数字,"target_calories":数字,"protein":数字,"carbs":数字,"fat":数字,"fiber":数字,"coachAdvice":"基于时间跨度的专业指导建议"}}"""
     reply = call_ai(prompt, temp=0.1, max_tokens=300, json_mode=True)
     result = parse_ai_json(reply)
     if result: return jsonify(result)

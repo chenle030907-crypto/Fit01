@@ -328,7 +328,7 @@ function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_t
 function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
 function loadWorkouts(){return api('/api/workouts?date='+T()).then(ws=>{S.workouts=ws})}
 function loadDishes(){return api('/api/dishes').then(ds=>{S.dishes=ds})}
-function loadGoals(){let u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode,training_intensity:u.training_intensity||'中强度'})}).then(g=>{S.goals=g})}
+function loadGoals(){let u=S.user||{};return api('/api/nutrition',{method:'POST',body:JSON.stringify({current_weight:u.current_weight||70,height:u.height||170,birth_date:u.birth_date||'1995-01-01',gender:u.gender||1,activity_level:u.activity_level||1.55,target_weight:u.target_weight||65,mode:S.mode,training_intensity:u.training_intensity||'中强度',target_date:u.target_date||'',current_date:T()})}).then(g=>{S.goals=g})}
 function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
 function loadWater(){return api('/api/water?date='+T()).then(w=>{S.water=w})}
 function loadWaterTarget(){let u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
@@ -350,11 +350,12 @@ function editProfile(){
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="pf-m"><div class="modal-box"><div class="modal-body"><div class="modal-title">编辑资料</div>
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:28px"><span class="unit-label">cm</span></span><span class="unit-wrap" style="flex:1"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:28px"><span class="unit-label">kg</span></span></div>
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:28px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}" style="flex:1"></div>
+    <div class="input-row mb8" style="background:var(--fill);border-radius:10px;padding:0 14px;height:44px;align-items:center"><span style="color:var(--sub);font-size:14px;margin-right:12px;white-space:nowrap">目标达成日期</span><input class="input" id="pf-td" type="date" value="${u.target_date||''}" style="background:transparent;padding:0;border:none;font-size:15px;flex:1"></div>
     <select class="input mb8" id="pf-ti">${['低强度','中强度','高强度'].map(o=>`<option value="${o}" ${(u.training_intensity||'中强度')==o?'selected':''}>训练强度: ${o}</option>`).join('')}</select>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveProfile()">保存</button><button class="cancel-btn" onclick="$('#pf-m').remove()">取消</button></div></div></div>`)
 }
 function saveProfile(){
-  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:1.55,training_intensity:$('#pf-ti')?.value||'中强度'}
+  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:1.55,training_intensity:$('#pf-ti')?.value||'中强度',target_date:$('#pf-td')?.value||''}
   api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadGoals().then(render);toast('资料已更新，目标已重算')})
 }
 
