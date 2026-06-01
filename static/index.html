@@ -336,17 +336,17 @@ function loadWaterTarget(){let u=S.user||{};return api('/api/water-target',{meth
 function loadHistory(){return api('/api/user/recent-records?days=7').then(r=>{S.history=r||[]})}
 function renderHistory(){
   let h=S.history||[];if(!h.length)return''
-  let modeColors={'有氧日':'#0071e3,#e1f0ff','无氧日':'#34c759,#eafaf1','Happy日':'#af52de,#f5eafa','放纵日':'#ff9500,#fff9e6'}
   let u=S.user||{},td=u.target_date||''
-  let daysLeft='';if(td){try{let t=new Date(td),now=new Date();daysLeft=Math.ceil((t-now)/86400000);daysLeft=daysLeft>0?'还剩'+daysLeft+'天':'已到期'}catch(e){}}
-  return`<div class="card" style="margin-top:0"><div style="display:flex;justify-content:space-between;align-items:center"><span class="c-title">周期动态复盘</span>${td?`<span style="font-size:12px;color:var(--blue);font-weight:500;background:rgba(0,122,255,.1);padding:2px 8px;border-radius:20px">目标日:${td.slice(5)} (${daysLeft})</span>`:''}</div>`+
-    h.slice(-7).reverse().map(r=>{
-      let net=r.actualCaloriesIn-(r.actualCaloriesBurn||0)
-      let over=net-(r.targetCalories||2000)
-      let colors=(modeColors[r.mode]||'#86868b,#f5f5f7').split(',')
-      let d=new Date(r.date),today=T(),label=r.date===today?'今天':(d.getMonth()+1)+'月'+d.getDate()+'日'
-      return`<div class="food-row" onclick="S.tab='diet';render()"><div><span class="bold">${label}</span><span class="chip" style="color:${colors[0]};background:${colors[1]};margin-left:8px;font-size:11px">${r.mode||'Happy日'}</span></div><div class="text-right"><span>净摄入 ${net}kcal</span><br><span class="text-sm" style="color:${over>0?'var(--red)':'var(--green)'}">${over>0?'超标 '+(over)+' kcal':'完美达标'}</span></div></div>`
-    }).join('')+'</div>'
+  let daysLeft='';if(td){try{let t=new Date(td),now=new Date();daysLeft=Math.ceil((t-now)/86400000);daysLeft=daysLeft>0?'剩'+daysLeft+'天':'已到期'}catch(e){}}
+  let pts=h.map(r=>r.actualCaloriesIn-(r.actualCaloriesBurn||0))
+  let maxV=Math.max(...pts,500),minV=Math.min(...pts,0),range=maxV-minV||1,W=320,H=160,P=10
+  let toX=i=>P+(W-2*P)*i/(pts.length-1||1)
+  let toY=v=>P+(H-2*P)*(1-(v-minV)/range)
+  let pathD=pts.map((v,i)=>`${i===0?'M':'L'}${toX(i).toFixed(1)},${toY(v).toFixed(1)}`).join(' ')
+  let areaD=`M${toX(0).toFixed(1)},${H-P}L${pathD.slice(1)}L${toX(pts.length-1).toFixed(1)},${H-P}Z`
+  let lbls='';let step=Math.max(1,Math.floor((pts.length-1)/5))
+  for(let i=0;i<pts.length;i+=step){let d=new Date(h[i].date);lbls+=`<text x="${toX(i).toFixed(1)}" y="${H-2}" text-anchor="middle" fill="#86868b" font-size="10">${(d.getMonth()+1)}/${d.getDate()}</text>`}
+  return`<div class="card" style="margin-top:0"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span class="c-title">周期趋势复盘</span>${td?`<span style="font-size:12px;color:var(--blue);font-weight:500;background:rgba(0,122,255,.1);padding:2px 8px;border-radius:20px">目标日:${td.slice(5)} (${daysLeft})</span>`:''}</div><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto"><defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0071e3" stop-opacity=".12"/><stop offset="100%" stop-color="#0071e3" stop-opacity="0"/></linearGradient></defs><path d="${areaD}" fill="url(#ag)"/><path d="${pathD}" fill="none" stroke="#0071e3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${lbls}</svg></div>`
 }
 
 // ── Mode switch ──
