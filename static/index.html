@@ -493,13 +493,15 @@ function addWorkoutModal(){
     <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8 w100" onclick="addStrengthRow()">+ 添加动作（可手写名称）</button><div class="chip-row mt8">${STRENGTH_EXAMPLES.map(e=>`<button class="chip" onclick="addStrengthRow('${e}')">${e}</button>`).join('')}</div></div>
     <div id="wo-cd" class="hidden"><span class="text-sub">分段训练</span><div id="wo-segs"></div><button class="btn outline sm mt8 w100" onclick="addCardioSeg()">+ 添加下一段训练</button><div class="chip-row mt8">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="fillCardioSeg('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div></div>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveWorkout()">保存训练</button><button class="cancel-btn" onclick="$('#wo-m').remove()">取消</button></div></div></div>`)
-  setTimeout(()=>{let el=$('#wo-dr');if(el)el.addEventListener('input',estimateCalories)},100)
+  setTimeout(()=>{toggleWoType();let el=$('#wo-dr');if(el)el.addEventListener('input',estimateCalories)},100)
 }
 function toggleWoType(){
   let isCardio=$('#wo-tp').value==='cardio'
   $('#wo-st').classList.toggle('hidden',isCardio)
   $('#wo-cd').classList.toggle('hidden',!isCardio)
   let tr=$('#wo-time-row');if(tr)tr.style.display=isCardio?'flex':'none'
+  if(!isCardio){$('#wo-dr').value='';$('#wo-cal').value=300}
+  else{$('#wo-dr').value=45}
   if(isCardio&&!$('#wo-segs').children.length)addCardioSeg('running')
 }
 function addStrengthRow(name=''){
@@ -575,8 +577,8 @@ function estimateCalories(){
   }).catch(()=>{$('#wo-cal').value=300})
 }
 function saveWorkout(){
-  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||45,cal=parseInt($('#wo-cal')?.value)||300,u=S.user||{},exs=[],desc=''
-  if(tp==='strength'){
+  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||(tp==='cardio'?45:0),cal=parseInt($('#wo-cal')?.value)||300,u=S.user||{},exs=[],desc=''
+  if(tp==='strength'){dr=0
     $('#wo-exs').querySelectorAll('.card').forEach(card=>{let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||'训练',s=parseInt(inps[1]?.value)||4,re=parseInt(inps[2]?.value)||12,w=parseInt(inps[3]?.value)||0;exs.push({name:n,sets:s,reps:re,weight:w});desc+=n+' '+s+'组×'+re+'次×'+w+'kg; '})
   }else{
     let segs=[];let allNames=[]
