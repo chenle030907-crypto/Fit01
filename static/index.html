@@ -484,7 +484,12 @@ function saveMeal(){
 function addWorkoutModal(){
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="wo-m"><div class="modal-box"><div class="modal-body">
     <div class="modal-title">记录训练</div>
-    <div class="flex g8 mb8"><select class="input sm" id="wo-tp" onchange="toggleWoType()"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-dr" type="number" value="45" style="padding-right:28px;width:100%"><span class="unit-label">min</span></span><span class="unit-wrap" style="width:90px"><input class="input sm" id="wo-cal" type="number" value="300" style="padding-right:28px;width:100%" placeholder="估算"><span class="unit-label">kcal</span></span></div>
+    <div style="display:flex;flex-direction:column;gap:14px;width:100%;margin-bottom:8px">
+      <select class="input" id="wo-tp" onchange="toggleWoType()" style="width:100%"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select>
+      <div class="flex g8">
+        <span class="unit-wrap" style="flex:1"><input class="input" id="wo-dr" type="number" value="45" style="padding-right:32px;width:100%"><span class="unit-label">min</span></span>
+        <span class="unit-wrap" style="flex:1"><input class="input" id="wo-cal" type="number" value="300" style="padding-right:38px;width:100%" placeholder="AI估算"><span class="unit-label">kcal</span></span>
+      </div></div>
     <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8 w100" onclick="addStrengthRow()">+ 添加动作（可手写名称）</button><div class="chip-row mt8">${STRENGTH_EXAMPLES.map(e=>`<button class="chip" onclick="addStrengthRow('${e}')">${e}</button>`).join('')}</div></div>
     <div id="wo-cd" class="hidden"><span class="text-sub">分段训练</span><div id="wo-segs"></div><button class="btn outline sm mt8 w100" onclick="addCardioSeg()">+ 添加下一段训练</button><div class="chip-row mt8">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="fillCardioSeg('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div></div>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveWorkout()">保存训练</button><button class="cancel-btn" onclick="$('#wo-m').remove()">取消</button></div></div></div>`)
