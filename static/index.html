@@ -350,13 +350,12 @@ function editProfile(){
   $('#app').insertAdjacentHTML('beforeend',`<div class="modal-overlay" id="pf-m"><div class="modal-box"><div class="modal-body"><div class="modal-title">编辑资料</div>
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-ht" type="number" value="${u.height||170}" style="padding-right:28px"><span class="unit-label">cm</span></span><span class="unit-wrap" style="flex:1"><input class="input" id="pf-wt" type="number" value="${u.current_weight||70}" style="padding-right:28px"><span class="unit-label">kg</span></span></div>
     <div class="input-row mb8"><span class="unit-wrap" style="flex:1"><input class="input" id="pf-tw" type="number" value="${u.target_weight||65}" style="padding-right:28px"><span class="unit-label">kg</span></span><input class="input" id="pf-bd" type="date" value="${u.birth_date||'1995-01-01'}" style="flex:1"></div>
-    <select class="input mb8" id="pf-al">${[{v:1.2,l:'久坐'},{v:1.375,l:'轻度'},{v:1.55,l:'中度'},{v:1.725,l:'高度'},{v:1.9,l:'极强度'}].map(o=>`<option value="${o.v}" ${u.activity_level==o.v?'selected':''}>${o.l}</option>`).join('')}</select>
     <select class="input mb8" id="pf-ti">${['低强度','中强度','高强度'].map(o=>`<option value="${o}" ${(u.training_intensity||'中强度')==o?'selected':''}>训练强度: ${o}</option>`).join('')}</select>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveProfile()">保存</button><button class="cancel-btn" onclick="$('#pf-m').remove()">取消</button></div></div></div>`)
 }
 function saveProfile(){
-  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:+($('#pf-al')?.value)||1.55,training_intensity:$('#pf-ti')?.value||'中强度'}
-  api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadAll().then(render);toast('已保存')})
+  let d={nickname:'',height:+($('#pf-ht')?.value)||170,current_weight:+($('#pf-wt')?.value)||70,target_weight:+($('#pf-tw')?.value)||65,birth_date:$('#pf-bd')?.value||'1995-01-01',activity_level:1.55,training_intensity:$('#pf-ti')?.value||'中强度'}
+  api('/api/user',{method:'POST',body:JSON.stringify(d)}).then(()=>{$('#pf-m').remove();loadGoals().then(render);toast('资料已更新，目标已重算')})
 }
 
 // ── Meal modal ──
