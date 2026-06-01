@@ -109,11 +109,18 @@ def normalize_photo_result(obj):
     return d
 
 # ── AI APIs (Qwen) ──
+SYSTEM_PROMPT = """Role: 你是一位拥有10年经验的高级运动营养师与王牌体能教练。
+Task: 负责计算用户的每日营养目标或单次运动的卡路里消耗。
+Rule: 你必须基于用户的具体身高、体重、运动项目、强度、组数次数进行精准的生理学估算。拒绝给出模糊范围，必须给出明确的整数数值。
+Output Format: 必须严格只返回JSON字符串，不要包含任何Markdown标记、解释或闲聊。"""
+
 def call_ai(prompt, temp=0.1, max_tokens=1024, json_mode=False):
     if not API_KEY: return None
     try:
-        body = {"model":"qwen3.6-flash","messages":[{"role":"user","content":prompt}],
-                "temperature":temp,"max_tokens":max_tokens,"enable_thinking":False}
+        body = {"model":"qwen3.6-flash","messages":[
+            {"role":"system","content":SYSTEM_PROMPT},
+            {"role":"user","content":prompt}
+        ],"temperature":temp,"max_tokens":max_tokens,"enable_thinking":False}
         if json_mode: body["response_format"] = {"type": "json_object"}
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
