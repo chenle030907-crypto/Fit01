@@ -377,10 +377,12 @@ function addMealModal(){window._foods=[];window._ingredients=[]
         <button class="btn primary sm mt8" onclick="addPhotoFood()">确认添加该菜品</button>
       </div>
     </div>
+    <span class="text-sub mt8">整盘菜品估算</span>
+    <div class="input-row mt4"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-dw" type="number" placeholder="克数" value="" style="padding-right:28px;width:100%"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="estimateDish()" style="flex-shrink:0">AI估算</button></div>
+    <div id="mc-dish-est" class="mt4"></div>
     <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
     <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2" onfocus="clearPhotoCard()"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:28px;width:100%" onfocus="clearPhotoCard()"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
     <div id="mc-ings" class="mt8"></div>
-    <div class="input-row mt8"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）"></div>
     <button class="btn outline w100 mt8" id="mc-parse" onclick="parseIngredients()" style="display:none">🔍 解析菜品</button>
     <div id="mc-res" class="mt8"></div>
     <span class="text-sub mt8">已保存菜品</span><div class="chip-row mt4" id="mc-dishes"></div>
@@ -485,6 +487,21 @@ function parseIngredients(){
 }
 function useDish(id){api('/api/dishes').then(ds=>{let d=ds.find(x=>x.id===id);if(!d)return;let fs;try{fs=JSON.parse(d.foods)}catch(e){return};window._foods=fs;window._ingredients=fs.map(f=>f.name+' '+f.amount+'g');$('#mc-dn').value=d.name;refreshIngredients();$('#mc-parse').style.display='none';$('#mc-res').innerHTML=`<div class="card" style="margin:8px 0 0;background:var(--fill)"><span class="c-title" style="color:var(--green)">已选用: ${d.name}</span><span class="c-val">${d.calories||0}</span><span class="c-unit"> kcal</span></div>`})}
 function deleteDish(id){if(!confirm('删除？'))return;api('/api/dishes/'+id,{method:'DELETE'}).then(()=>{toast('已删除');api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el)el.innerHTML=(ds||[]).slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})})}
+function estimateDish(){
+  let name=$('#mc-dn')?.value?.trim(),g=parseInt($('#mc-dw')?.value||0)
+  if(!name)return toast('请输入菜品名称')
+  if(!g||g<1)return toast('请输入克数')
+  let u=S.user||{};$('#mc-dish-est').innerHTML='<span class="text-sm text-sub">🔄 AI 估算中...</span>'
+  api('/api/ai/estimate-diet',{method:'POST',body:JSON.stringify({dishName:name,weightGrams:g,userProfile:{currentWeight:u.current_weight||70,targetWeight:u.target_weight||65,height:u.height||170}})}).then(r=>{
+    if(!window._foods)window._foods=[]
+    window._foods.push({name:name,amount:g,calories:r.calories||0,protein:r.protein||0,carbs:r.carbon||0,fat:r.fat||0,unit:'g',dishName:name})
+    if(!window._ingredients)window._ingredients=[]
+    window._ingredients.push(name+' '+g+'g')
+    refreshIngredients();$('#mc-parse').style.display='block'
+    $('#mc-dish-est').innerHTML=`<span class="text-sm" style="color:var(--green)">✅ ${r.calories||0}kcal · 蛋白${r.protein||0}g · 碳水${r.carbon||0}g · 脂肪${r.fat||0}g</span>${r.advice?`<div class="text-sm text-sub">💬 ${r.advice}</div>`:''}`
+    toast(`${name} ${g}g · ${r.calories||0}kcal`)
+  }).catch(()=>{$('#mc-dish-est').innerHTML='';toast('估算失败')})
+}
 function saveMeal(){
   let fs=window._foods||[];if(!fs.length)return toast('请先解析食材')
   let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now(),dn=$('#mc-dn')?.value?.trim()||fs.map(f=>f.name).sort().join('+')

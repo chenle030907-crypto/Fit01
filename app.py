@@ -394,6 +394,30 @@ def get_hydration(drink_type, amount, api_key=None):
         except: pass
     return amount
 
+# ── Dish Nutrition AI ──
+@app.route("/api/ai/estimate-diet", methods=["POST"])
+def estimate_diet():
+    data = request.get_json()
+    name = data.get("dishName","").strip()
+    grams = data.get("weightGrams",0)
+    u = data.get("userProfile",{})
+    cw = u.get("currentWeight",70); tw = u.get("targetWeight",65); h = u.get("height",170)
+    if not name or grams <= 0: return jsonify({"error":"missing fields"}), 400
+    prompt = f"""【Role】你是一位拥有10年临床经验的高级运动营养师。
+【Context】用户身高{h}cm,当前体重{cw}kg,目标体重{tw}kg({'减脂期' if tw<cw else '增肌期' if tw>cw else '维持期'})。
+【Task】用户吃了一盘中餐:{name},总重量{grams}克。
+
+【计算要求】
+1. 根据常识拆解该菜品在{grams}g下的典型食材配比
+2. 计算该重量下的总卡路里、碳水、蛋白质、脂肪
+3. 如果用户在减脂期，建议是否适合
+
+只返回纯JSON:{{"calories":数字,"carbon":数字,"protein":数字,"fat":数字,"advice":"一句话建议"}}"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=256, json_mode=True)
+    result = parse_ai_json(reply)
+    if result: return jsonify(result)
+    return jsonify({"calories":500,"carbon":50,"protein":20,"fat":15,"advice":"注意控制油盐摄入"})
+
 # ── Photo Food Analysis ──
 @app.route("/api/analyze-photo", methods=["POST"])
 def analyze_photo():
