@@ -487,21 +487,20 @@ function addWorkoutModal(){
     <div style="display:flex;flex-direction:column;gap:14px;width:100%;margin-bottom:8px">
       <select class="input" id="wo-tp" onchange="toggleWoType()" style="width:100%"><option value="strength">💪 无氧</option><option value="cardio">🏃 有氧</option></select>
       <div class="flex g8" id="wo-time-row">
-        <span class="unit-wrap" style="flex:1"><input class="input" id="wo-dr" type="number" value="45" style="padding-right:32px;width:100%"><span class="unit-label">min</span></span>
-        <span class="unit-wrap" style="flex:1;display:flex;align-items:center;background:var(--fill);border-radius:10px;padding:0 4px 0 14px;height:44px"><input class="input" id="wo-cal" type="number" value="300" style="flex:1;background:transparent;padding:0;border:none;font-size:17px;text-align:right" placeholder="0"><span style="color:var(--sub);font-size:13px;margin:0 8px;white-space:nowrap">kcal</span><button class="btn primary sm" onclick="estimateCalories()" style="border-radius:8px;padding:6px 10px;font-size:12px;white-space:nowrap;flex-shrink:0">AI估算</button></span>
+        <span class="unit-wrap" style="flex:1"><input class="input" id="wo-dr" type="number" placeholder="时间" style="padding-right:32px;width:100%"><span class="unit-label">min</span></span>
+        <span class="unit-wrap" style="flex:1;display:flex;align-items:center;background:var(--fill);border-radius:10px;padding:0 4px 0 14px;height:44px"><input class="input" id="wo-cal" type="number" placeholder="点击AI估算" style="flex:1;background:transparent;padding:0;border:none;font-size:17px;text-align:right"><span style="color:var(--sub);font-size:13px;margin:0 8px;white-space:nowrap">kcal</span><button class="btn primary sm" onclick="estimateCalories()" style="border-radius:8px;padding:6px 10px;font-size:12px;white-space:nowrap;flex-shrink:0">AI估算</button></span>
       </div></div>
     <div id="wo-st"><span class="text-sub">动作</span><div id="wo-exs"></div><button class="btn outline sm mt8 w100" onclick="addStrengthRow()">+ 添加动作（可手写名称）</button><div class="chip-row mt8">${STRENGTH_EXAMPLES.map(e=>`<button class="chip" onclick="addStrengthRow('${e}')">${e}</button>`).join('')}</div></div>
     <div id="wo-cd" class="hidden"><span class="text-sub">分段训练</span><div id="wo-segs"></div><button class="btn outline sm mt8 w100" onclick="addCardioSeg()">+ 添加下一段训练</button><div class="chip-row mt8">${Object.entries(CARDIO_PRESETS).map(([k,v])=>`<button class="chip" onclick="fillCardioSeg('${k}')">${v.emoji} ${v.name}</button>`).join('')}</div></div>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveWorkout()">保存训练</button><button class="cancel-btn" onclick="$('#wo-m').remove()">取消</button></div></div></div>`)
-  setTimeout(()=>{toggleWoType();let el=$('#wo-dr');if(el)el.addEventListener('input',estimateCalories)},100)
+  setTimeout(()=>{toggleWoType()},100)
 }
 function toggleWoType(){
   let isCardio=$('#wo-tp').value==='cardio'
   $('#wo-st').classList.toggle('hidden',isCardio)
   $('#wo-cd').classList.toggle('hidden',!isCardio)
   let tr=$('#wo-time-row');if(tr)tr.style.display=isCardio?'flex':'none'
-  if(!isCardio){$('#wo-dr').value='';$('#wo-cal').value=300}
-  else{$('#wo-dr').value=45}
+  if(!isCardio){$('#wo-dr').value=''}
   if(isCardio&&!$('#wo-segs').children.length)addCardioSeg('running')
 }
 function addStrengthRow(name=''){
@@ -513,7 +512,6 @@ function addStrengthRow(name=''){
       <span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="0" value="0" style="padding:14px 34px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">kg</span></span>
     </div>
     <button class="btn sm danger mt8" onclick="this.closest('.card').remove();estimateCalories()">× 移除</button></div>`)
-  setTimeout(estimateCalories,300)
 }
 function addCardioSeg(exName=''){
   let n=$('#wo-segs').children.length+1,dur=parseInt($('#wo-dr')?.value||45)
@@ -522,7 +520,6 @@ function addCardioSeg(exName=''){
     <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:8px"><span class="text-sub">第${n}段</span><button class="btn sm danger" onclick="this.closest('.card').remove();estimateCalories()">×</button></div>
     <div class="input-row mb8">${namePart}<span class="unit-wrap" style="flex:1"><input class="input sm" type="number" placeholder="${dur}" value="${dur}" style="padding:14px 32px 14px 14px;font-size:17px;text-align:center;width:100%"><span class="unit-label" style="font-size:13px;right:10px">分钟</span></span></div>
   </div>`)
-  estimateCalories()
 }
 function fillCardioSeg(key){
   let filled=false
@@ -577,7 +574,7 @@ function estimateCalories(){
   }).catch(()=>{$('#wo-cal').value=300})
 }
 function saveWorkout(){
-  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||(tp==='cardio'?45:0),cal=parseInt($('#wo-cal')?.value)||300,u=S.user||{},exs=[],desc=''
+  let tp=$('#wo-tp')?.value||'strength',dr=parseInt($('#wo-dr')?.value)||(tp==='cardio'?45:0),cal=parseInt($('#wo-cal')?.value)||0,u=S.user||{},exs=[],desc=''
   if(tp==='strength'){dr=0
     $('#wo-exs').querySelectorAll('.card').forEach(card=>{let inps=card.querySelectorAll('input');let n=inps[0]?.value?.trim()||'训练',s=parseInt(inps[1]?.value)||4,re=parseInt(inps[2]?.value)||12,w=parseInt(inps[3]?.value)||0;exs.push({name:n,sets:s,reps:re,weight:w});desc+=n+' '+s+'组×'+re+'次×'+w+'kg; '})
   }else{
