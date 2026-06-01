@@ -322,6 +322,22 @@ def calc_nutrition():
     tw = data.get("target_weight",65)
     mode = data.get("mode","happy")
     age = datetime.date.today().year - int(bw[:4])
+    mode_names = {"cardio":"有氧日(高碳水)","strength":"无氧日(高蛋白)","happy":"Happy休息日","cheat":"放纵日"}
+    prompt = f"""你是运动营养学专家。用户{age}岁,性别{'男' if g==1 else '女'},{w}kg,{h}cm,目标{tw}kg,活动系数{al}。今天是{mode_names.get(mode,mode)}。
+根据运动营养学精确计算:
+- BMR基础代谢(Mifflin-St Jeor公式)
+- TDEE日总消耗
+- 今日目标热量(根据模式调整:有氧日+15%,无氧日+10%,Happy日维持,放纵日+30%)
+- 蛋白质g(有氧1.4g/kg,无氧2.0g/kg,Happy1.2g/kg,放纵1.0g/kg)
+- 脂肪g(0.8-1.0g/kg)
+- 碳水g(剩余热量/4)
+- 膳食纤维g(男30g/女25g)
+只返回纯JSON:{{"bmr":数字,"tdee":数字,"target_calories":数字,"protein":数字,"carbs":数字,"fat":数字,"fiber":数字}}"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=256, json_mode=True)
+    result = parse_ai_json(reply)
+    if result: return jsonify(result)
+    # Fallback
+    age = datetime.date.today().year - int(bw[:4])
     bmr = int(10*w + 6.25*h - 5*age + (5 if g==1 else -161))
     tdee = int(bmr * al)
     adj = -500 if (tw-w)<-5 else (-300 if (tw-w)<-2 else (400 if (tw-w)>5 else 0))
