@@ -120,7 +120,7 @@ const MODES={cardio:{l:'有氧日',e:'🏃',d:'高碳水供能',bg:'rgba(0,122,2
   happy:{l:'Happy日',e:'😊',d:'休息恢复',bg:'rgba(52,199,89,.08)',c:'#34C759'},
   cheat:{l:'放纵日',e:'🎉',d:'随便吃',bg:'rgba(255,59,48,.08)',c:'#FF3B30'}}
 
-let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500,waterDrinks:[],steps:0,stepCal:0}
+let S={tab:'home',user:{},meals:[],workouts:[],dishes:[],goals:{},mode:'happy',measurements:[],water:[],waterTarget:2500,waterDrinks:[],steps:0,stepCal:0,history:[]}
 
 const CARDIO_PRESETS={running:{name:'跑步',emoji:'🏃',fields:['分钟','速度km/h']},
   walking:{name:'爬坡/快走',emoji:'🚶',fields:['分钟','坡度%','速度km/h']},
@@ -169,6 +169,7 @@ function home(){
     </div>
     ${g.coachAdvice?`<div class="card" style="background:var(--fill);margin-top:8px"><span class="text-sm">💬 ${g.coachAdvice}</span></div>`:''}
     <div class="macro-row">${renderMacroBar('蛋白',Math.round(S.mealsProtein||0),g.protein||0,'var(--orange)')}${renderMacroBar('碳水',Math.round(S.mealsCarbs||0),g.carbs||0,'var(--green)')}${renderMacroBar('脂肪',Math.round(S.mealsFat||0),g.fat||0,'var(--blue)')}</div>
+    ${renderHistory()}
     <div class="card"><span class="c-title">🚶 步数</span><div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val">${(S.steps||0).toLocaleString()}</span><span class="text-sub">步</span><span class="text-sm" style="color:var(--orange);margin-left:auto">消耗 ≈${S.stepCal||0} kcal</span></div><div class="input-row mt8"><input class="input sm" id="step-in" type="number" placeholder="步数" value="" style="flex:1;text-align:center;font-size:18px;font-weight:600"><button class="btn primary sm" onclick="recordSteps()">更新</button></div></div>
     <div class="card"><span class="c-title">💧 饮水 · ${pct}%</span>
       <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0"><span class="c-val">${eff}</span><span class="text-sub">/ ${wt} ml</span></div>
@@ -323,7 +324,7 @@ function quickWaterFixed(ml){
 function undoWater(id){api('/api/water/'+id,{method:'DELETE'}).then(()=>{loadWater().then(render);toast('已撤销')})}
 
 // ── Data ──
-function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements(),loadWater(),loadWaterTarget()]).then(loadGoals)}
+function loadAll(){return Promise.all([loadUser(),loadMeals(),loadWorkouts(),loadDishes(),loadMeasurements(),loadWater(),loadWaterTarget(),loadHistory()]).then(loadGoals)}
 function loadUser(){return api('/api/user').then(u=>{S.user=u;S.mode=u.workout_type||'happy'})}
 function loadMeals(){return api('/api/meals?date='+T()).then(ms=>{S.meals=ms;S.mealsTotal=0;S.mealsProtein=0;S.mealsCarbs=0;S.mealsFat=0;ms.forEach(m=>{try{JSON.parse(m.foods).forEach(f=>{S.mealsTotal+=f.calories||0;S.mealsProtein+=f.protein||0;S.mealsCarbs+=f.carbs||0;S.mealsFat+=f.fat||0})}catch(e){}});S.mealsTotal=Math.round(S.mealsTotal);S.mealsProtein=Math.round(S.mealsProtein);S.mealsCarbs=Math.round(S.mealsCarbs);S.mealsFat=Math.round(S.mealsFat)})}
 function loadWorkouts(){return api('/api/workouts?date='+T()).then(ws=>{S.workouts=ws})}
@@ -332,6 +333,19 @@ function loadGoals(){let u=S.user||{};return api('/api/nutrition',{method:'POST'
 function loadMeasurements(){return api('/api/measurements').then(ms=>{S.measurements=ms})}
 function loadWater(){return api('/api/water?date='+T()).then(w=>{S.water=w})}
 function loadWaterTarget(){let u=S.user||{};return api('/api/water-target',{method:'POST',body:JSON.stringify({weight:u.current_weight||70,activity_level:u.activity_level||1.55})}).then(d=>{S.waterTarget=d.target_ml;S.waterDrinks=d.drinks})}
+function loadHistory(){return api('/api/user/recent-records?days=7').then(r=>{S.history=r||[]})}
+function renderHistory(){
+  let h=S.history||[];if(!h.length)return''
+  let modeColors={'有氧日':'#0071e3,#e1f0ff','无氧日':'#34c759,#eafaf1','Happy日':'#af52de,#f5eafa','放纵日':'#ff9500,#fff9e6'}
+  return`<div class="card" style="margin-top:0"><span class="c-title">历史动态复盘</span>`+
+    h.slice(-7).reverse().map(r=>{
+      let net=r.actualCaloriesIn-(r.actualCaloriesBurn||0)
+      let over=net-(r.targetCalories||2000)
+      let colors=(modeColors[r.mode]||'#86868b,#f5f5f7').split(',')
+      let d=new Date(r.date),today=T(),label=r.date===today?'今天':(d.getMonth()+1)+'月'+d.getDate()+'日'
+      return`<div class="food-row" onclick="S.tab='diet';render()"><div><span class="bold">${label}</span><span class="chip" style="color:${colors[0]};background:${colors[1]};margin-left:8px;font-size:11px">${r.mode||'Happy日'}</span></div><div class="text-right"><span>净摄入 ${net}kcal</span><br><span class="text-sm" style="color:${over>0?'var(--red)':'var(--green)'}">${over>0?'超标 '+(over)+' kcal':'完美达标'}</span></div></div>`
+    }).join('')+'</div>'
+}
 
 // ── Mode switch ──
 function switchMode(){

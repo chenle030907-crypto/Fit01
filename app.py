@@ -416,6 +416,40 @@ def get_hydration(drink_type, amount, api_key=None):
         except: pass
     return amount
 
+# ── Daily Records History ──
+@app.route("/api/user/recent-records", methods=["GET"])
+def recent_records():
+    db = get_db()
+    days = int(request.args.get("days", 7))
+    end = datetime.date.today()
+    start = end - datetime.timedelta(days=days-1)
+    records = []
+    current = start
+    while current <= end:
+        ds = current.isoformat()
+        meals = db.execute("SELECT * FROM meals WHERE date=?", [ds]).fetchall()
+        workouts = db.execute("SELECT * FROM workouts WHERE date=?", [ds]).fetchall()
+        u = db.execute("SELECT * FROM users WHERE id=1").fetchone()
+        total_in = 0
+        for m in meals:
+            try:
+                for f in json.loads(m["foods"]): total_in += f.get("calories", 0)
+            except: pass
+        total_burn = sum(w["calories"] or 0 for w in workouts)
+        mode = dict(u).get("workout_type", "happy") if u else "happy"
+        mode_names = {"cardio":"有氧日","strength":"无氧日","happy":"Happy日","cheat":"放纵日"}
+        # Get target for that day (rough estimate from stored mode)
+        records.append({
+            "date": ds,
+            "mode": mode_names.get(mode, mode),
+            "actualCaloriesIn": total_in,
+            "actualCaloriesBurn": total_burn,
+            "targetCalories": 2000
+        })
+        current += datetime.timedelta(days=1)
+    records.reverse()
+    return jsonify(records)
+
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
 def estimate_diet():
