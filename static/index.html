@@ -378,7 +378,12 @@ function addMealModal(){window._foods=[];window._ingredients=[];setTimeout(syncD
       </div>
     </div>
     <span class="text-sub mt8">整盘菜品估算 <span id="mc-dish-hint" class="text-sm"></span></span>
-    <div class="input-row mt4"><input class="input" id="mc-dn" placeholder="菜品名称（如：番茄炒蛋）" style="flex:2"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-dw" type="number" placeholder="克数" value="" style="padding-right:28px;width:100%"><span class="unit-label">g</span></span><button class="btn primary sm" id="mc-dish-btn" onclick="estimateDish()" style="flex-shrink:0">AI估算</button></div>
+    <div class="input-row mt4" style="gap:12px">
+      <div style="flex:1.8;display:flex;align-items:center;background:var(--fill);border-radius:10px;padding:0 14px;height:44px"><input class="input" id="mc-dn" placeholder="菜品名称（如：青椒炒鸡胸肉）" style="background:transparent;padding:0;border:none;font-size:15px"></div>
+      <div style="flex:1.2;display:flex;align-items:center;background:var(--fill);border-radius:10px;padding:0 8px 0 14px;height:44px;justify-content:space-between">
+        <div style="display:flex;align-items:center;flex:1"><input class="input" id="mc-dw" type="number" placeholder="克数" style="background:transparent;padding:0;border:none;font-size:15px;text-align:right"><span style="color:var(--sub);font-size:13px;margin-left:4px;margin-right:6px">g</span></div>
+        <button id="mc-dish-btn" onclick="estimateDish()" style="background:none;border:none;color:#0071e3;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;padding:4px 2px">✨ 估算</button>
+      </div></div>
     <div id="mc-dish-est" class="mt4"></div>
     <span class="text-sub mt8">食材（手动输入食材名+克数）</span>
     <div class="input-row mt4"><input class="input" id="mc-nm" placeholder="食材名称" style="flex:2" onfocus="clearPhotoCard()"><span class="unit-wrap" style="flex:1"><input class="input sm" id="mc-gr" type="number" value="100" style="padding-right:28px;width:100%" onfocus="clearPhotoCard()"><span class="unit-label">g</span></span><button class="btn primary sm" onclick="addIngredient()">+</button></div>
@@ -477,9 +482,9 @@ function refreshIngredients(){let h='';(window._ingredients||[]).forEach((ing,i)
 function syncDishMode(){
   let hasIngs=window._ingredients&&window._ingredients.length>0
   let dw=$('#mc-dw'),btn=$('#mc-dish-btn'),hint=$('#mc-dish-hint')
-  if(dw){dw.disabled=hasIngs;dw.style.opacity=hasIngs?'0.4':'1'}
+  if(dw){dw.disabled=hasIngs;dw.style.opacity=hasIngs?'0.3':'1'}
   if(hint)hint.textContent=hasIngs?'（已启用具体食材计算）':''
-  if(btn)btn.textContent=hasIngs?'食材计算':btn.textContent
+  if(btn){btn.textContent=hasIngs?'✨ 食材计算':'✨ 估算';btn.style.opacity=hasIngs?'0.3':'1'}
 }
 function removeIngredient(i){window._ingredients.splice(i,1);refreshIngredients();if(!window._ingredients.length)$('#mc-parse').style.display='none'}
 function parseIngredients(){
