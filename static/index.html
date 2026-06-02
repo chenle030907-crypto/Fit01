@@ -589,6 +589,26 @@ function applyRecDish(name,cal,carb,pro,fat,mealType){
   refreshIngredients();$('#mc-parse').style.display='block'
   $('#mc-dish-est').innerHTML=`<span class="text-sm" style="color:var(--green)">✅ 已选用: ${name} · ${cal}kcal</span>`
   toast(`已选用: ${name}`)
+  // Show AI recipe drawer
+  showRecipe(name,cal)
+}
+function showRecipe(name,cal){
+  let h=`<div class="modal-overlay" id="rc-m" onclick="$('#rc-m').remove()"><div class="modal-box" onclick="event.stopPropagation()" style="border-radius:20px 20px 0 0;padding-bottom:40px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:18px;font-weight:600">✨ AI 烹饪大厨</span><span onclick="$('#rc-m').remove()" style="color:var(--sub);font-size:22px;cursor:pointer;padding:4px">✕</span></div>
+    <div style="background:var(--fill);border-radius:12px;padding:14px;margin-bottom:16px"><span style="font-size:17px;font-weight:600">${name}</span><div style="font-size:13px;color:var(--blue);margin-top:2px;font-weight:500">预估总热量: ${cal} kcal</div></div>
+    <div id="rc-ingredients"><span class="text-sub">🔄 AI 正在生成配方...</span></div>
+    <div id="rc-steps" class="mt8"></div>
+  </div></div>`
+  document.body.insertAdjacentHTML('beforeend',h)
+  api('/api/ai/generate-recipe',{method:'POST',body:JSON.stringify({dishName:name,calories:cal})}).then(r=>{
+    let il=r.ingredientsList||[],st=r.steps||[]
+    let ih='<span style="font-size:14px;color:var(--sub);font-weight:600;display:block;margin-bottom:8px">📊 建议食材与用量</span><div class="chip-row">'
+    il.forEach(i=>{ih+=`<span class="chip">${i.name} ${i.weight}</span>`})
+    ih+='</div>';$('#rc-ingredients').innerHTML=ih
+    let sh='<span style="font-size:14px;color:var(--sub);font-weight:600;display:block;margin:16px 0 8px">🍳 极简健康做法</span>'
+    st.forEach((s,i)=>{sh+=`<div style="display:flex;gap:10px;padding:6px 0;font-size:14px;line-height:1.5"><span style="color:var(--sub);font-weight:600;min-width:20px">${i+1}.</span><span>${s}</span></div>`})
+    $('#rc-steps').innerHTML=sh
+  }).catch(()=>{$('#rc-ingredients').innerHTML='<span class="text-sub">配方加载失败</span>'})
 }
 function saveMeal(){
   let fs=window._foods||[];if(!fs.length)return toast('请先解析食材')

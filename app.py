@@ -503,6 +503,24 @@ def recommend_dishes():
             if key in result and isinstance(result[key], list): return jsonify(result[key])
     return jsonify([])
 
+# ── AI Recipe Generator ──
+@app.route("/api/ai/generate-recipe", methods=["POST"])
+def generate_recipe():
+    data = request.get_json()
+    name = data.get("dishName","").strip()
+    calories = data.get("calories", 500)
+    if not name: return jsonify({"error":"no dish name"}), 400
+    prompt = f"""你是精通少油减脂健康的专业大厨。用户选中菜品:{name},总热量锁死在{calories}kcal。
+1. 根据热量约束倒推食材精准克数(含调料如橄榄油5g)
+2. 严格控油盐糖
+3. 输出不超过4步的极简做法
+
+只返回纯JSON:{{"ingredientsList":[{{"name":"食材名","weight":"xxg"}}],"steps":["步骤1","步骤2","步骤3"]}}"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=400, json_mode=True)
+    result = parse_ai_json(reply)
+    if result: return jsonify(result)
+    return jsonify({"ingredientsList":[{"name":name,"weight":"300g"}],"steps":["根据个人口味烹饪即可"]})
+
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
 def estimate_diet():
