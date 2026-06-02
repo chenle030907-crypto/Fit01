@@ -609,13 +609,19 @@ function showRecipe(name,cal){
   api('/api/ai/generate-recipe',{method:'POST',body:JSON.stringify({dishName:name,calories:cal})}).then(r=>{
     let text=(r&&r.data)||r||''
     if(typeof text!=='string')text=JSON.stringify(text)
-    // Try JSON parse for structured display
     let html=''
     try{
       let obj=JSON.parse(text)
       if(obj.ingredients||obj.steps||obj.食材用量||obj.极简做法){
-        let ings=obj.ingredients||obj.食材用量||{}
-        let sts=obj.steps||obj.极简做法||[]
+        // Reverse-overwrite form with AI's official name and calories
+        let officialName=obj.菜品||name
+        let officialCal=obj.总热量_kcal||cal
+        $('#mc-dn').value=officialName
+        if(window._foods&&window._foods.length>0){window._foods[0].dishName=officialName;window._foods[0].name=officialName;window._foods[0].calories=officialCal}
+        // Store recipe detail for saving
+        window._recipeDetail={ingredients:obj.食材用量||obj.ingredients||{},steps:obj.极简做法||obj.steps||[]}
+        let ings=obj.食材用量||obj.ingredients||{}
+        let sts=obj.极简做法||obj.steps||[]
         html='<div style="margin-bottom:20px"><span style="font-size:13px;color:var(--sub);font-weight:600;display:block;margin-bottom:10px">📊 建议食材与用量</span><div class="chip-row">'
         if(typeof ings==='object'&&!Array.isArray(ings)){
           for(let[k,v]of Object.entries(ings)){html+=`<span class="chip">${k}: ${v}</span>`}
@@ -628,14 +634,13 @@ function showRecipe(name,cal){
     }catch(e){}
     if(!html)html=`<pre style="white-space:pre-wrap;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-size:14px;color:var(--text);line-height:1.8;margin:0;padding:0">${text||'配方加载失败'}</pre>`
     $('#rc-content').innerHTML=html
-    console.log('👉 AI recipe done')
   }).catch(()=>{$('#rc-content').innerHTML='<span class="text-sub">配方加载失败</span>'})
 }
 function saveMeal(){
   let fs=window._foods||[];if(!fs.length)return toast('请先解析食材')
   let mt=$('#mc-tp')?.value||'lunch',tm=$('#mc-tm')?.value||now(),dn=$('#mc-dn')?.value?.trim()||fs.map(f=>f.name).sort().join('+')
   fs.forEach(f=>{f.dishName=dn})
-  api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:fs})}).then(()=>{
+  api('/api/meals',{method:'POST',body:JSON.stringify({date:T(),meal_type:mt,time:tm,foods:fs,note:window._recipeDetail?JSON.stringify(window._recipeDetail):''})}).then(()=>{
     let cal=fs.reduce((s,f)=>s+(f.calories||0),0),pro=fs.reduce((s,f)=>s+(f.protein||0),0),car=fs.reduce((s,f)=>s+(f.carbs||0),0),fat=fs.reduce((s,f)=>s+(f.fat||0),0)
     api('/api/dishes',{method:'POST',body:JSON.stringify({name:dn,foods:fs,calories:Math.round(cal),protein:Math.round(pro*10)/10,carbs:Math.round(car*10)/10,fat:Math.round(fat*10)/10,tags:S.mode})})
     $('#mc-m').remove();loadAll().then(render);toast('已保存')
