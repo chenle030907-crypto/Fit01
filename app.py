@@ -124,7 +124,7 @@ def call_ai(prompt, temp=0.1, max_tokens=2000, json_mode=False):
         body = {"model":"qwen3.6-flash","messages":[
             {"role":"system","content":SYSTEM_PROMPT},
             {"role":"user","content":prompt}
-        ],"temperature":temp,"max_tokens":max_tokens,"enable_thinking":False}
+        ],"temperature":temp,"max_tokens":max_tokens}
         if json_mode: body["response_format"] = {"type": "json_object"}
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
@@ -144,7 +144,7 @@ def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
                 {"type":"text","text":prompt},
                 {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
             ]}],"temperature":temp,"max_tokens":max_tokens,
-            "enable_thinking":False},
+            },
             timeout=15
         )
         data = r.json()
@@ -508,12 +508,7 @@ def generate_recipe():
     name = data.get("dishName","").strip()
     calories = data.get("calories", 500)
     if not name: return jsonify({"error":"no dish name"}), 400
-    prompt = f"""你是精通少油减脂健康的专业大厨。用户选中菜品:{name},总热量锁死在{calories}kcal。
-1. 根据热量约束倒推食材精准克数(含调料如橄榄油5g)
-2. 严格控油盐糖
-3. 输出不超过4步的极简做法
-
-只返回纯JSON:{{"ingredientsList":[{{"name":"食材名","weight":"xxg"}}],"steps":["步骤1","步骤2","步骤3"]}}"""
+    prompt = f"""你是专业大厨。菜品:{name},热量{calories}kcal。倒推食材克数+4步做法。极简返回JSON:{{"ingredients":["食材1 120g","食材2 5g"],"steps":["步骤1","步骤2"]}}"""
     reply = call_ai(prompt, temp=0.1, max_tokens=2000)
     print(f"[AI-API-Call] generate_recipe raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
     result = parse_ai_json(reply)

@@ -601,11 +601,11 @@ function showRecipe(name,cal){
   </div></div></div>`
   document.body.insertAdjacentHTML('beforeend',h)
   api('/api/ai/generate-recipe',{method:'POST',body:JSON.stringify({dishName:name,calories:cal})}).then(r=>{
-    console.log('👉 AI recipe response:',r)
-    let il=r.ingredientsList||r.ingredients||[],st=r.steps||r.methods||[]
+    console.log('👉 AI recipe:',r)
+    let il=r.ingredients||r.ingredientsList||[],st=r.steps||r.methods||[]
     let ih='<span style="font-size:14px;color:var(--sub);font-weight:600;display:block;margin-bottom:8px">📊 建议食材与用量</span><div class="chip-row">'
     if(il.length===0){ih+='<span class="text-sub">暂无数据</span>'}
-    else il.forEach(i=>{let name=typeof i==='string'?i:(i.name||''),w=typeof i==='string'?'':(i.weight||i.amount||'');ih+=`<span class="chip">${name} ${w}</span>`})
+    else il.forEach(i=>{if(typeof i==='string'){ih+=`<span class="chip">${i}</span>`}else{ih+=`<span class="chip">${i.name||''} ${i.weight||i.amount||''}</span>`}})
     ih+='</div>';$('#rc-ingredients').innerHTML=ih
     let sh='<span style="font-size:14px;color:var(--sub);font-weight:600;display:block;margin:16px 0 8px">🍳 极简健康做法</span>'
     if(st.length===0){sh+='<span class="text-sub">暂无数据</span>'}
