@@ -459,13 +459,34 @@ def recent_records():
 def recommend_dishes():
     data = request.get_json()
     ingredient = data.get("inputIngredient","").strip()
+    meal_type = data.get("mealType","午餐")
     remaining = data.get("remainingTargets",{})
+    user = data.get("userProfile",{})
     rc = remaining.get("calories",500); rp = remaining.get("protein",30)
     rcarb = remaining.get("carbon",50); rf = remaining.get("fat",20)
-    hint = f'用户想吃的食材: {ingredient}。' if ingredient else '请基于剩余营养素自由推荐。'
-    prompt = f"""你是AI智能餐单规划师。用户今日剩余营养素缺口: {rc}kcal, 蛋白{rp}g, 碳水{rcarb}g, 脂肪{rf}g。{hint}
-请推荐5道菜，满足: 1) {'' if ingredient else ''}包含早/午/晚餐 2) 营养素填补缺口但不超过 3) 1-2道标记source为"saved"，其余"ai"
-返回纯JSON数组: [{{"name":"菜名(含克数)","mealType":"早餐/午餐/晚餐","calories":数字,"carbon":数字,"protein":数字,"fat":数字,"source":"saved/ai"}}]"""
+    weight = user.get("currentWeight",70); height = user.get("height",170)
+    tw = user.get("targetWeight",65); ti = data.get("trainingIntensity","中强度")
+
+    # Detect "empty day" scenario: if remaining calories > 80% of estimated daily target
+    estimated_daily = int((10*weight + 6.25*height - 5*25 + 5) * 1.55)
+    is_empty_day = rc > estimated_daily * 0.8
+    meal_ratios = {"早餐":"25%-30%","午餐":"35%-40%","晚餐":"30%-35%"}
+    ratio_info = ""
+    if is_empty_day:
+        ratio_info = f"""
+⚠️ 检测到用户今天前几餐可能漏记（剩余缺口几乎等于全天总量）。
+请启动【单餐比例锁】：针对当前餐时【{meal_type}】，严格将推荐总热量控制在用户全天合理总热量（约{estimated_daily}kcal）的{meal_ratios.get(meal_type,'30%')}以内。
+严禁把全天热量堆到这一顿饭里！每道菜的热量必须是单餐合理分量（300-700kcal）。"""
+    else:
+        ratio_info = f"\n用户前面已正常记录饮食，请精准填补剩余缺口。"
+
+    hint = f'用户想吃的食材: {ingredient}。' if ingredient else '请根据当前餐时自由推荐适合该餐的健康食物。'
+
+    prompt = f"""你是AI智能餐单规划师。用户当前选择【{meal_type}】, 身高{height}cm, 体重{weight}kg, 目标{tw}kg, 训练强度{ti}。
+今日剩余营养素: {rc}kcal, 蛋白{rp}g, 碳水{rcarb}g, 脂肪{rf}g。{hint}{ratio_info}
+
+请推荐5道适合【{meal_type}】的菜品。返回纯JSON数组:
+[{{"name":"菜名(含克数)","mealType":"{meal_type}","calories":数字,"carbon":数字,"protein":数字,"fat":数字,"source":"ai"}}]"""
     reply = call_ai(prompt, temp=0.3, max_tokens=800, json_mode=True)
     result = parse_ai_json(reply)
     if result and isinstance(result, list): return jsonify(result)

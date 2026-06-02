@@ -555,7 +555,9 @@ function loadRecommendations(){
   let remaining={calories:(g.target_calories||2000)-eaten+wb,carbon:(g.carbs||250)-Math.round(S.mealsCarbs||0),protein:(g.protein||90)-Math.round(S.mealsProtein||0),fat:(g.fat||55)-Math.round(S.mealsFat||0)}
   let ingredient=$('#mc-dn')?.value?.trim()||''
   let recEl=$('#mc-recs');if(recEl)recEl.innerHTML='<span class="text-sm text-sub">🔄 AI 正在生成推荐...</span>'
-  api('/api/ai/recommend-dishes',{method:'POST',body:JSON.stringify({inputIngredient:ingredient,remainingTargets:remaining})}).then(dishes=>{
+  let mealType=$('#mc-tp')?.value||'lunch';let mtNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}
+  let u=S.user||{}
+  api('/api/ai/recommend-dishes',{method:'POST',body:JSON.stringify({inputIngredient:ingredient,remainingTargets:remaining,mealType:mtNames[mealType]||'午餐',userProfile:{currentWeight:u.current_weight||70,targetWeight:u.target_weight||65,height:u.height||170},trainingIntensity:u.training_intensity||'中强度'})}).then(dishes=>{
     if(!dishes||!dishes.length){if(recEl)recEl.innerHTML='<span class="text-sm text-sub">暂无推荐</span>';return}
     let h='';let mealColors={早餐:'#ff9500,#fff9e6',午餐:'#0071e3,#e1f0ff',晚餐:'#af52de,#f5eafa'}
     dishes.forEach(d=>{
