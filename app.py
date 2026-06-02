@@ -140,7 +140,9 @@ def call_ai(prompt, temp=0.1, max_tokens=2000, json_mode=False):
             json=body, timeout=20
         )
         return r.json()["choices"][0]["message"]["content"]
-    except: return None
+    except Exception as e:
+        print(f"[call_ai] exception: {e}")
+        return None
 
 def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
     if not API_KEY: return None
@@ -521,11 +523,12 @@ def generate_recipe():
     name = data.get("dishName","").strip()
     calories = data.get("calories", 500)
     if not name: return jsonify({"error":"no dish name"}), 400
-    prompt = f"""你是专业大厨。为[{name}]（{calories}kcal）输出详细少油减脂做法。包含火候、腌制方法、下锅顺序、调料克数。直接输出JSON填空，无markdown：
-{{"菜品":"{name}","总热量_kcal":{calories},"食材用量":{{"牛里脊":"150g(薄片,生抽1勺+淀粉半勺腌10分)","西兰花":"100g(开水烫30秒)","橄榄油":"5g(半汤匙)"}},"极简做法":["热锅下油,小火煸蒜","大火滑炒肉片至8成熟捞出","倒入蔬菜大火翻炒10秒","肉片回锅颠匀出锅"]}}"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=400)
-    print(f"[AI-API-Call] generate_recipe ({len(reply) if reply else 0} chars)")
-    if reply and len(reply) > 20: return jsonify({"success":True,"data":reply.strip()})
+    prompt = f"""你是专业大厨。为[{name}]（{calories}kcal）输出详细少油减脂做法，包含火候、腌制、下锅顺序、调料克数。直接输出JSON：{{"菜品":"{name}","总热量_kcal":{calories},"食材用量":{{"主食材":"150g(切薄片,生抽1勺+淀粉半勺腌10分)","蔬菜":"100g(开水烫30秒)","橄榄油":"5g"}},"极简做法":["热锅下油小火煸蒜","大火滑炒肉片至8成熟捞出","倒入蔬菜大火翻炒10秒加盐","肉片回锅颠匀出锅"]}}"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=800)
+    print(f"[recipe] reply len={len(reply) if reply else 0}")
+    if reply and len(reply.strip()) > 30:
+        return jsonify({"success":True,"data":reply.strip()})
+    print(f"[recipe] AI returned short/none: {reply}")
     fallback = json.dumps({"菜品":name,"总热量_kcal":calories,"食材用量":{"核心食材":"200g","橄榄油":"5g"},"极简做法":["食材洗净切块","热锅下油翻炒","适量调味炒熟","出锅享用"]}, ensure_ascii=False)
     return jsonify({"success":True,"data":fallback})
 
