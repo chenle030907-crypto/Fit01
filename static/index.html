@@ -621,7 +621,7 @@ function showRecipe(name,cal){
         // Store recipe detail for saving
         window._recipeDetail={ingredients:obj.食材用量||obj.ingredients||{},steps:obj.极简做法||obj.steps||[]}
         let ings=obj.食材用量||obj.ingredients||{}
-        let sts=obj.极简做法||obj.steps||[]
+        let sts=(obj.极简做法||obj.steps||[]).map(s=>{let t=typeof s==='string'?s:(s.text||s.step||'');return t.replace(/糙米饭/g,'藜麦饭').replace(/白米饭/g,'糙米饭').replace(/食用油/g,'橄榄油')})
         html='<div style="margin-bottom:20px"><span style="font-size:13px;color:var(--sub);font-weight:600;display:block;margin-bottom:10px">📊 建议食材与用量</span><div class="chip-row">'
         if(typeof ings==='object'&&!Array.isArray(ings)){
           for(let[k,v]of Object.entries(ings)){html+=`<span class="chip">${k}: ${v}</span>`}
