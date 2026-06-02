@@ -521,23 +521,22 @@ def generate_recipe():
     name = data.get("dishName","").strip()
     calories = data.get("calories", 500)
     if not name: return jsonify({"error":"no dish name"}), 400
-    prompt = f"""你是专业大厨。为菜品[{name}]（热量{calories}kcal）输出食材用量和做法。
+    prompt = f"""你是专业大厨。为菜品[{name}]（{calories}kcal）秒出食材与做法。严禁前言后语，直接输出JSON填空：
 
-[食材用量]
-- 食材A 150g
-- 橄榄油 5g
-
-[极简做法]
-1. 第一步
-2. 第二步
-
-直接输出纯文本，不要JSON，不要markdown标记。"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=600)
-    print(f"[AI-API-Call] generate_recipe text({len(reply) if reply else 0})")
-    if reply and len(reply) > 20:
-        return jsonify({"success":True,"data":reply.strip()})
-    print(f"[AI-API-Call] generate_recipe FAILED, using fallback")
-    return jsonify({"success":True,"data":"[食材用量]\n- 主食材 200g\n- 配菜 100g\n- 橄榄油 5g\n- 低钠酱油 适量\n\n[极简做法]\n1. 食材洗净切块或薄片备用\n2. 热锅倒入橄榄油，中小火\n3. 下锅翻炒至熟，加微量酱油调味\n4. 出锅盛盘享用"})
+{{"菜品":"{name}","总热量_kcal":{calories},"食材用量":{{"主食材A":"150g","辅料B":"50g","橄榄油":"5g"}},"极简做法":["步骤1","步骤2","步骤3"]}}"""
+    import threading, queue
+    result_queue = queue.Queue()
+    def ai_call(): result_queue.put(call_ai(prompt, temp=0.1, max_tokens=400))
+    t = threading.Thread(target=ai_call); t.start(); t.join(timeout=3)
+    if t.is_alive():
+        print(f"[AI-API-Call] generate_recipe TIMEOUT 3s, using fallback")
+        fallback = json.dumps({"菜品":name,"总热量_kcal":calories,"食材用量":{"核心食材":"200g","橄榄油":"5g"},"极简做法":["食材洗净切块","热锅下油翻炒","适量调味炒熟","出锅享用"]}, ensure_ascii=False)
+        return jsonify({"success":True,"data":fallback})
+    reply = result_queue.get() if not result_queue.empty() else None
+    print(f"[AI-API-Call] generate_recipe ({len(reply) if reply else 0} chars)")
+    if reply and len(reply) > 20: return jsonify({"success":True,"data":reply.strip()})
+    fallback = json.dumps({"菜品":name,"总热量_kcal":calories,"食材用量":{"核心食材":"200g","橄榄油":"5g"},"极简做法":["食材洗净切块","热锅下油翻炒","适量调味炒熟","出锅享用"]}, ensure_ascii=False)
+    return jsonify({"success":True,"data":fallback})
 
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
