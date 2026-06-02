@@ -514,7 +514,7 @@ def generate_recipe():
 3. 输出不超过4步的极简做法
 
 只返回纯JSON:{{"ingredientsList":[{{"name":"食材名","weight":"xxg"}}],"steps":["步骤1","步骤2","步骤3"]}}"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=400, json_mode=True)
+    reply = call_ai(prompt, temp=0.1, max_tokens=800)
     print(f"[AI-API-Call] generate_recipe raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
     result = parse_ai_json(reply)
     if result: return jsonify(result)
