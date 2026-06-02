@@ -527,7 +527,7 @@ def generate_recipe():
     result = parse_ai_json(reply)
     if result: return jsonify(result)
     print(f"[AI-API-Call] generate_recipe FAILED")
-    return jsonify({"ingredientsList":[],"steps":[]})
+    return jsonify({"ingredients":["主食材 200g","配菜 100g","食用油 5g","调料适量"],"steps":["食材洗净切块","热锅下油","中小火翻炒至熟","出锅享用"]})
 
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
