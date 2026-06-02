@@ -578,27 +578,27 @@ function loadRecommendations(){
     if(recEl)recEl.innerHTML=h
   }).catch(()=>{if(recEl)recEl.innerHTML='<span class="text-sm text-sub">推荐加载失败，点换一批重试</span>'})
 }
+// Store current recommendations for combo bundling
 function applyRecDish(name,cal,carb,pro,fat,mealType){
-  window._recLock=true
-  setTimeout(()=>{window._recLock=false},600)
-  // Bundle ALL AI recommendations as a combo meal
-  let recEl=$('#mc-recs'),allDishes=[]
-  if(recEl){
-    let cards=recEl.querySelectorAll('div[onclick*="applyRecDish"]')
-    cards.forEach(c=>{
-      let onclick=c.getAttribute('onclick')||''
-      let m=onclick.match(/applyRecDish\('(.+?)',(\d+),(\d+),([\d.]+),([\d.]+)/)
-      if(m)allDishes.push({name:m[1],cal:parseInt(m[2]),carb:parseInt(m[3]),pro:parseFloat(m[4]),fat:parseFloat(m[5])})
+  window._recLock=true;setTimeout(()=>{window._recLock=false},600)
+  // Read ALL recommendation names/calories directly from the DOM
+  let names=[],totalCal=0,totalCarb=0,totalPro=0,totalFat=0
+  let cards=document.querySelectorAll('#mc-recs div[onclick*="applyRecDish"]')
+  cards.forEach(c=>{
+    let spans=c.querySelectorAll('span')
+    let n='',cl=0,ca=0,pr=0,fa=0
+    spans.forEach(s=>{
+      let t=s.textContent||''
+      if(t.includes('kcal')){let m=t.match(/(\d+)/);if(m)cl=parseInt(m[1])}
+      else if(t.includes('碳')){let m=t.match(/碳(\d+)/);if(m)ca=parseInt(m[1])}
+      else if(t.includes('蛋')){let m=t.match(/蛋([\d.]+)/);if(m)pr=parseFloat(m[1])}
+      else if(t.includes('脂')){let m=t.match(/脂([\d.]+)/);if(m)fa=parseFloat(m[1])}
+      else if(!n&&t.length>2&&!t.includes('💡')&&!t.includes('🪄')&&!t.includes('早餐')&&!t.includes('午餐')&&!t.includes('晚餐'))n=t
     })
-  }
-  if(allDishes.length===0)allDishes=[{name,cal,carb,pro:pro||20,fat:fat||10}]
-  let combinedName=allDishes.map(d=>d.name).join(' + ')
-  let totalCal=allDishes.reduce((s,d)=>s+d.cal,0)
-  let totalCarb=allDishes.reduce((s,d)=>s+d.carb,0)
-  let totalPro=allDishes.reduce((s,d)=>s+d.pro,0)
-  let totalFat=allDishes.reduce((s,d)=>s+d.fat,0)
-  let mtNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};let mt=$('#mc-tp')?.value||'lunch'
-  let comboLabel=`AI ${mtNames[mt]||'午餐'}套餐`
+    if(n){names.push(n);totalCal+=cl;totalCarb+=ca;totalPro+=pr;totalFat+=fa}
+  })
+  if(names.length===0){names=[name];totalCal=cal;totalCarb=carb;totalPro=pro||20;totalFat=fat||10}
+  let combinedName=names.join(' + ');let mtNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};let mt=$('#mc-tp')?.value||'lunch';let comboLabel=`AI ${mtNames[mt]||'午餐'}套餐`
   $('#mc-dn').value=comboLabel;$('#mc-dw').value=Math.round(totalCal/3)
   if(!window._foods)window._foods=[]
   window._foods.push({name:'AI定制套餐',amount:300,calories:totalCal,protein:totalPro,carbs:totalCarb,fat:totalFat,unit:'g',dishName:comboLabel})
