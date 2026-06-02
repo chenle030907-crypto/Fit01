@@ -137,7 +137,7 @@ def call_ai(prompt, temp=0.1, max_tokens=2000, json_mode=False):
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-            json=body, timeout=20
+            json=body, timeout=40
         )
         return r.json()["choices"][0]["message"]["content"]
     except Exception as e:
@@ -500,7 +500,7 @@ def recommend_dishes():
 
 请推荐5道适合【{meal_type}】的菜品。返回纯JSON数组:
 [{{"name":"菜名(含克数)","mealType":"{meal_type}","calories":数字,"carbon":数字,"protein":数字,"fat":数字,"source":"ai"}}]"""
-    reply = call_ai(prompt, temp=0.3, max_tokens=800, json_mode=True)
+    reply = call_ai(prompt, temp=0.3, max_tokens=600)
     print(f"[AI-API-Call] recommend_dishes raw({len(reply) if reply else 0}): {reply[:300] if reply else 'None'}")
     result = parse_ai_json(reply)
     if isinstance(result, list): return jsonify(result)
