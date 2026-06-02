@@ -412,7 +412,8 @@ function addMealModal(){window._foods=[];window._ingredients=[];setTimeout(syncD
       <div id="mc-recs"></div>
     </div>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveMeal()">添加到饮食</button><button class="cancel-btn" onclick="$('#mc-m').remove()">取消</button></div></div></div>`)
-  setTimeout(loadRecommendations,300)
+  setTimeout(loadRecommendations,500)
+  setTimeout(()=>{let el=$('#mc-tp');if(el)el.addEventListener('change',loadRecommendations)},600)
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
 }
 
@@ -552,13 +553,14 @@ function estimateDish(){
 }
 function loadRecommendations(){
   let g=S.goals||{},eaten=S.mealsTotal||0,wb=(S.workouts||[]).reduce((s,w)=>s+(w.calories||0),0)
-  let remaining={calories:(g.target_calories||2000)-eaten+wb,carbon:(g.carbs||250)-Math.round(S.mealsCarbs||0),protein:(g.protein||90)-Math.round(S.mealsProtein||0),fat:(g.fat||55)-Math.round(S.mealsFat||0)}
+  // Always send the full picture - even if everything is 0
+  let remaining={calories:Math.max(0,(g.target_calories||2000)-eaten+wb),carbon:Math.max(0,(g.carbs||250)-(S.mealsCarbs||0)),protein:Math.max(0,(g.protein||90)-(S.mealsProtein||0)),fat:Math.max(0,(g.fat||55)-(S.mealsFat||0))}
   let ingredient=$('#mc-dn')?.value?.trim()||''
   let recEl=$('#mc-recs');if(recEl)recEl.innerHTML='<span class="text-sm text-sub">🔄 AI 正在生成推荐...</span>'
   let mealType=$('#mc-tp')?.value||'lunch';let mtNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}
   let u=S.user||{}
   api('/api/ai/recommend-dishes',{method:'POST',body:JSON.stringify({inputIngredient:ingredient,remainingTargets:remaining,mealType:mtNames[mealType]||'午餐',userProfile:{currentWeight:u.current_weight||70,targetWeight:u.target_weight||65,height:u.height||170},trainingIntensity:u.training_intensity||'中强度'})}).then(dishes=>{
-    if(!dishes||!dishes.length){if(recEl)recEl.innerHTML='<span class="text-sm text-sub">暂无推荐</span>';return}
+    if(!dishes||!dishes.length){if(recEl)recEl.innerHTML='<span class="text-sm text-sub">暂无推荐，点换一批重试</span>';return}
     let h='';let mealColors={早餐:'#ff9500,#fff9e6',午餐:'#0071e3,#e1f0ff',晚餐:'#af52de,#f5eafa'}
     dishes.forEach(d=>{
       let mc=(mealColors[d.mealType]||'#86868b,#f5f5f7').split(',')
@@ -568,7 +570,7 @@ function loadRecommendations(){
       </div>`
     })
     if(recEl)recEl.innerHTML=h
-  }).catch(()=>{if(recEl)recEl.innerHTML='<span class="text-sm text-sub">推荐加载失败</span>'})
+  }).catch(()=>{if(recEl)recEl.innerHTML='<span class="text-sm text-sub">推荐加载失败，点换一批重试</span>'})
 }
 function applyRecDish(name,cal,carb,pro,fat,mealType){
   $('#mc-dn').value=name;$('#mc-dw').value=cal>0?Math.round(cal/3):300
