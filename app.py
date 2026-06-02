@@ -491,12 +491,29 @@ def recommend_dishes():
     print(f"[recommend] raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
     result = parse_ai_json(reply)
     if result is None:
-        # Fallback: generate simple recommendations locally
-        fallback = []
-        names = ["番茄炒蛋","清蒸鱼","鸡胸肉沙拉","牛肉面","蔬菜汤","豆腐煲","蛋炒饭","三明治","燕麦粥","炒青菜"]
-        for i in range(5):
-            fallback.append({"name":names[i%10], "mealType":meal_type, "calories":300+i*50, "carbon":30+i*5, "protein":15+i*3, "fat":8+i*2, "source":"ai"})
-        return jsonify(fallback)
+        # Fallback: meal-type-specific dishes
+        fallback_dishes = {
+            "早餐": [{"name":"燕麦粥+水煮蛋 200g","calories":280,"carbon":40,"protein":15,"fat":8},
+                     {"name":"全麦三明治 150g","calories":320,"carbon":45,"protein":18,"fat":10},
+                     {"name":"豆浆+素包子 250g","calories":350,"carbon":50,"protein":12,"fat":9},
+                     {"name":"牛奶+紫薯 200g","calories":300,"carbon":48,"protein":14,"fat":7},
+                     {"name":"鸡蛋灌饼(少油) 180g","calories":380,"carbon":42,"protein":16,"fat":14}],
+            "午餐": [{"name":"番茄炒蛋+糙米饭 350g","calories":450,"carbon":55,"protein":20,"fat":12},
+                     {"name":"清蒸鲈鱼+西兰花 300g","calories":320,"carbon":15,"protein":35,"fat":10},
+                     {"name":"鸡胸肉沙拉 280g","calories":350,"carbon":20,"protein":40,"fat":12},
+                     {"name":"红烧牛肉面(少油) 400g","calories":480,"carbon":60,"protein":25,"fat":14},
+                     {"name":"豆腐青菜煲 300g","calories":280,"carbon":25,"protein":18,"fat":10}],
+            "晚餐": [{"name":"白灼虾+蒸南瓜 250g","calories":260,"carbon":20,"protein":30,"fat":6},
+                     {"name":"凉拌鸡丝+杂粮饭 280g","calories":350,"carbon":40,"protein":28,"fat":10},
+                     {"name":"番茄菌菇汤+蒸蛋 300g","calories":220,"carbon":18,"protein":20,"fat":8},
+                     {"name":"清炒时蔬+煎豆腐 250g","calories":280,"carbon":22,"protein":18,"fat":12},
+                     {"name":"牛肉蔬菜汤(低脂) 300g","calories":300,"carbon":15,"protein":35,"fat":10}]
+        }
+        dishes = fallback_dishes.get(meal_type, fallback_dishes["午餐"])
+        if ingredient:
+            dishes = [dict(d, name=f"{ingredient}{d['name'][d['name'].find('+'):]}" if '+' in d['name'] else ingredient+d['name']) for d in dishes]
+        for d in dishes: d["mealType"] = meal_type; d["source"] = "ai"
+        return jsonify(dishes[:5])
     if isinstance(result, list): return jsonify(result)
     if isinstance(result, dict):
         for key in ["dishes","recommendations","items"]:
