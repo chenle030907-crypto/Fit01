@@ -521,13 +521,23 @@ def generate_recipe():
     name = data.get("dishName","").strip()
     calories = data.get("calories", 500)
     if not name: return jsonify({"error":"no dish name"}), 400
-    prompt = f"""你是专业大厨。菜品:{name},热量{calories}kcal。倒推食材克数+4步做法。极简返回JSON:{{"ingredients":["食材1 120g","食材2 5g"],"steps":["步骤1","步骤2"]}}"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=2000)
-    print(f"[AI-API-Call] generate_recipe raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
-    result = parse_ai_json(reply)
-    if result: return jsonify(result)
-    print(f"[AI-API-Call] generate_recipe FAILED")
-    return jsonify({"ingredients":["主食材 200g","配菜 100g","食用油 5g","调料适量"],"steps":["食材洗净切块","热锅下油","中小火翻炒至熟","出锅享用"]})
+    prompt = f"""你是专业大厨。为菜品[{name}]（热量{calories}kcal）输出食材用量和做法。
+
+[食材用量]
+- 食材A 150g
+- 橄榄油 5g
+
+[极简做法]
+1. 第一步
+2. 第二步
+
+直接输出纯文本，不要JSON，不要markdown标记。"""
+    reply = call_ai(prompt, temp=0.1, max_tokens=600)
+    print(f"[AI-API-Call] generate_recipe text({len(reply) if reply else 0})")
+    if reply and len(reply) > 20:
+        return jsonify({"success":True,"data":reply.strip()})
+    print(f"[AI-API-Call] generate_recipe FAILED, using fallback")
+    return jsonify({"success":True,"data":"[食材用量]\n- 主食材 200g\n- 配菜 100g\n- 橄榄油 5g\n- 低钠酱油 适量\n\n[极简做法]\n1. 食材洗净切块或薄片备用\n2. 热锅倒入橄榄油，中小火\n3. 下锅翻炒至熟，加微量酱油调味\n4. 出锅盛盘享用"})
 
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
