@@ -129,7 +129,7 @@ Output Format: 必须严格只返回JSON字符串，不要包含任何Markdown�
 def call_ai(prompt, temp=0.1, max_tokens=2000, json_mode=False):
     if not API_KEY: return None
     try:
-        body = {"model":"qwen3.6-flash","messages":[
+        body = {"model":"qwen-flash","messages":[
             {"role":"system","content":SYSTEM_PROMPT},
             {"role":"user","content":prompt}
         ],"temperature":temp,"max_tokens":max_tokens}
@@ -150,7 +150,7 @@ def call_vision(prompt, image_base64, temp=0.1, max_tokens=512):
         r = requests.post(
             "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
             headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
-            json={"model":"qwen3.6-flash","messages":[{"role":"user","content":[
+            json={"model":"qwen-flash","messages":[{"role":"user","content":[
                 {"type":"text","text":prompt},
                 {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{image_base64}"}}
             ]}],"temperature":temp,"max_tokens":max_tokens,
