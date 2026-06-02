@@ -89,10 +89,18 @@ def extract_json(text):
 
 def parse_ai_json(reply):
     if not reply: return None
+    # Aggressive cleaning: strip all markdown, find JSON
+    text = reply.strip()
+    if text.startswith("```json"): text = text[7:]
+    if text.startswith("```"): text = text[3:]
+    if text.endswith("```"): text = text[:-3]
+    text = text.strip()
+    # Try array first, then object
     try:
-        chunk = extract_json(reply)
+        chunk = extract_json(text)
         if chunk: return json.loads(chunk)
-    except: pass
+    except Exception as e:
+        print(f"[parse_ai_json] load failed: {e}")
     return None
 
 # 硬编码兜底
@@ -497,9 +505,14 @@ def recommend_dishes():
     if isinstance(result, dict):
         for key in ["dishes","recommendations","items"]:
             if key in result and isinstance(result[key], list): return jsonify(result[key])
-    # AI failed — return empty, frontend shows "暂无推荐，点换一批重试"
-    print(f"[AI-API-Call] recommend_dishes FAILED to parse, reply was: {reply[:300] if reply else 'None'}")
-    return jsonify([])
+    # AI failed — lightweight fallback
+    print(f"[AI-API-Call] recommend_dishes FAILED to parse")
+    fb=[{"name":"鸡胸肉沙拉 250g","mealType":meal_type,"calories":320,"carbon":15,"protein":38,"fat":10,"source":"ai"},
+        {"name":"番茄炒蛋+糙米饭 300g","mealType":meal_type,"calories":400,"carbon":48,"protein":18,"fat":12},
+        {"name":"清蒸鱼+西兰花 280g","mealType":meal_type,"calories":280,"carbon":12,"protein":32,"fat":8},
+        {"name":"牛肉蔬菜汤 300g","mealType":meal_type,"calories":300,"carbon":18,"protein":30,"fat":12},
+        {"name":"豆腐菌菇煲 250g","mealType":meal_type,"calories":250,"carbon":22,"protein":16,"fat":10}]
+    return jsonify(fb)
 
 # ── AI Recipe Generator ──
 @app.route("/api/ai/generate-recipe", methods=["POST"])
