@@ -488,36 +488,14 @@ def recommend_dishes():
 请推荐5道适合【{meal_type}】的菜品。返回纯JSON数组:
 [{{"name":"菜名(含克数)","mealType":"{meal_type}","calories":数字,"carbon":数字,"protein":数字,"fat":数字,"source":"ai"}}]"""
     reply = call_ai(prompt, temp=0.3, max_tokens=800, json_mode=True)
-    print(f"[recommend] raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
+    print(f"[AI-API-Call] recommend_dishes raw({len(reply) if reply else 0}): {reply[:300] if reply else 'None'}")
     result = parse_ai_json(reply)
-    if result is None:
-        # Fallback: meal-type-specific dishes
-        fallback_dishes = {
-            "早餐": [{"name":"燕麦粥+水煮蛋 200g","calories":280,"carbon":40,"protein":15,"fat":8},
-                     {"name":"全麦三明治 150g","calories":320,"carbon":45,"protein":18,"fat":10},
-                     {"name":"豆浆+素包子 250g","calories":350,"carbon":50,"protein":12,"fat":9},
-                     {"name":"牛奶+紫薯 200g","calories":300,"carbon":48,"protein":14,"fat":7},
-                     {"name":"鸡蛋灌饼(少油) 180g","calories":380,"carbon":42,"protein":16,"fat":14}],
-            "午餐": [{"name":"番茄炒蛋+糙米饭 350g","calories":450,"carbon":55,"protein":20,"fat":12},
-                     {"name":"清蒸鲈鱼+西兰花 300g","calories":320,"carbon":15,"protein":35,"fat":10},
-                     {"name":"鸡胸肉沙拉 280g","calories":350,"carbon":20,"protein":40,"fat":12},
-                     {"name":"红烧牛肉面(少油) 400g","calories":480,"carbon":60,"protein":25,"fat":14},
-                     {"name":"豆腐青菜煲 300g","calories":280,"carbon":25,"protein":18,"fat":10}],
-            "晚餐": [{"name":"白灼虾+蒸南瓜 250g","calories":260,"carbon":20,"protein":30,"fat":6},
-                     {"name":"凉拌鸡丝+杂粮饭 280g","calories":350,"carbon":40,"protein":28,"fat":10},
-                     {"name":"番茄菌菇汤+蒸蛋 300g","calories":220,"carbon":18,"protein":20,"fat":8},
-                     {"name":"清炒时蔬+煎豆腐 250g","calories":280,"carbon":22,"protein":18,"fat":12},
-                     {"name":"牛肉蔬菜汤(低脂) 300g","calories":300,"carbon":15,"protein":35,"fat":10}]
-        }
-        dishes = fallback_dishes.get(meal_type, fallback_dishes["午餐"])
-        if ingredient:
-            dishes = [dict(d, name=f"{ingredient}{d['name'][d['name'].find('+'):]}" if '+' in d['name'] else ingredient+d['name']) for d in dishes]
-        for d in dishes: d["mealType"] = meal_type; d["source"] = "ai"
-        return jsonify(dishes[:5])
     if isinstance(result, list): return jsonify(result)
     if isinstance(result, dict):
         for key in ["dishes","recommendations","items"]:
             if key in result and isinstance(result[key], list): return jsonify(result[key])
+    # AI failed — return empty, frontend shows "暂无推荐，点换一批重试"
+    print(f"[AI-API-Call] recommend_dishes FAILED to parse, reply was: {reply[:300] if reply else 'None'}")
     return jsonify([])
 
 # ── AI Recipe Generator ──
@@ -534,9 +512,11 @@ def generate_recipe():
 
 只返回纯JSON:{{"ingredientsList":[{{"name":"食材名","weight":"xxg"}}],"steps":["步骤1","步骤2","步骤3"]}}"""
     reply = call_ai(prompt, temp=0.1, max_tokens=400, json_mode=True)
+    print(f"[AI-API-Call] generate_recipe raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
     result = parse_ai_json(reply)
     if result: return jsonify(result)
-    return jsonify({"ingredientsList":[{"name":name,"weight":"300g"}],"steps":["根据个人口味烹饪即可"]})
+    print(f"[AI-API-Call] generate_recipe FAILED")
+    return jsonify({"ingredientsList":[],"steps":[]})
 
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
