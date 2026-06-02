@@ -118,7 +118,7 @@ Task: 负责计算用户的每日营养目标或单次运动的卡路里消耗�
 Rule: 你必须基于用户的具体身高、体重、运动项目、强度、组数次数进行精准的生理学估算。拒绝给出模糊范围，必须给出明确的整数数值。
 Output Format: 必须严格只返回JSON字符串，不要包含任何Markdown标记、解释或闲聊。"""
 
-def call_ai(prompt, temp=0.1, max_tokens=1500, json_mode=False):
+def call_ai(prompt, temp=0.1, max_tokens=2000, json_mode=False):
     if not API_KEY: return None
     try:
         body = {"model":"qwen3.6-flash","messages":[
@@ -514,7 +514,7 @@ def generate_recipe():
 3. 输出不超过4步的极简做法
 
 只返回纯JSON:{{"ingredientsList":[{{"name":"食材名","weight":"xxg"}}],"steps":["步骤1","步骤2","步骤3"]}}"""
-    reply = call_ai(prompt, temp=0.1, max_tokens=1200)
+    reply = call_ai(prompt, temp=0.1, max_tokens=2000)
     print(f"[AI-API-Call] generate_recipe raw({len(reply) if reply else 0}): {reply[:200] if reply else 'None'}")
     result = parse_ai_json(reply)
     if result: return jsonify(result)
