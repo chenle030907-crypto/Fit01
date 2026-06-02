@@ -523,7 +523,8 @@ def generate_recipe():
     name = data.get("dishName","").strip()
     calories = data.get("calories", 500)
     if not name: return jsonify({"error":"no dish name"}), 400
-    prompt = f"""你是专业大厨。为[{name}]（{calories}kcal）输出详细少油减脂做法，包含火候、腌制、下锅顺序、调料克数。直接输出JSON：{{"菜品":"{name}","总热量_kcal":{calories},"食材用量":{{"主食材":"150g(切薄片,生抽1勺+淀粉半勺腌10分)","蔬菜":"100g(开水烫30秒)","橄榄油":"5g"}},"极简做法":["热锅下油小火煸蒜","大火滑炒肉片至8成熟捞出","倒入蔬菜大火翻炒10秒加盐","肉片回锅颠匀出锅"]}}"""
+    combo_hint = f'注意：这是一套组合套餐，包含多道食材/菜品。请合理解释烹饪先后顺序，融合成一套丝滑的厨房动线。' if '+' in name else ''
+    prompt = f"""你是专业大厨。为套餐[{name}]（{calories}kcal）输出详细少油减脂做法，包含火候、腌制、下锅顺序、调料克数。{combo_hint}直接输出JSON：{{"菜品":"{name}","总热量_kcal":{calories},"食材用量":{{"主食材":"150g(切薄片,生抽1勺+淀粉半勺腌10分)","蔬菜":"100g(开水烫30秒)","橄榄油":"5g"}},"极简做法":["热锅下油小火煸蒜","大火滑炒肉片至8成熟捞出","倒入蔬菜大火翻炒10秒加盐","回锅颠匀出锅"]}}"""
     reply = call_ai(prompt, temp=0.1, max_tokens=800)
     print(f"[recipe] reply len={len(reply) if reply else 0}")
     if reply and len(reply.strip()) > 30:

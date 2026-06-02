@@ -579,18 +579,35 @@ function loadRecommendations(){
   }).catch(()=>{if(recEl)recEl.innerHTML='<span class="text-sm text-sub">推荐加载失败，点换一批重试</span>'})
 }
 function applyRecDish(name,cal,carb,pro,fat,mealType){
-  window._recLock=true  // Prevent triggering loadRecommendations
-  $('#mc-dn').value=name;$('#mc-dw').value=cal>0?Math.round(cal/3):300
+  window._recLock=true
   setTimeout(()=>{window._recLock=false},600)
+  // Bundle ALL AI recommendations as a combo meal
+  let recEl=$('#mc-recs'),allDishes=[]
+  if(recEl){
+    let cards=recEl.querySelectorAll('div[onclick*="applyRecDish"]')
+    cards.forEach(c=>{
+      let onclick=c.getAttribute('onclick')||''
+      let m=onclick.match(/applyRecDish\('(.+?)',(\d+),(\d+),([\d.]+),([\d.]+)/)
+      if(m)allDishes.push({name:m[1],cal:parseInt(m[2]),carb:parseInt(m[3]),pro:parseFloat(m[4]),fat:parseFloat(m[5])})
+    })
+  }
+  if(allDishes.length===0)allDishes=[{name,cal,carb,pro:pro||20,fat:fat||10}]
+  let combinedName=allDishes.map(d=>d.name).join(' + ')
+  let totalCal=allDishes.reduce((s,d)=>s+d.cal,0)
+  let totalCarb=allDishes.reduce((s,d)=>s+d.carb,0)
+  let totalPro=allDishes.reduce((s,d)=>s+d.pro,0)
+  let totalFat=allDishes.reduce((s,d)=>s+d.fat,0)
+  let mtNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};let mt=$('#mc-tp')?.value||'lunch'
+  let comboLabel=`AI ${mtNames[mt]||'午餐'}套餐`
+  $('#mc-dn').value=comboLabel;$('#mc-dw').value=Math.round(totalCal/3)
   if(!window._foods)window._foods=[]
-  window._foods.push({name:name,amount:300,calories:cal,protein:pro,carbs:carb,fat:fat,unit:'g',dishName:name})
+  window._foods.push({name:'AI定制套餐',amount:300,calories:totalCal,protein:totalPro,carbs:totalCarb,fat:totalFat,unit:'g',dishName:comboLabel})
   if(!window._ingredients)window._ingredients=[]
-  window._ingredients.push(name+' 300g')
+  window._ingredients.push(combinedName+' '+Math.round(totalCal/3)+'g')
   refreshIngredients();$('#mc-parse').style.display='block'
-  $('#mc-dish-est').innerHTML=`<span class="text-sm" style="color:var(--green)">✅ 已选用: ${name} · ${cal}kcal</span>`
-  toast(`已选用: ${name}`)
-  // Show AI recipe drawer
-  showRecipe(name,cal)
+  $('#mc-dish-est').innerHTML=`<span class="text-sm" style="color:var(--green)">✅ 套餐 · ${totalCal}kcal</span>`
+  toast(`套餐: ${totalCal}kcal`)
+  showRecipe(combinedName,totalCal)
 }
 function showRecipe(name,cal){
   let h=`<div class="modal-overlay" id="rc-m" onclick="$('#rc-m').remove()"><div class="modal-box" onclick="event.stopPropagation()" style="border-radius:20px 20px 0 0;padding-bottom:40px">
