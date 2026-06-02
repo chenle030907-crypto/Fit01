@@ -454,6 +454,26 @@ def recent_records():
     records.reverse()
     return jsonify(records)
 
+# ── AI Dish Recommendations ──
+@app.route("/api/ai/recommend-dishes", methods=["POST"])
+def recommend_dishes():
+    data = request.get_json()
+    ingredient = data.get("inputIngredient","").strip()
+    remaining = data.get("remainingTargets",{})
+    rc = remaining.get("calories",500); rp = remaining.get("protein",30)
+    rcarb = remaining.get("carbon",50); rf = remaining.get("fat",20)
+    hint = f'用户想吃的食材: {ingredient}。' if ingredient else '请基于剩余营养素自由推荐。'
+    prompt = f"""你是AI智能餐单规划师。用户今日剩余营养素缺口: {rc}kcal, 蛋白{rp}g, 碳水{rcarb}g, 脂肪{rf}g。{hint}
+请推荐5道菜，满足: 1) {'' if ingredient else ''}包含早/午/晚餐 2) 营养素填补缺口但不超过 3) 1-2道标记source为"saved"，其余"ai"
+返回纯JSON数组: [{{"name":"菜名(含克数)","mealType":"早餐/午餐/晚餐","calories":数字,"carbon":数字,"protein":数字,"fat":数字,"source":"saved/ai"}}]"""
+    reply = call_ai(prompt, temp=0.3, max_tokens=800, json_mode=True)
+    result = parse_ai_json(reply)
+    if result and isinstance(result, list): return jsonify(result)
+    if result and isinstance(result, dict):
+        for key in ["dishes","recommendations","items"]:
+            if key in result and isinstance(result[key], list): return jsonify(result[key])
+    return jsonify([])
+
 # ── Dish Nutrition AI ──
 @app.route("/api/ai/estimate-diet", methods=["POST"])
 def estimate_diet():
