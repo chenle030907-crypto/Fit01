@@ -416,7 +416,7 @@ function addMealModal(){window._foods=[];window._ingredients=[];setTimeout(syncD
   setTimeout(()=>{
     let el=$('#mc-tp');if(el)el.addEventListener('change',loadRecommendations)
     let dn=$('#mc-dn');let dnTimer=null
-    if(dn)dn.addEventListener('input',()=>{clearTimeout(dnTimer);dnTimer=setTimeout(loadRecommendations,500)})
+    if(dn)dn.addEventListener('input',()=>{if(window._recLock)return;clearTimeout(dnTimer);dnTimer=setTimeout(loadRecommendations,500)})
   },600)
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
 }
@@ -556,10 +556,12 @@ function estimateDish(){
   }).catch(()=>{$('#mc-dish-est').innerHTML='';toast('估算失败')})
 }
 function loadRecommendations(){
+  let ingredient=$('#mc-dn')?.value?.trim()||''
+  if(ingredient===window._lastRecQuery&&window._lastRecTime&&Date.now()-window._lastRecTime<2000)return
+  window._lastRecQuery=ingredient;window._lastRecTime=Date.now()
   let g=S.goals||{},eaten=S.mealsTotal||0,wb=(S.workouts||[]).reduce((s,w)=>s+(w.calories||0),0)
   // Always send the full picture - even if everything is 0
   let remaining={calories:Math.max(0,(g.target_calories||2000)-eaten+wb),carbon:Math.max(0,(g.carbs||250)-(S.mealsCarbs||0)),protein:Math.max(0,(g.protein||90)-(S.mealsProtein||0)),fat:Math.max(0,(g.fat||55)-(S.mealsFat||0))}
-  let ingredient=$('#mc-dn')?.value?.trim()||''
   let recEl=$('#mc-recs');if(recEl)recEl.innerHTML='<span class="text-sm text-sub">🔄 AI 正在生成推荐...</span>'
   let mealType=$('#mc-tp')?.value||'lunch';let mtNames={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}
   let u=S.user||{}
@@ -577,7 +579,9 @@ function loadRecommendations(){
   }).catch(()=>{if(recEl)recEl.innerHTML='<span class="text-sm text-sub">推荐加载失败，点换一批重试</span>'})
 }
 function applyRecDish(name,cal,carb,pro,fat,mealType){
+  window._recLock=true  // Prevent triggering loadRecommendations
   $('#mc-dn').value=name;$('#mc-dw').value=cal>0?Math.round(cal/3):300
+  setTimeout(()=>{window._recLock=false},600)
   if(!window._foods)window._foods=[]
   window._foods.push({name:name,amount:300,calories:cal,protein:pro,carbs:carb,fat:fat,unit:'g',dishName:name})
   if(!window._ingredients)window._ingredients=[]
