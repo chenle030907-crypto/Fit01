@@ -413,7 +413,11 @@ function addMealModal(){window._foods=[];window._ingredients=[];setTimeout(syncD
     </div>
     </div><div class="modal-footer"><button class="btn primary" style="width:100%" onclick="saveMeal()">添加到饮食</button><button class="cancel-btn" onclick="$('#mc-m').remove()">取消</button></div></div></div>`)
   setTimeout(loadRecommendations,500)
-  setTimeout(()=>{let el=$('#mc-tp');if(el)el.addEventListener('change',loadRecommendations)},600)
+  setTimeout(()=>{
+    let el=$('#mc-tp');if(el)el.addEventListener('change',loadRecommendations)
+    let dn=$('#mc-dn');let dnTimer=null
+    if(dn)dn.addEventListener('input',()=>{clearTimeout(dnTimer);dnTimer=setTimeout(loadRecommendations,500)})
+  },600)
   api('/api/dishes?tag='+(S.mode||'happy')).then(ds=>{let el=$('#mc-dishes');if(el&&ds.length)el.innerHTML=ds.slice(0,10).map(d=>`<span style="display:inline-flex;align-items:flex-start;margin:0 6px 6px 0"><button class="chip" onclick="useDish(${d.id})" style="border-radius:20px 0 0 20px;margin:0">${d.name}<br><small>${d.calories}kcal</small></button><button class="chip" style="background:var(--red);color:#fff;border-radius:0 20px 20px 0;border:none;padding:7px 8px;font-size:11px" onclick="deleteDish(${d.id})">×</button></span>`).join('')})
 }
 
