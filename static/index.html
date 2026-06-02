@@ -602,7 +602,25 @@ function showRecipe(name,cal){
   api('/api/ai/generate-recipe',{method:'POST',body:JSON.stringify({dishName:name,calories:cal})}).then(r=>{
     let text=(r&&r.data)||r||''
     if(typeof text!=='string')text=JSON.stringify(text)
-    $('#rc-content').innerHTML=`<pre style="white-space:pre-wrap;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-size:14px;color:var(--text);line-height:1.8;margin:0;padding:0">${text||'配方加载失败'}</pre>`
+    // Try JSON parse for structured display
+    let html=''
+    try{
+      let obj=JSON.parse(text)
+      if(obj.ingredients||obj.steps||obj.食材用量||obj.极简做法){
+        let ings=obj.ingredients||obj.食材用量||{}
+        let sts=obj.steps||obj.极简做法||[]
+        html='<div style="margin-bottom:20px"><span style="font-size:13px;color:var(--sub);font-weight:600;display:block;margin-bottom:10px">📊 建议食材与用量</span><div class="chip-row">'
+        if(typeof ings==='object'&&!Array.isArray(ings)){
+          for(let[k,v]of Object.entries(ings)){html+=`<span class="chip">${k}: ${v}</span>`}
+        }else if(Array.isArray(ings)){ings.forEach(i=>html+=`<span class="chip">${typeof i==='string'?i:(i.name||'')+' '+(i.weight||'')}</span>`)}
+        html+='</div></div>'
+        html+='<div><span style="font-size:13px;color:var(--sub);font-weight:600;display:block;margin-bottom:10px">🍳 极简健康做法</span>'
+        if(Array.isArray(sts)){sts.forEach((s,i)=>{html+=`<div style="display:flex;gap:10px;padding:5px 0;font-size:14px;line-height:1.6;align-items:flex-start"><span style="font-size:12px;font-weight:600;color:var(--blue);background:rgba(0,122,255,.1);width:18px;height:18px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;margin-top:2px">${i+1}</span><span>${typeof s==='string'?s:(s.text||s.step||'')}</span></div>`})}
+        html+='</div>'
+      }
+    }catch(e){}
+    if(!html)html=`<pre style="white-space:pre-wrap;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;font-size:14px;color:var(--text);line-height:1.8;margin:0;padding:0">${text||'配方加载失败'}</pre>`
+    $('#rc-content').innerHTML=html
     console.log('👉 AI recipe done')
   }).catch(()=>{$('#rc-content').innerHTML='<span class="text-sub">配方加载失败</span>'})
 }
